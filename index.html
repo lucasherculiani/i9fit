@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>i9Fit</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0d;--surface:#161616;--surface2:#1e1e1e;--surface3:#262626;--border:#2a2a2a;--border2:#333;--accent:#c8f542;--accent2:#a8d932;--text:#f0f0f0;--muted:#888;--muted2:#555;--danger:#ff4d4d;--done:#1a3a1a;--done-border:#2d5c2d;--done-text:#6dbf6d;--radius:12px;--radius-sm:8px;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Syne',sans-serif}
+.view{display:none;min-height:100vh}.view.active{display:block}
+#view-login{display:none;align-items:center;justify-content:center;flex-direction:column;padding:2rem}
+#view-login.active{display:flex}
+#view-admin-login{display:none;align-items:center;justify-content:center;flex-direction:column;padding:2rem}
+#view-admin-login.active{display:flex}
+/* LOGIN */
+.login-box{width:100%;max-width:400px}
+.login-logo{font-family:'Montserrat',sans-serif;font-size:5.5rem;font-weight:900;letter-spacing:-.5px;margin-bottom:.15rem;color:#fff;line-height:1}
+.login-logo span{color:var(--accent)}
+.login-sub{color:var(--muted);font-size:.875rem;margin-bottom:2.5rem}
+.login-box label{font-size:.75rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.5rem}
+.login-box input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.875rem 1rem;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border .2s}
+.login-box input:focus{border-color:var(--accent)}
+.login-box input::placeholder{color:var(--muted2)}
+.btn-primary{width:100%;margin-top:1rem;background:var(--accent);color:#0d0d0d;border:none;border-radius:var(--radius-sm);padding:.875rem;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s,transform .1s}
+.btn-primary:hover{background:var(--accent2)}.btn-primary:active{transform:scale(.98)}
+.login-admin-link{margin-top:2rem;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;text-decoration:underline}
+.login-admin-link:hover{color:var(--accent)}
+.login-error{background:#1a0a0a;border:1px solid #3d1212;color:var(--danger);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.85rem;margin-top:.75rem;display:none}
+.admin-badge{display:inline-block;font-size:.7rem;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:.25rem .6rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.5rem}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
+.topbar-logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:-.5px;color:#fff}
+.topbar-logo span{color:var(--accent)}
+.topbar-user{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:.75rem}
+.topbar-user strong{color:var(--text)}
+.btn-back{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.4rem .9rem;font-size:.8rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-back:hover{color:var(--text);border-color:var(--muted)}
+.btn-logout{background:transparent;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;padding:.3rem .5rem}
+.btn-logout:hover{color:var(--danger)}
+/* SEMANAS ALUNO */
+.page-header{padding:1.5rem 1.5rem .5rem}
+.page-header h2{font-family:'Montserrat',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
+.page-header p{color:var(--muted);font-size:.875rem;margin-top:.25rem}
+.grid-semanas{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;padding:1.25rem 1.5rem}
+.card-semana{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.card-semana:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card-semana::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.card-semana:hover::before{transform:scaleX(1)}
+.card-semana.concluida{background:var(--done);border-color:var(--done-border)}
+.card-semana.concluida::before{background:var(--done-text);transform:scaleX(1)}
+.semana-num{font-family:'Montserrat',sans-serif;font-size:2rem;font-weight:900;color:var(--accent);line-height:1}
+.card-semana.concluida .semana-num{color:var(--done-text)}
+.semana-label{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.25rem}
+.semana-dias{font-size:.8rem;color:var(--muted2);margin-top:.75rem}
+.semana-badge{display:inline-block;font-size:.7rem;background:var(--surface3);border-radius:4px;padding:.2rem .5rem;color:var(--muted);margin-top:.5rem}
+.semana-check{font-size:.72rem;color:var(--done-text);margin-top:.4rem;display:none}
+.card-semana.concluida .semana-check{display:block}
+/* DIAS ALUNO */
+.grid-dias{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;padding:1.25rem 1.5rem}
+.card-dia{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .2s}
+.card-dia:hover{border-color:var(--accent);background:var(--surface2)}
+.card-dia.concluido{background:var(--done);border-color:var(--done-border)}
+.dia-label{font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:800}
+.dia-nome{font-size:.8rem;color:var(--muted);margin-top:.35rem}
+.dia-count{font-size:.75rem;color:var(--muted2);margin-top:.5rem}
+.dia-done-badge{font-size:.7rem;color:var(--done-text);margin-top:.4rem;display:none}
+.card-dia.concluido .dia-done-badge{display:block}
+/* TREINO DO DIA */
+.treino-header{padding:1.25rem 1.5rem .75rem}
+.treino-header h2{font-family:'Montserrat',sans-serif;font-size:1.3rem;font-weight:800}
+.treino-header p{font-size:.8rem;color:var(--muted);margin-top:.2rem}
+.treino-actions{padding:.25rem 1.5rem .75rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.btn-concluir{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.5rem 1.1rem;font-size:.82rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-concluir:hover{border-color:var(--done-text);color:var(--done-text)}
+.btn-concluir.concluido{background:var(--done);border-color:var(--done-border);color:var(--done-text);font-weight:500}
+.exercicios-list{padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.75rem}
+.card-exercicio{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:all .2s}
+.card-exercicio.feito{background:var(--done);border-color:var(--done-border);opacity:.85}
+.ex-check-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.5rem}
+.ex-nome{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700}
+.ex-check-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.3rem .75rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .15s}
+.ex-check-btn:hover{border-color:var(--done-text);color:var(--done-text)}
+.ex-check-btn.feito{background:var(--done);border-color:var(--done-border);color:var(--done-text)}
+.ex-meta{font-size:.82rem;color:var(--muted);margin-bottom:.2rem;line-height:1.5}
+.ex-meta span{color:var(--text);font-weight:500}
+.ex-tecnica{font-size:.78rem;color:#6b8f2e;background:#1a2a0a;border:1px solid #2a4010;border-radius:4px;padding:.25rem .6rem;display:inline-block;margin-top:.35rem;margin-bottom:.5rem}
+.ex-prescricao{font-size:.85rem;color:var(--text);line-height:1.65;white-space:pre-wrap;background:var(--surface2);border-radius:6px;padding:.65rem .85rem;margin-top:.35rem;border-left:2px solid var(--accent)}
+.ex-peso-row{display:flex;align-items:center;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+.ex-peso-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;min-width:50px}
+.peso-ctrl{display:flex;align-items:center;gap:.4rem}
+.peso-btn{width:34px;height:34px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'DM Sans',sans-serif;line-height:1}
+.peso-btn:hover{border-color:var(--accent);color:var(--accent)}.peso-btn:active{transform:scale(.9)}
+.peso-input{width:72px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.4rem .5rem;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--accent);text-align:center;outline:none;transition:border .2s}
+.peso-input:focus{border-color:var(--accent)}
+.peso-unit{font-size:.8rem;color:var(--muted)}
+.peso-sugerido{font-size:.72rem;color:var(--muted2);margin-left:.25rem}
+/* BREADCRUMB */
+.breadcrumb{padding:.5rem 1.5rem;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.breadcrumb span{cursor:pointer;transition:color .15s}.breadcrumb span:hover{color:var(--accent)}
+.breadcrumb .sep{color:var(--muted2);cursor:default}
+/* ADMIN */
+.admin-wrap{max-width:860px;margin:0 auto;padding:1.5rem}
+.prot-list{display:flex;flex-direction:column;gap:.6rem;margin-top:1.1rem}
+.prot-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;cursor:pointer;transition:border .2s}
+.prot-card:hover{border-color:var(--accent)}
+.prot-card-info{flex:1;min-width:0}
+.prot-card-nome{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem}
+.prot-card-desc{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+.prot-card-actions{display:flex;gap:.4rem;flex-shrink:0}
+.proto-edit-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.proto-edit-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800}
+.proto-edit-desc{font-size:.85rem;color:var(--muted);margin-top:.25rem}
+/* Semana bloco */
+.semana-bloco{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;overflow:hidden}
+.semana-bloco-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;cursor:pointer;user-select:none}
+.semana-bloco-header:hover{background:var(--surface2)}
+.semana-bloco-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.6rem}
+.chevron{font-size:.72rem;color:var(--muted);transition:transform .2s;display:inline-block}
+.open-bloco .chevron{transform:rotate(180deg)}
+.bloco-body{display:none;border-top:1px solid var(--border);padding:1rem 1.25rem}
+.open-bloco .bloco-body{display:block}
+/* Dia bloco */
+.dia-bloco{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-bottom:.55rem;overflow:hidden}
+.dia-bloco-header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;cursor:pointer;user-select:none}
+.dia-bloco-header:hover{background:var(--surface3)}
+.dia-bloco-title{font-size:.88rem;font-weight:500;display:flex;align-items:center;gap:.5rem}
+.dia-bloco-body{display:none;border-top:1px solid var(--border);padding:.75rem 1rem}
+.open-dia .dia-bloco-body{display:block}
+.open-dia .chevron{transform:rotate(180deg)}
+/* Ex item admin */
+.ex-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:.35rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.ex-item-info{flex:1;min-width:0}
+.ex-item-nome{font-size:.87rem;font-weight:500}
+.ex-item-sub{font-size:.74rem;color:var(--muted);margin-top:.1rem}
+.ex-item-actions{display:flex;gap:.3rem;flex-shrink:0}
+/* Formulários */
+.form-card{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.9rem;margin:.6rem 0;display:none}
+.form-card.open{display:block}
+.form-card h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.75rem}
+.form-row{margin-bottom:.6rem}
+.form-row label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.3rem}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.55rem .8rem;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--text);outline:none;transition:border .2s}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--accent)}
+.form-row select option{background:var(--surface)}
+.form-row textarea{resize:vertical;min-height:56px}
+.form-row textarea.big{min-height:130px;line-height:1.6}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem}
+.form-actions{display:flex;gap:.4rem;margin-top:.75rem}
+.btn-save{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.48rem 1.1rem;font-size:.8rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer}
+.btn-save:hover{background:var(--accent2)}
+.btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:.48rem .9rem;font-size:.8rem;color:var(--muted);font-family:'DM Sans',sans-serif;cursor:pointer}
+.btn-cancel:hover{color:var(--text)}
+.btn-add{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.35rem .8rem;font-size:.78rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap}
+.btn-add:hover{background:var(--accent2)}
+.btn-add-ghost{background:transparent;border:1px dashed var(--border2);border-radius:6px;padding:.3rem .7rem;font-size:.76rem;color:var(--muted);font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+.btn-add-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-icon{background:var(--surface2);border:1px solid var(--border);border-radius:5px;width:27px;height:27px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.78rem;transition:all .14s;color:var(--muted)}
+.btn-icon:hover{border-color:var(--accent);color:var(--accent)}
+.btn-icon.del:hover{border-color:var(--danger);color:var(--danger)}
+/* Tipo toggle ex */
+.tipo-toggle{display:flex;gap:.4rem;margin-bottom:.75rem}
+.tipo-btn{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.45rem;font-size:.78rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;text-align:center}
+.tipo-btn.ativo{background:var(--surface3);border-color:var(--accent);color:var(--accent);font-weight:500}
+/* Alunos */
+.admin-list{display:flex;flex-direction:column;gap:.5rem;margin-top:.85rem}
+.admin-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.admin-item-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.7rem .9rem}
+.admin-item-info{flex:1;min-width:0}
+.admin-item-title{font-size:.88rem;font-weight:500}
+.admin-item-sub{font-size:.74rem;color:var(--muted);margin-top:.1rem}
+.admin-item-actions{display:flex;gap:.3rem;flex-shrink:0}
+.edit-aluno-form{background:var(--surface2);border-top:1px solid var(--border);padding:.75rem .9rem;display:none}
+.edit-aluno-form.open{display:block}
+/* Tabs admin */
+.admin-nav{display:flex;gap:.4rem}
+.nav-tab{background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.35rem .8rem;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s}
+.nav-tab:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+.nav-tab.active{background:var(--surface2);color:var(--accent);border-color:var(--accent)}
+.admin-panel{display:none}.admin-panel.active{display:block}
+/* Modal generico */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:1.5rem;max-width:400px;width:100%;max-height:85vh;display:flex;flex-direction:column}
+.modal-box h4{font-size:1rem;font-weight:700;margin-bottom:.5rem;flex-shrink:0}
+.modal-box p{font-size:.85rem;color:var(--muted);margin-bottom:1rem;flex-shrink:0}
+.modal-scroll{flex:1;overflow-y:auto;margin-bottom:1rem}
+.modal-actions{display:flex;gap:.5rem;justify-content:flex-end;flex-shrink:0}
+.btn-danger{background:var(--danger);color:#fff;border:none;border-radius:var(--radius-sm);padding:.5rem 1.1rem;font-size:.85rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+/* Duplicar dia */
+.dupl-group{margin-bottom:1rem}
+.dupl-group-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem}
+.dupl-dia-btn{width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.6rem .85rem;font-size:.83rem;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:.3rem;transition:all .15s;display:block}
+.dupl-dia-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* Misc */
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--muted)}
+.empty-state div{font-size:1.75rem;margin-bottom:.5rem}
+.empty-state p{font-size:.82rem}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.section-head h3{font-size:.95rem;font-weight:700}
+.tag{display:inline-block;font-size:.68rem;background:var(--surface3);border-radius:3px;padding:.15rem .45rem;color:var(--muted)}
+.func-tag{font-size:.68rem;background:#1a2a0a;color:#6b8f2e;border-radius:3px;padding:.1rem .4rem;margin-left:.3rem}
+.fade-in{animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+@media(max-width:520px){.form-grid2,.form-grid3{grid-template-columns:1fr}.admin-nav{flex-wrap:wrap}.proto-edit-header{flex-direction:column}}
+
+/* MODAL EDITAR EX */
+.modal-edit-ex{background:var(--surface2);border-radius:var(--radius-sm);padding:1rem;max-height:70vh;overflow-y:auto}
+/* RELATORIO */
+@media print{
+  body{background:#fff;color:#000}
+  .no-print{display:none!important}
+  .print-page{page-break-after:always}
+  .rel-card{border:1px solid #ccc;border-radius:8px;padding:1rem;margin-bottom:1rem;break-inside:avoid}
+  .rel-aluno{font-size:1.1rem;font-weight:700;margin-bottom:.35rem}
+  .rel-dia{font-size:.85rem;color:#555;margin-bottom:.75rem}
+  .rel-ex{margin-bottom:.6rem;padding-bottom:.6rem;border-bottom:1px solid #eee}
+  .rel-ex:last-child{border-bottom:none}
+  .rel-ex-nome{font-weight:700;font-size:.95rem}
+  .rel-ex-meta{font-size:.82rem;color:#444;margin-top:.2rem}
+  .rel-ex-presc{font-size:.82rem;color:#333;white-space:pre-wrap;background:#f5f5f5;padding:.4rem .6rem;border-radius:4px;margin-top:.3rem}
+  .rel-peso-box{border:1px solid #bbb;border-radius:4px;padding:.3rem .6rem;font-size:.8rem;margin-top:.35rem;display:inline-block}
+}
+@media screen{
+  #view-relatorio{background:var(--bg)}
+  .rel-topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
+  .rel-wrap{max-width:860px;margin:0 auto;padding:1.5rem}
+  .rel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+  .rel-aluno{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:.25rem}
+  .rel-dia{font-size:.82rem;color:var(--muted);margin-bottom:.85rem}
+  .rel-ex{margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+  .rel-ex:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+  .rel-ex-nome{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem}
+  .rel-ex-meta{font-size:.82rem;color:var(--muted);margin-top:.2rem}
+  .rel-ex-presc{font-size:.82rem;color:var(--text);white-space:pre-wrap;background:var(--surface2);padding:.4rem .6rem;border-radius:4px;margin-top:.3rem;border-left:2px solid var(--accent)}
+  .rel-peso-box{border:1px solid var(--border2);border-radius:4px;padding:.3rem .6rem;font-size:.78rem;color:var(--muted);margin-top:.35rem;display:inline-block}
+  .btn-print{background:var(--accent);color:#0d0d0d;border:none;border-radius:var(--radius-sm);padding:.45rem 1.1rem;font-size:.82rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer}
+  .btn-print:hover{background:var(--accent2)}
+}
+/* CONFIG RELATORIO */
+.rel-config{max-width:860px;margin:0 auto;padding:1.5rem}
+.aluno-sel-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;margin-bottom:.5rem}
+.aluno-sel-row{display:flex;align-items:center;gap:.75rem}
+.aluno-sel-check{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.aluno-sel-nome{font-size:.9rem;font-weight:500;flex:1}
+.aluno-sel-config{margin-top:.6rem;display:none;gap:.5rem}
+.aluno-sel-config.show{display:flex;flex-wrap:wrap}
+.aluno-sel-config select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.4rem .7rem;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--text);outline:none;flex:1;min-width:130px}
+.aluno-sel-config select:focus{border-color:var(--accent)}
+
+
+
+/* PESO NO RELATORIO */
+.rel-peso-edit{display:flex;align-items:center;gap:.4rem;margin-top:.45rem;flex-wrap:wrap}
+.rel-peso-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.rel-peso-ctrl{display:flex;align-items:center;gap:.3rem}
+.rel-peso-btn{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .13s;line-height:1}
+.rel-peso-btn:hover{border-color:var(--accent);color:var(--accent)}
+.rel-peso-input{width:64px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:.3rem .4rem;font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--accent);text-align:center;outline:none;transition:border .2s}
+.rel-peso-input:focus{border-color:var(--accent)}
+.rel-peso-unit{font-size:.75rem;color:var(--muted)}
+.rel-peso-anterior{font-size:.7rem;color:var(--muted2);margin-left:.2rem}
+.rel-save-bar{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.rel-save-bar p{font-size:.8rem;color:var(--muted)}
+.rel-save-status{font-size:.8rem;color:var(--done-text);display:none}
+@media print{
+  .rel-peso-edit{display:none}
+  .rel-save-bar{display:none}
+}
+
+
+/* BACKUP */
+.backup-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.backup-bar-info{flex:1;min-width:0}
+.backup-bar-title{font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700}
+.backup-bar-sub{font-size:.75rem;color:var(--muted);margin-top:.2rem}
+.backup-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn-export{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.42rem .9rem;font-size:.78rem;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-export:hover{border-color:var(--accent);color:var(--accent)}
+.btn-import{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.42rem .9rem;font-size:.78rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:background .15s}
+.btn-import:hover{background:var(--accent2)}
+.import-status{font-size:.78rem;margin-top:.5rem;display:none}
+.import-status.ok{color:var(--done-text)}
+.import-status.err{color:var(--danger)}
+
+</style>
+</head>
+<body>
+<!-- LOGIN ALUNO -->
+<div id="view-login" class="view active">
+  <div class="login-box fade-in">
+    <div class="login-logo">i9<span>Fit</span></div>
+    <div class="login-sub">Acesse seu protocolo de treinamento</div>
+    <label>Seu nome ou nick</label>
+    <input type="text" id="login-input" placeholder="ex: joao, aninha..." autocomplete="off" autocapitalize="off">
+    <div class="login-error" id="login-error">Aluno nao encontrado. Verifique com seu treinador.</div>
+    <button class="btn-primary" onclick="loginAluno()">Entrar</button>
+    <div class="login-admin-link" onclick="showView('view-admin-login')">Acesso do treinador</div>
+  </div>
+</div>
+
+<!-- LOGIN ADMIN -->
+<div id="view-admin-login" class="view">
+  <div class="login-box fade-in">
+    <div class="admin-badge">Area do Treinador</div>
+    <div class="login-logo">i9<span>Fit</span></div>
+    <div class="login-sub">Gerencie protocolos e alunos</div>
+    <label>Senha de acesso</label>
+    <input type="password" id="admin-senha-input" placeholder="senha">
+    <div class="login-error" id="admin-error">Senha incorreta.</div>
+    <button class="btn-primary" onclick="loginAdmin()">Acessar painel</button>
+    <div class="login-admin-link" onclick="showView('view-login')">Voltar</div>
+  </div>
+</div>
+
+<!-- SEMANAS DO ALUNO -->
+<div id="view-semanas" class="view">
+  <div class="topbar">
+    <div class="topbar-logo">i9<span>Fit</span></div>
+    <div class="topbar-user">Ola, <strong id="user-display"></strong><button class="btn-logout" onclick="logout()">Sair</button></div>
+  </div>
+  <div class="page-header fade-in">
+    <h2 id="protocolo-nome">Protocolo</h2>
+    <p id="protocolo-desc"></p>
+  </div>
+  <div class="grid-semanas fade-in" id="grid-semanas"></div>
+</div>
+
+<!-- DIAS DA SEMANA -->
+<div id="view-dias" class="view">
+  <div class="topbar">
+    <button class="btn-back" onclick="renderSemanas()">&#8592; Semanas</button>
+    <div class="topbar-logo">i9<span>Fit</span></div>
+    <div class="topbar-user"><strong id="dias-user"></strong></div>
+  </div>
+  <div class="breadcrumb" id="breadcrumb-dias"></div>
+  <div class="page-header fade-in"><h2 id="semana-titulo"></h2><p id="semana-desc"></p></div>
+  <div class="grid-dias fade-in" id="grid-dias"></div>
+</div>
+
+<!-- TREINO DO DIA -->
+<div id="view-treino" class="view">
+  <div class="topbar">
+    <button class="btn-back" onclick="voltarParaDias()">&#8592; Dias</button>
+    <div class="topbar-logo">i9<span>Fit</span></div>
+  </div>
+  <div class="breadcrumb" id="breadcrumb-treino"></div>
+  <div class="treino-header fade-in"><h2 id="dia-titulo"></h2><p id="dia-desc"></p></div>
+  <div class="treino-actions fade-in">
+    <button class="btn-concluir" id="btn-concluir-dia" onclick="toggleConcluirDia()">&#10003; Marcar dia como concluido</button>
+  </div>
+  <div class="exercicios-list fade-in" id="exercicios-list"></div>
+</div>
+
+<!-- ADMIN: LISTA DE PROTOCOLOS / ALUNOS -->
+<div id="view-admin" class="view">
+  <div class="topbar">
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">admin</span></div>
+    <div style="display:flex;align-items:center;gap:.6rem">
+      <div class="admin-nav">
+        <button class="nav-tab active" id="tab-prot" onclick="adminTab('protocolos')">Protocolos</button>
+        <button class="nav-tab" id="tab-alunos" onclick="adminTab('alunos')">Alunos</button>
+      </div>
+      <button class="btn-add-ghost" style="font-size:.76rem" onclick="abrirRelConfig()">&#128438; Relatorio</button><button class="btn-logout" onclick="showView('view-login')">Sair</button>
+    </div>
+  </div>
+  <div class="admin-wrap">
+    <div class="admin-panel active" id="panel-protocolos">
+      <div class="backup-bar">
+        <div class="backup-bar-info">
+          <div class="backup-bar-title">&#128190; Backup dos dados</div>
+          <div class="backup-bar-sub">Exporte para salvar ou transferir para outro dispositivo. Importe para restaurar.</div>
+        </div>
+        <div>
+          <div class="backup-actions">
+            <button class="btn-export" onclick="exportarDados()">&#8595; Exportar JSON</button>
+            <label class="btn-import" style="cursor:pointer">&#8593; Importar JSON<input type="file" accept=".json" id="import-file" style="display:none" onchange="importarDados(this)"></label>
+          </div>
+          <div class="import-status" id="import-status"></div>
+        </div>
+      </div>
+      <div class="section-head">
+        <h3>Protocolos de Treino</h3>
+        <button class="btn-add" onclick="toggleForm('form-novo-prot')">+ Novo protocolo</button>
+      </div>
+      <div class="form-card" id="form-novo-prot">
+        <h4>Novo protocolo</h4>
+        <div class="form-row"><label>Nome</label><input id="f-prot-nome" placeholder="ex: Hipertrofia 8 Semanas"></div>
+        <div class="form-row"><label>Descricao (opcional)</label><textarea id="f-prot-desc" placeholder="Objetivo..."></textarea></div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="salvarProtocolo()">Criar</button>
+          <button class="btn-cancel" onclick="toggleForm('form-novo-prot')">Cancelar</button>
+        </div>
+      </div>
+      <div id="list-protocolos" class="prot-list"></div>
+    </div>
+    <div class="admin-panel" id="panel-alunos">
+      <div class="section-head">
+        <h3>Alunos</h3>
+        <button class="btn-add" onclick="toggleForm('form-novo-aluno')">+ Novo aluno</button>
+      </div>
+      <div class="form-card" id="form-novo-aluno">
+        <h4>Cadastrar aluno</h4>
+        <div class="form-row"><label>Nick (login - sem espacos)</label><input id="f-aluno-nick" placeholder="ex: joao, ana123"></div>
+        <div class="form-row"><label>Nome completo (opcional)</label><input id="f-aluno-nome" placeholder="Nome para exibicao"></div>
+        <div class="form-row"><label>Protocolo</label>
+          <select id="f-aluno-protocolo"><option value="">-- Selecionar --</option></select>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="salvarAluno()">Salvar</button>
+          <button class="btn-cancel" onclick="toggleForm('form-novo-aluno')">Cancelar</button>
+        </div>
+      </div>
+      <div id="list-alunos" class="admin-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN: EDITAR PROTOCOLO -->
+<div id="view-admin-prot" class="view">
+  <div class="topbar">
+    <button class="btn-back" onclick="voltarAdmin()">&#8592; Protocolos</button>
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">admin</span></div>
+  </div>
+  <div class="admin-wrap fade-in">
+    <div class="proto-edit-header">
+      <div>
+        <div class="proto-edit-title" id="edit-prot-nome"></div>
+        <div class="proto-edit-desc" id="edit-prot-desc"></div>
+      </div>
+      <button class="btn-add" onclick="toggleForm('form-nova-semana')">+ Semana</button>
+    </div>
+    <div class="form-card" id="form-nova-semana">
+      <h4>Adicionar semana</h4>
+      <div class="form-grid2">
+        <div class="form-row"><label>Numero</label><input id="f-sem-num" type="number" min="1" placeholder="1"></div>
+        <div class="form-row"><label>Rotulo (opcional)</label><input id="f-sem-obs" placeholder="ex: Fase de Adaptacao"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="salvarSemana()">Adicionar</button>
+        <button class="btn-cancel" onclick="toggleForm('form-nova-semana')">Cancelar</button>
+      </div>
+    </div>
+    <div id="lista-semanas-edit"></div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRMAR DELETE -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-box" style="max-height:auto">
+    <h4 id="modal-title">Confirmar exclusao</h4>
+    <p id="modal-msg">Esta acao nao pode ser desfeita.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn-danger" id="modal-confirm-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DUPLICAR DIA -->
+<div class="modal-overlay" id="modal-dupl">
+  <div class="modal-box">
+    <h4>Copiar treino existente</h4>
+    <p>Selecione um dia para copiar todos os exercicios. Voce podera editar depois.</p>
+    <div class="modal-scroll" id="dupl-lista"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-dupl')">Cancelar</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL: EDITAR EXERCÍCIO -->
+<div class="modal-overlay" id="modal-edit-ex">
+  <div class="modal-box">
+    <h4>Editar exercicio</h4>
+    <div class="modal-edit-ex">
+      <div class="form-row"><label>Nome / Titulo</label><input id="ee-nome" placeholder="Nome do exercicio"></div>
+      <div class="tipo-toggle">
+        <button class="tipo-btn ativo" id="ee-tbm" onclick="setTipoEe('musc')">&#127947; Musculacao</button>
+        <button class="tipo-btn" id="ee-tbf" onclick="setTipoEe('func')">&#9889; Funcional / Cross</button>
+      </div>
+      <div id="ee-campos-musc">
+        <div class="form-grid3">
+          <div class="form-row"><label>Series</label><input id="ee-series" type="number" min="1" placeholder="4"></div>
+          <div class="form-row"><label>Reps</label><input id="ee-reps" placeholder="8-12"></div>
+          <div class="form-row"><label>Tecnica</label><input id="ee-tecnica" placeholder="Drop-set..."></div>
+        </div>
+        <div class="form-grid2">
+          <div class="form-row"><label>Metodo</label><input id="ee-metodo" placeholder="Cadencia 3-1-1..."></div>
+          <div class="form-row"><label>Observacao</label><input id="ee-obs" placeholder="Pegada pronada..."></div>
+        </div>
+      </div>
+      <div id="ee-campos-func" style="display:none">
+        <div class="form-row"><label>Prescricao livre</label><textarea id="ee-presc" class="big" placeholder="4 rounds:&#10;10 Wall Balls..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:.85rem">
+      <button class="btn-cancel" onclick="closeModal('modal-edit-ex')">Cancelar</button>
+      <button class="btn-save" onclick="confirmarEditEx()">Salvar alteracoes</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW: CONFIG RELATÓRIO -->
+<div id="view-rel-config" class="view no-print">
+  <div class="topbar">
+    <button class="btn-back" onclick="voltarAdmin()">&#8592; Admin</button>
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">relatorio</span></div>
+  </div>
+  <div class="rel-config fade-in">
+    <div class="section-head" style="margin-bottom:1.25rem">
+      <h3 style="font-size:1.1rem">Gerar Folha de Treino</h3>
+      <button class="btn-save" onclick="gerarRelatorio()">Gerar relatorio &#8594;</button>
+    </div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:1.25rem">Selecione os alunos presentes e escolha a semana e o dia de cada um.</p>
+    <div id="rel-alunos-config"></div>
+  </div>
+</div>
+
+<!-- VIEW: RELATÓRIO GERADO -->
+<div id="view-relatorio" class="view">
+  <div class="rel-topbar no-print">
+    <button class="btn-back" onclick="showView('view-rel-config')">&#8592; Configurar</button>
+    <div class="topbar-logo">i9<span>Fit</span></div>
+    <button class="btn-print" onclick="window.print()">&#128438; Imprimir</button>
+  </div>
+  <div class="rel-wrap" id="rel-conteudo"></div>
+  <div class="rel-save-bar no-print">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem">Salvar cargas da sessao</div>
+      <p>Os pesos preenchidos aqui serao sugeridos na proxima sessao de cada aluno.</p>
+    </div>
+    <div style="display:flex;gap:.6rem;align-items:center">
+      <span class="rel-save-status" id="rel-save-ok">&#10003; Salvo!</span>
+      <button class="btn-save" onclick="salvarCargasRelatorio()">Salvar cargas &#8594;</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC6xUfFJ59fXT1_eR1HDD7UPiQ8aakSkHY",
+  authDomain: "i9fit-4b643.firebaseapp.com",
+  projectId: "i9fit-4b643",
+  storageBucket: "i9fit-4b643.firebasestorage.app",
+  messagingSenderId: "60375557935",
+  appId: "1:60375557935:web:b761c243672d50c7c263da",
+  measurementId: "G-9ZX1089GT7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const SISTEMA_REF = doc(db, "sistema", "i9fit");
+
+const __defaultStorage = {
+  pt_data: JSON.stringify({alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]}),
+  pt_pesos: JSON.stringify({})
+};
+
+let __storageCache = {};
+let __saveTimer = null;
+let __firebaseReady = false;
+
+function __normalizarStorage(raw){
+  const storage = raw && raw.storage && typeof raw.storage === "object" ? raw.storage : {};
+  // Compatibilidade: caso o documento tenha sido salvo direto como dados do sistema
+  if(!storage.pt_data && raw && (raw.alunos || raw.protocolos || raw.semanas || raw.dias || raw.exercicios)){
+    storage.pt_data = JSON.stringify({
+      alunos: raw.alunos || [],
+      protocolos: raw.protocolos || [],
+      semanas: raw.semanas || [],
+      dias: raw.dias || [],
+      exercicios: raw.exercicios || []
+    });
+  }
+  if(!storage.pt_pesos && raw && raw.pesos && typeof raw.pesos === "object"){
+    storage.pt_pesos = JSON.stringify(raw.pesos);
+  }
+  Object.keys(__defaultStorage).forEach((k)=>{
+    if(storage[k] === undefined || storage[k] === null) storage[k] = __defaultStorage[k];
+  });
+  return storage;
+}
+
+async function __carregarFirebase(){
+  try{
+    const snap = await getDoc(SISTEMA_REF);
+    __storageCache = __normalizarStorage(snap.exists() ? snap.data() : null);
+    __firebaseReady = true;
+    if(!snap.exists()){
+      await __salvarFirebaseAgora();
+    }
+  }catch(err){
+    console.error("Erro ao carregar Firestore:", err);
+    alert("Nao foi possivel conectar ao Firebase. Confira as regras do Firestore e a conexao com a internet.");
+    __storageCache = {...__defaultStorage};
+  }
+}
+
+async function __salvarFirebaseAgora(){
+  try{
+    await setDoc(SISTEMA_REF, {
+      storage: __storageCache,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  }catch(err){
+    console.error("Erro ao salvar no Firestore:", err);
+    alert("Nao foi possivel salvar no Firebase. Confira as regras do Firestore.");
+  }
+}
+
+function __agendarSaveFirebase(){
+  if(!__firebaseReady) return;
+  clearTimeout(__saveTimer);
+  __saveTimer = setTimeout(__salvarFirebaseAgora, 250);
+}
+
+// Shim de localStorage: mantém o código original funcionando, mas salva no Firestore.
+var localStorage = {
+  getItem: function(key){
+    return Object.prototype.hasOwnProperty.call(__storageCache, key) ? __storageCache[key] : null;
+  },
+  setItem: function(key, value){
+    __storageCache[key] = String(value);
+    __agendarSaveFirebase();
+  },
+  removeItem: function(key){
+    delete __storageCache[key];
+    __agendarSaveFirebase();
+  },
+  clear: function(){
+    __storageCache = {};
+    __agendarSaveFirebase();
+  }
+};
+
+await __carregarFirebase();
+
+
+// PRE-LOAD: protocolo semente
+(function(){
+  try{
+    var existing = JSON.parse(localStorage.getItem('pt_data') || 'null');
+    var seed = {"alunos": [], "protocolos": [{"id": "yzllhysn", "nome": "Teste 1 Masc - Semana Espaco Saude", "desc": "Protocolo masculino 4 dias. Segunda: Fullbody. Terca/Quarta: Musculacao. Quinta: Funcional/HIIT."}], "semanas": [{"id": "izf4kes1", "protocoloId": "yzllhysn", "num": 1, "obs": "Semana de Teste"}], "dias": [{"id": "91zf60vn", "semanaId": "izf4kes1", "label": "Segunda", "nome": "Fullbody", "obs": "3 series de 10 reps em todos os exercicios. Foco em execucao controlada.", "ordem": 1}, {"id": "ra9ls9n3", "semanaId": "izf4kes1", "label": "Terca", "nome": "Membros Superiores + Core", "obs": "Foco em peito, costas e ombros. Cadencia controlada.", "ordem": 2}, {"id": "3e99cuql", "semanaId": "izf4kes1", "label": "Quarta", "nome": "Membros Inferiores + Gluteos", "obs": "Foco em quadriceps, posterior e gluteos.", "ordem": 3}, {"id": "2sl6zy7s", "semanaId": "izf4kes1", "label": "Quinta", "nome": "Funcional + HIIT Tabata", "obs": "Aquecimento com corrida leve 5min. Bloco 1: musculacao. Bloco 2: Tabata 8 rounds (20s exec / 10s descanso = 4 min por exercicio).", "ordem": 4}], "exercicios": [{"id": "872qcgwd", "diaId": "91zf60vn", "nome": "Cadeira extensora", "ordem": 1, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "bt35em7n", "diaId": "91zf60vn", "nome": "Mesa flexora", "ordem": 2, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "sg1uj7u8", "diaId": "91zf60vn", "nome": "Remada baixa", "ordem": 3, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "lkke775r", "diaId": "91zf60vn", "nome": "Crucifixo maquina", "ordem": 4, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "tjhj3dpr", "diaId": "91zf60vn", "nome": "Triceps pulley", "ordem": 5, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "3e3f4wzr", "diaId": "91zf60vn", "nome": "Rosca direta", "ordem": 6, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "0fz8023q", "diaId": "91zf60vn", "nome": "Elevacao de panturrilha na escada", "ordem": 7, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "w510a7w9", "diaId": "91zf60vn", "nome": "Abducao deitada unilateral", "ordem": 8, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "gj66fdrz", "diaId": "91zf60vn", "nome": "Prancha ventral", "ordem": 9, "tipo": "musc", "prescricao": "", "series": "3", "reps": "30s", "tecnica": "", "metodo": "", "obs": ""}, {"id": "6ybrg06d", "diaId": "ra9ls9n3", "nome": "Supino inclinado com barra", "ordem": 1, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "Cadencia 3-1-1", "obs": ""}, {"id": "ve7mq9qo", "diaId": "ra9ls9n3", "nome": "Supino com halter reto", "ordem": 2, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "e1mbq9gl", "diaId": "ra9ls9n3", "nome": "Pulley frente", "ordem": 3, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "ho3vpfu1", "diaId": "ra9ls9n3", "nome": "Puxada alta triangulo", "ordem": 4, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "uf1wfhhj", "diaId": "ra9ls9n3", "nome": "Remada com barra pegada pronada", "ordem": 5, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "bhi2lsus", "diaId": "ra9ls9n3", "nome": "Crucifixo inverso", "ordem": 6, "tipo": "musc", "prescricao": "", "series": "3", "reps": "12", "tecnica": "Contracao de pico", "metodo": "", "obs": ""}, {"id": "byzetl75", "diaId": "ra9ls9n3", "nome": "Triceps frances", "ordem": 7, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "us23lu1h", "diaId": "ra9ls9n3", "nome": "Rosca com barra W", "ordem": 8, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "uyvy0ct0", "diaId": "ra9ls9n3", "nome": "Extensao lombar (banco romano)", "ordem": 9, "tipo": "musc", "prescricao": "", "series": "3", "reps": "12", "tecnica": "", "metodo": "", "obs": ""}, {"id": "eo3gq26t", "diaId": "ra9ls9n3", "nome": "Abdominal mao no calcanhar", "ordem": 10, "tipo": "musc", "prescricao": "", "series": "3", "reps": "15", "tecnica": "", "metodo": "", "obs": ""}, {"id": "rdr7l11p", "diaId": "3e99cuql", "nome": "Levantamento terra", "ordem": 1, "tipo": "musc", "prescricao": "", "series": "3", "reps": "8", "tecnica": "", "metodo": "Excentrica lenta", "obs": ""}, {"id": "k7j9kupv", "diaId": "3e99cuql", "nome": "Stiff", "ordem": 2, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": ""}, {"id": "4nn11yxo", "diaId": "3e99cuql", "nome": "Afundo", "ordem": 3, "tipo": "musc", "prescricao": "", "series": "3", "reps": "10", "tecnica": "", "metodo": "", "obs": "Cada perna"}, {"id": "rc5z7eb6", "diaId": "3e99cuql", "nome": "Cadeira extensora", "ordem": 4, "tipo": "musc", "prescricao": "", "series": "3", "reps": "12", "tecnica": "Drop set", "metodo": "", "obs": ""}, {"id": "8lmof0ac", "diaId": "3e99cuql", "nome": "Mesa flexora", "ordem": 5, "tipo": "musc", "prescricao": "", "series": "3", "reps": "12", "tecnica": "Contracao de pico", "metodo": "", "obs": ""}, {"id": "ojqq3cwv", "diaId": "3e99cuql", "nome": "Abducao deitada unilateral", "ordem": 6, "tipo": "musc", "prescricao": "", "series": "3", "reps": "15", "tecnica": "Contracao de pico", "metodo": "", "obs": ""}, {"id": "nn9abl8a", "diaId": "3e99cuql", "nome": "Elevacao de panturrilha na escada", "ordem": 7, "tipo": "musc", "prescricao": "", "series": "3", "reps": "15", "tecnica": "Contracao de pico", "metodo": "", "obs": ""}, {"id": "9s20igx8", "diaId": "3e99cuql", "nome": "Abdominal infra", "ordem": 8, "tipo": "musc", "prescricao": "", "series": "3", "reps": "15", "tecnica": "", "metodo": "", "obs": ""}, {"id": "3j0crhvh", "diaId": "3e99cuql", "nome": "Gato cruzado", "ordem": 9, "tipo": "musc", "prescricao": "", "series": "3", "reps": "15", "tecnica": "", "metodo": "", "obs": "Cada lado"}, {"id": "77n501qw", "diaId": "2sl6zy7s", "nome": "Bloco 1 - Musculacao", "ordem": 1, "tipo": "func", "prescricao": "3 series de 10 repeticoes em cada exercicio:\n\nRemada com barra pegada supinada\nSuperman\nPrancha alta\nGangorra", "series": "", "reps": "", "tecnica": "", "metodo": "", "obs": ""}, {"id": "qwv6cfkb", "diaId": "2sl6zy7s", "nome": "Bloco 2 - HIIT Tabata", "ordem": 2, "tipo": "func", "prescricao": "8 rounds por exercicio: 20s execucao / 10s descanso (= 4 min cada)\nDescanse 1 min entre cada bloco.\n\nBloco A: Thruster (com halter)\nBloco B: Corda naval (ondas alternadas)\nBloco C: Polichinelo\nBloco D: Escalador", "series": "", "reps": "", "tecnica": "", "metodo": "", "obs": ""}, {"id": "62qv1i56", "diaId": "2sl6zy7s", "nome": "Finalizacao", "ordem": 3, "tipo": "func", "prescricao": "Salto de corda: 3 series de 1 min\nRemador: 500m\nPrancha baixa: 3 series de 30s", "series": "", "reps": "", "tecnica": "", "metodo": "", "obs": ""}]};
+    // Garantir estrutura base
+    if(!existing) existing = {alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]};
+    ['alunos','protocolos','semanas','dias','exercicios'].forEach(function(k){
+      if(!existing[k]) existing[k]=[];
+    });
+    // Merge seguro: so adiciona itens do seed que ainda nao existem (por ID)
+    // Nunca remove nem sobrescreve dados do usuario
+    var changed = false;
+    ['protocolos','semanas','dias','exercicios'].forEach(function(k){
+      seed[k].forEach(function(item){
+        if(!existing[k].find(function(e){return e.id===item.id;})){
+          existing[k].push(item);
+          changed = true;
+        }
+      });
+    });
+    if(changed) localStorage.setItem('pt_data', JSON.stringify(existing));
+  } catch(e){}
+})();
+
+
+var ADMIN_SENHA='admin123';
+var state={user:null,protocolo:null,semana:null,dia:null,editProtId:null};
+
+// STORAGE
+function getData(){try{return JSON.parse(localStorage.getItem('pt_data'))||{alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]};}catch(e){return{alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]};}}
+function saveData(d){localStorage.setItem('pt_data',JSON.stringify(d));}
+function getPesos(){try{return JSON.parse(localStorage.getItem('pt_pesos'))||{};}catch(e){return{};}}
+function savePesos(p){localStorage.setItem('pt_pesos',JSON.stringify(p));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+// VIEWS
+// NAVEGACAO / BOTAO VOLTAR DO CELULAR
+var __historyReady = false;
+
+function __activeViewId(){
+  var active = document.querySelector('.view.active');
+  return active ? active.id : 'view-login';
+}
+
+function __safeHash(id){
+  return '#' + String(id || 'view-login').replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
+function showView(id, opts){
+  opts = opts || {};
+  var el = document.getElementById(id);
+  if(!el) return;
+
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  el.classList.add('active');
+  window.scrollTo(0,0);
+
+  // Cada tela vira uma entrada no historico. Assim o botao voltar do Android/iPhone
+  // volta para a tela anterior em vez de sair do navegador/Google Sites.
+  if(__historyReady && !opts.skipHistory){
+    var currentHash = window.location.hash || '';
+    var nextHash = __safeHash(id);
+    if(currentHash !== nextHash){
+      try{ history.pushState({view:id}, '', nextHash); }catch(e){}
+    }
+  }
+}
+
+function __initHistoryNavigation(){
+  var initial = __activeViewId();
+  try{ history.replaceState({view:initial}, '', window.location.hash || __safeHash(initial)); }catch(e){}
+  __historyReady = true;
+}
+
+window.addEventListener('popstate', function(event){
+  var id = event.state && event.state.view ? event.state.view : (window.location.hash || '').replace('#','');
+  if(!id || !document.getElementById(id)) id = 'view-login';
+  showView(id, {skipHistory:true});
+});
+
+function toggleForm(id){var el=document.getElementById(id);if(el)el.classList.toggle('open');}
+
+// MODAL GENERICO
+var modalCb=null;
+function confirmDelete(title,msg,cb){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-msg').textContent=msg||'Esta acao nao pode ser desfeita.';
+  modalCb=cb;
+  document.getElementById('modal-confirm').classList.add('open');
+}
+function closeModal(id){document.getElementById(id||'modal-confirm').classList.remove('open');}
+document.getElementById('modal-confirm-btn').onclick=function(){closeModal('modal-confirm');if(modalCb)modalCb();};
+
+// LOGIN ALUNO
+function loginAluno(){
+  var nick=document.getElementById('login-input').value.trim().toLowerCase();
+  if(!nick)return;
+  var d=getData();
+  var aluno=null;for(var i=0;i<d.alunos.length;i++){if(d.alunos[i].nick.toLowerCase()===nick){aluno=d.alunos[i];break;}}
+  if(!aluno){document.getElementById('login-error').style.display='block';return;}
+  document.getElementById('login-error').style.display='none';
+  state.user=aluno;
+  state.protocolo=null;for(var i=0;i<d.protocolos.length;i++){if(d.protocolos[i].id===aluno.protocoloId){state.protocolo=d.protocolos[i];break;}}
+  renderSemanas();
+}
+document.getElementById('login-input').addEventListener('keydown',function(e){if(e.key==='Enter')loginAluno();});
+function logout(){state.user=null;state.protocolo=null;document.getElementById('login-input').value='';showView('view-login');}
+
+// LOGIN ADMIN
+function loginAdmin(){
+  var s=document.getElementById('admin-senha-input').value;
+  if(s!==ADMIN_SENHA){document.getElementById('admin-error').style.display='block';return;}
+  document.getElementById('admin-error').style.display='none';
+  document.getElementById('admin-senha-input').value='';
+  renderAdminHome();showView('view-admin');
+}
+document.getElementById('admin-senha-input').addEventListener('keydown',function(e){if(e.key==='Enter')loginAdmin();});
+
+// ========== AREA DO ALUNO ==========
+
+function renderSemanas(){
+  var d=getData();
+  var prot=state.protocolo;
+  // recarregar protocolo caso tenha mudado
+  if(state.user){var up=null;for(var i=0;i<d.alunos.length;i++){if(d.alunos[i].id===state.user.id){up=d.alunos[i];break;}}if(up){state.user=up;state.protocolo=null;for(var i=0;i<d.protocolos.length;i++){if(d.protocolos[i].id===up.protocoloId){state.protocolo=d.protocolos[i];break;}}prot=state.protocolo;}}
+  document.getElementById('user-display').textContent=state.user.nome||state.user.nick;
+  document.getElementById('protocolo-nome').textContent=prot?prot.nome:'Sem protocolo';
+  document.getElementById('protocolo-desc').textContent=prot?(prot.desc||''):'Peca ao treinador para vincular um protocolo.';
+  var nick=state.user.nick;
+  var semanas=prot?d.semanas.filter(function(s){return s.protocoloId===prot.id;}).sort(function(a,b){return a.num-b.num;}):[];
+  var grid=document.getElementById('grid-semanas');
+  if(!semanas.length){grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhuma semana cadastrada.</p></div>';showView('view-semanas');return;}
+  grid.innerHTML=semanas.map(function(s){
+    var dias=d.dias.filter(function(di){return di.semanaId===s.id;});
+    var concl=dias.length>0&&dias.every(function(di){return localStorage.getItem(nick+'__dia__'+di.id)==='1';});
+    return '<div class="card-semana'+(concl?' concluida':'')+'" onclick="openSemana(\''+s.id+'\')">'
+      +'<div class="semana-num">'+s.num+'</div>'
+      +'<div class="semana-label">Semana</div>'
+      +'<div class="semana-dias">'+dias.length+' dia'+(dias.length!==1?'s':'')+'</div>'
+      +(s.obs?'<div class="semana-badge">'+s.obs+'</div>':'')
+      +'<div class="semana-check">&#10003; Concluida</div>'
+      +'</div>';
+  }).join('');
+  showView('view-semanas');
+}
+
+function openSemana(id){
+  var d=getData();
+  var sem=null;for(var i=0;i<d.semanas.length;i++){if(d.semanas[i].id===id){sem=d.semanas[i];break;}}
+  if(!sem)return;
+  state.semana=sem;
+  document.getElementById('semana-titulo').textContent='Semana '+sem.num;
+  document.getElementById('semana-desc').textContent=sem.obs||'';
+  document.getElementById('dias-user').textContent=state.user.nome||state.user.nick;
+  document.getElementById('breadcrumb-dias').innerHTML='<span onclick="renderSemanas()">'+(state.protocolo?state.protocolo.nome:'Protocolo')+'</span><span class="sep">&#8250;</span><span>Semana '+sem.num+'</span>';
+  renderDiasGrid();
+  showView('view-dias');
+}
+
+function renderDiasGrid(){
+  var d=getData();var sem=state.semana;if(!sem)return;
+  var nick=state.user.nick;
+  var dias=d.dias.filter(function(di){return di.semanaId===sem.id;}).sort(function(a,b){return a.ordem-b.ordem;});
+  var grid=document.getElementById('grid-dias');if(!grid)return;
+  if(!dias.length){grid.innerHTML='<div class="empty-state"><div>&#128197;</div><p>Nenhum dia cadastrado.</p></div>';return;}
+  grid.innerHTML=dias.map(function(di){
+    var exs=d.exercicios.filter(function(e){return e.diaId===di.id;});
+    var concl=localStorage.getItem(nick+'__dia__'+di.id)==='1';
+    return '<div class="card-dia'+(concl?' concluido':'')+'" onclick="openDia(\''+di.id+'\')">'
+      +'<div class="dia-label">'+di.label+'</div>'
+      +'<div class="dia-nome">'+(di.nome||'')+'</div>'
+      +'<div class="dia-count">'+exs.length+' exercicio'+(exs.length!==1?'s':'')+'</div>'
+      +'<div class="dia-done-badge">&#10003; Concluido</div>'
+      +'</div>';
+  }).join('');
+}
+
+function voltarParaDias(){
+  renderDiasGrid();
+  showView('view-dias');
+}
+
+function openDia(id){
+  var d=getData();
+  var dia=null;for(var i=0;i<d.dias.length;i++){if(d.dias[i].id===id){dia=d.dias[i];break;}}
+  if(!dia)return;
+  state.dia=dia;
+  var sem=state.semana;var prot=state.protocolo;var nick=state.user.nick;
+  document.getElementById('dia-titulo').textContent=dia.label+(dia.nome?' - '+dia.nome:'');
+  document.getElementById('dia-desc').textContent=dia.obs||'';
+  document.getElementById('breadcrumb-treino').innerHTML='<span onclick="renderSemanas()">'+(prot?prot.nome:'Protocolo')+'</span><span class="sep">&#8250;</span><span onclick="voltarParaDias()">Semana '+(sem?sem.num:'')+'</span><span class="sep">&#8250;</span><span>'+dia.label+'</span>';
+  // botao concluir dia
+  var diaConcl=localStorage.getItem(nick+'__dia__'+id)==='1';
+  var btnC=document.getElementById('btn-concluir-dia');
+  if(btnC){if(diaConcl){btnC.classList.add('concluido');btnC.textContent='\u2713 Dia concluido!';}else{btnC.classList.remove('concluido');btnC.textContent='\u2713 Marcar dia como concluido';}}
+  // exercicios
+  var exs=d.exercicios.filter(function(e){return e.diaId===id;}).sort(function(a,b){return a.ordem-b.ordem;});
+  var list=document.getElementById('exercicios-list');
+  if(!exs.length){list.innerHTML='<div class="empty-state"><div>&#128170;</div><p>Nenhum exercicio.</p></div>';showView('view-treino');return;}
+  var pesos=getPesos();
+  list.innerHTML=exs.map(function(ex,i){
+    var key=nick+'__'+ex.id;
+    var ultimo=pesos[key]!==undefined?pesos[key]:'';
+    var exFeito=localStorage.getItem(nick+'__ex__'+ex.id+'__'+id)==='1';
+    return '<div class="card-exercicio'+(exFeito?' feito':'')+'" id="cex-'+i+'">'
+      +'<div class="ex-check-row">'
+      +'<div class="ex-nome">'+ex.nome+'</div>'
+      +'<button class="ex-check-btn'+(exFeito?' feito':'')+'" onclick="toggleExFeito(\''+nick+'\',\''+id+'\',\''+ex.id+'\','+i+')">'+( exFeito?'\u2713 Feito':'\u2713 Marcar')+'</button>'
+      +'</div>'
+      +(ex.series&&ex.tipo!=='func'?'<div class="ex-meta">'+ex.series+' series x <span>'+(ex.reps||'--')+'</span> reps</div>':'')
+      +(ex.metodo&&ex.tipo!=='func'?'<div class="ex-meta">Metodo: <span>'+ex.metodo+'</span></div>':'')
+      +(ex.obs&&ex.tipo!=='func'?'<div class="ex-meta">Obs: <span>'+ex.obs+'</span></div>':'')
+      +(ex.tecnica&&ex.tipo!=='func'?'<div class="ex-tecnica">&#9889; '+ex.tecnica+'</div>':'')
+      +(ex.prescricao?'<div class="ex-prescricao">'+ex.prescricao.replace(/\n/g,'<br>')+'</div>':'')
+      +'<div class="ex-peso-row"><span class="ex-peso-label">Carga</span>'
+      +'<div class="peso-ctrl">'
+      +'<button class="peso-btn" onclick="ajustarPeso(\'pi'+i+'\',-1,\''+nick+'\',\''+ex.id+'\')">&#8722;</button>'
+      +'<input class="peso-input" id="pi'+i+'" type="number" min="0" step="0.5" value="'+ultimo+'" placeholder="0" oninput="salvarPeso(\''+nick+'\',\''+ex.id+'\',this.value)">'
+      +'<button class="peso-btn" onclick="ajustarPeso(\'pi'+i+'\',1,\''+nick+'\',\''+ex.id+'\')">+</button>'
+      +'<span class="peso-unit">kg</span>'
+      +(ultimo!==''?'<span class="peso-sugerido">(ultimo: '+ultimo+' kg)</span>':'')
+      +'</div></div></div>';
+  }).join('');
+  showView('view-treino');
+}
+
+function toggleExFeito(nick,diaId,exId,idx){
+  var key=nick+'__ex__'+exId+'__'+diaId;
+  var atual=localStorage.getItem(key)==='1';
+  localStorage.setItem(key,atual?'0':'1');
+  var card=document.getElementById('cex-'+idx);
+  var btn=card?card.querySelector('.ex-check-btn'):null;
+  if(card)card.classList.toggle('feito',!atual);
+  if(btn){btn.classList.toggle('feito',!atual);btn.textContent=(!atual?'\u2713 Feito':'\u2713 Marcar');}
+}
+
+function toggleConcluirDia(){
+  var nick=state.user.nick;var diaId=state.dia?state.dia.id:'';if(!diaId)return;
+  var key=nick+'__dia__'+diaId;
+  var atual=localStorage.getItem(key)==='1';
+  localStorage.setItem(key,atual?'0':'1');
+  var btn=document.getElementById('btn-concluir-dia');
+  if(btn){btn.classList.toggle('concluido',!atual);btn.textContent=!atual?'\u2713 Dia concluido!':'\u2713 Marcar dia como concluido';}
+}
+
+function ajustarPeso(inputId,delta,nick,exId){
+  var input=document.getElementById(inputId);
+  var novo=Math.max(0,(parseFloat(input.value)||0)+delta);
+  input.value=novo%1===0?novo:novo.toFixed(1);
+  salvarPeso(nick,exId,input.value);
+}
+function salvarPeso(nick,exId,val){if(val==='')return;var p=getPesos();p[nick+'__'+exId]=val;savePesos(p);}
+
+// ========== AREA ADMIN ==========
+
+function adminTab(tab){
+  document.querySelectorAll('.admin-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.getElementById('tab-'+(tab==='protocolos'?'prot':'alunos')).classList.add('active');
+  if(tab==='alunos')renderAdminAlunos();
+}
+function renderAdminHome(){renderAdminProtocolos();renderAdminAlunos();}
+function voltarAdmin(){renderAdminHome();showView('view-admin');}
+
+// PROTOCOLOS
+function renderAdminProtocolos(){
+  var d=getData();
+  var list=document.getElementById('list-protocolos');
+  if(!d.protocolos.length){
+    list.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhum protocolo ainda.</p></div>';
+    return;
+  }
+  list.innerHTML='';
+  d.protocolos.forEach(function(p){
+    var nsem=d.semanas.filter(function(s){return s.protocoloId===p.id;}).length;
+    var nalunos=d.alunos.filter(function(a){return a.protocoloId===p.id;}).length;
+    // wrapper
+    var wrap=document.createElement('div');
+    wrap.className='admin-item';
+    wrap.style.cssText='flex-direction:column;align-items:stretch;cursor:default;padding:0;overflow:hidden';
+    // card clicavel
+    var card=document.createElement('div');
+    card.className='prot-card';
+    card.style.cssText='border:none;border-radius:0;margin:0';
+    card.innerHTML='<div class="prot-card-info">'
+      +'<div class="prot-card-nome">'+p.nome+'</div>'
+      +'<div class="prot-card-desc">'+nsem+' semana'+(nsem!==1?'s':'')+' &middot; '+nalunos+' aluno'+(nalunos!==1?'s':'')+(p.desc?' &middot; '+p.desc:'')+'</div>'
+      +'</div>'
+      +'<div class="prot-card-actions">'
+      +'<button class="btn-icon btn-ep" title="Editar">&#9998;</button>'
+      +'<button class="btn-icon del btn-dp">&#10005;</button>'
+      +'</div>';
+    card.querySelector('.prot-card-info').addEventListener('click',function(){abrirEditarProtocolo(p.id);});
+    card.querySelector('.btn-ep').addEventListener('click',function(e){e.stopPropagation();toggleEditProt(p.id);});
+    card.querySelector('.btn-dp').addEventListener('click',function(e){e.stopPropagation();deleteProtocolo(p.id);});
+    wrap.appendChild(card);
+    // form edicao inline
+    var form=document.createElement('div');
+    form.className='edit-aluno-form';
+    form.id='edit-prot-form-'+p.id;
+    form.innerHTML='<div class="form-row"><label>Nome</label><input id="epn-'+p.id+'" value="'+p.nome.replace(/"/g,'&quot;')+'"></div>'
+      +'<div class="form-row"><label>Descricao</label><input id="epd-'+p.id+'" value="'+(p.desc||'').replace(/"/g,'&quot;')+'" placeholder="Objetivo..."></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn-save bsp">Salvar</button>'
+      +'<button class="btn-cancel bcp">Cancelar</button>'
+      +'</div>';
+    form.querySelector('.bsp').addEventListener('click',function(){salvarEdicaoProt(p.id);});
+    form.querySelector('.bcp').addEventListener('click',function(){toggleEditProt(p.id);});
+    wrap.appendChild(form);
+    list.appendChild(wrap);
+  });
+}
+function salvarProtocolo(){
+  var nome=document.getElementById('f-prot-nome').value.trim();if(!nome)return alert('Nome obrigatorio!');
+  var d=getData();d.protocolos.push({id:uid(),nome:nome,desc:document.getElementById('f-prot-desc').value.trim()});saveData(d);
+  document.getElementById('f-prot-nome').value='';document.getElementById('f-prot-desc').value='';
+  toggleForm('form-novo-prot');renderAdminProtocolos();populateSelectProtocolos();
+}
+function toggleEditProt(id){
+  var el=document.getElementById('edit-prot-form-'+id);
+  if(el)el.classList.toggle('open');
+}
+function salvarEdicaoProt(id){
+  var d=getData();
+  var idx=d.protocolos.findIndex(function(p){return p.id===id;});
+  if(idx<0)return;
+  var nome=document.getElementById('epn-'+id);
+  var desc=document.getElementById('epd-'+id);
+  if(nome)d.protocolos[idx].nome=nome.value.trim()||d.protocolos[idx].nome;
+  if(desc)d.protocolos[idx].desc=desc.value.trim();
+  saveData(d);
+  toggleEditProt(id);
+  renderAdminProtocolos();
+  populateSelectProtocolos();
+}
+function deleteProtocolo(id){
+  confirmDelete('Excluir protocolo','Todas as semanas, dias e exercicios deste protocolo serao removidos.',function(){
+    var d=getData();
+    var sems=d.semanas.filter(function(s){return s.protocoloId===id;}).map(function(s){return s.id;});
+    var dias=d.dias.filter(function(di){return sems.indexOf(di.semanaId)>=0;}).map(function(di){return di.id;});
+    d.exercicios=d.exercicios.filter(function(e){return dias.indexOf(e.diaId)<0;});
+    d.dias=d.dias.filter(function(di){return sems.indexOf(di.semanaId)<0;});
+    d.semanas=d.semanas.filter(function(s){return s.protocoloId!==id;});
+    d.protocolos=d.protocolos.filter(function(p){return p.id!==id;});
+    saveData(d);renderAdminProtocolos();populateSelectProtocolos();
+  });
+}
+
+// EDITAR PROTOCOLO (semanas/dias/ex)
+function abrirEditarProtocolo(protId){
+  var d=getData();var prot=null;for(var i=0;i<d.protocolos.length;i++){if(d.protocolos[i].id===protId){prot=d.protocolos[i];break;}}
+  if(!prot)return;
+  state.editProtId=protId;
+  document.getElementById('edit-prot-nome').textContent=prot.nome;
+  document.getElementById('edit-prot-desc').textContent=prot.desc||'';
+  var nsem=d.semanas.filter(function(s){return s.protocoloId===protId;}).length;
+  document.getElementById('f-sem-num').value=nsem+1;
+  document.getElementById('f-sem-obs').value='';
+  document.getElementById('form-nova-semana').classList.remove('open');
+  renderListaSemanas();showView('view-admin-prot');
+}
+
+function renderListaSemanas(){
+  var protId=state.editProtId;var d=getData();
+  var semanas=d.semanas.filter(function(s){return s.protocoloId===protId;}).sort(function(a,b){return a.num-b.num;});
+  var container=document.getElementById('lista-semanas-edit');
+  if(!semanas.length){container.innerHTML='<div class="empty-state"><div>&#128197;</div><p>Nenhuma semana. Clique em "+ Semana".</p></div>';return;}
+  container.innerHTML='';
+  semanas.forEach(function(s){
+    var dias=d.dias.filter(function(di){return di.semanaId===s.id;}).sort(function(a,b){return a.ordem-b.ordem;});
+    // ── wrapper ──
+    var sb=document.createElement('div');
+    sb.className='semana-bloco';sb.id='sb-'+s.id;
+    // ── header ──
+    var hdr=document.createElement('div');
+    hdr.className='semana-bloco-header';
+    hdr.innerHTML='<div class="semana-bloco-title"><span style="color:var(--accent);font-size:1.3rem;line-height:1">'+s.num+'</span><span>Semana '+s.num+(s.obs?' &mdash; '+s.obs:'')+'</span><span class="tag">'+dias.length+' dia'+(dias.length!==1?'s':'')+'</span></div>';
+    var acts=document.createElement('div');
+    acts.style.cssText='display:flex;align-items:center;gap:.45rem';
+    acts.onclick=function(e){e.stopPropagation();};
+    var bDia=document.createElement('button');bDia.className='btn-add-ghost';bDia.style.cssText='font-size:.71rem;padding:.27rem .65rem';bDia.textContent='+ Dia';bDia.onclick=function(){abrirFormDia(s.id);};
+    var bCop=document.createElement('button');bCop.className='btn-add-ghost';bCop.style.cssText='font-size:.71rem;padding:.27rem .65rem';bCop.textContent='Copiar';bCop.onclick=function(){abrirModalDupl(s.id);};
+    var bEd=document.createElement('button');bEd.className='btn-icon';bEd.title='Editar';bEd.innerHTML='&#9998;';bEd.onclick=function(){toggleEditSemana(s.id);};
+    var bDel=document.createElement('button');bDel.className='btn-icon del';bDel.innerHTML='&#10005;';bDel.onclick=function(){deleteSemana(s.id);};
+    var chev=document.createElement('span');chev.className='chevron';chev.innerHTML='&#9660;';
+    acts.appendChild(bDia);acts.appendChild(bCop);acts.appendChild(bEd);acts.appendChild(bDel);acts.appendChild(chev);
+    hdr.appendChild(acts);
+    hdr.addEventListener('click',function(){sb.classList.toggle('open-bloco');});
+    sb.appendChild(hdr);
+    // ── body ──
+    var body=document.createElement('div');body.className='bloco-body';
+    // form editar semana
+    var feSem=document.createElement('div');feSem.className='form-card';feSem.id='form-edit-sem-'+s.id;
+    feSem.innerHTML='<h4>Editar semana</h4>'
+      +'<div class="form-grid2"><div class="form-row"><label>Numero</label><input id="esn-'+s.id+'" type="number" min="1" value="'+s.num+'"></div>'
+      +'<div class="form-row"><label>Rotulo</label><input id="eso-'+s.id+'" value="'+(s.obs||'')+'" placeholder="ex: Fase de Adaptacao"></div></div>'
+      +'<div class="form-actions"></div>';
+    var bSaveSem=document.createElement('button');bSaveSem.className='btn-save';bSaveSem.textContent='Salvar';bSaveSem.onclick=function(){salvarEdicaoSemana(s.id);};
+    var bCanSem=document.createElement('button');bCanSem.className='btn-cancel';bCanSem.textContent='Cancelar';bCanSem.onclick=function(){toggleEditSemana(s.id);};
+    feSem.querySelector('.form-actions').appendChild(bSaveSem);feSem.querySelector('.form-actions').appendChild(bCanSem);
+    body.appendChild(feSem);
+    // form novo dia
+    var fDia=document.createElement('div');fDia.className='form-card';fDia.id='form-dia-'+s.id;
+    fDia.innerHTML='<h4>Adicionar dia</h4>'
+      +'<div class="form-grid2"><div class="form-row"><label>Label do dia</label><input id="fdl-'+s.id+'" placeholder="ex: Dia A, Segunda"></div>'
+      +'<div class="form-row"><label>Foco (opcional)</label><input id="fdn-'+s.id+'" placeholder="ex: Peito e Triceps"></div></div>'
+      +'<div class="form-row"><label>Observacao (opcional)</label><input id="fdo-'+s.id+'" placeholder="..."></div>'
+      +'<div class="form-actions"></div>';
+    var bSaveDia=document.createElement('button');bSaveDia.className='btn-save';bSaveDia.textContent='Adicionar';bSaveDia.onclick=function(){salvarDia(s.id);};
+    var bCanDia=document.createElement('button');bCanDia.className='btn-cancel';bCanDia.textContent='Cancelar';bCanDia.onclick=function(){fDia.classList.remove('open');};
+    fDia.querySelector('.form-actions').appendChild(bSaveDia);fDia.querySelector('.form-actions').appendChild(bCanDia);
+    body.appendChild(fDia);
+    if(!dias.length){var emp=document.createElement('div');emp.className='empty-state';emp.style.padding='.75rem';emp.innerHTML='<p>Nenhum dia. Clique em "+ Dia" ou "Copiar".</p>';body.appendChild(emp);}
+    dias.forEach(function(di){
+      var exs=d.exercicios.filter(function(e){return e.diaId===di.id;}).sort(function(a,b){return a.ordem-b.ordem;});
+      var db=document.createElement('div');db.className='dia-bloco';db.id='db-'+di.id;
+      // dia header
+      var dhdr=document.createElement('div');dhdr.className='dia-bloco-header';
+      dhdr.innerHTML='<div class="dia-bloco-title"><b>'+di.label+'</b>'+(di.nome?' &mdash; '+di.nome:'')+'<span class="tag">'+exs.length+' ex.</span></div>';
+      var dacts=document.createElement('div');dacts.style.cssText='display:flex;align-items:center;gap:.35rem';
+      dacts.onclick=function(e){e.stopPropagation();};
+      var bEx=document.createElement('button');bEx.className='btn-add-ghost';bEx.style.cssText='font-size:.7rem;padding:.24rem .6rem';bEx.textContent='+ Exercicio';bEx.onclick=function(){abrirFormEx(di.id);};
+      var bDelD=document.createElement('button');bDelD.className='btn-icon del';bDelD.style.cssText='width:24px;height:24px';bDelD.innerHTML='&#10005;';bDelD.onclick=function(){deleteDia(di.id);};
+      var dchev=document.createElement('span');dchev.className='chevron';dchev.innerHTML='&#9660;';
+      dacts.appendChild(bEx);dacts.appendChild(bDelD);dacts.appendChild(dchev);
+      dhdr.appendChild(dacts);
+      dhdr.addEventListener('click',function(){db.classList.toggle('open-dia');});
+      db.appendChild(dhdr);
+      // dia body
+      var dbody=document.createElement('div');dbody.className='dia-bloco-body';
+      // form ex
+      var fEx=document.createElement('div');fEx.className='form-card';fEx.id='form-ex-'+di.id;
+      fEx.innerHTML='<h4>Adicionar exercicio</h4>'
+        +'<div class="form-row"><label>Nome / Titulo</label><input id="fen-'+di.id+'" placeholder="ex: Supino Reto ou WOD do Dia"></div>'
+        +'<div class="tipo-toggle">'
+        +'<button class="tipo-btn ativo" id="tbm-'+di.id+'">&#127947; Musculacao</button>'
+        +'<button class="tipo-btn" id="tbf-'+di.id+'">&#9889; Funcional / Cross</button>'
+        +'</div>'
+        +'<div id="campos-musc-'+di.id+'">'
+        +'<div class="form-grid3"><div class="form-row"><label>Series</label><input id="fes-'+di.id+'" type="number" min="1" placeholder="4"></div><div class="form-row"><label>Reps</label><input id="fer-'+di.id+'" placeholder="8-12"></div><div class="form-row"><label>Tecnica</label><input id="fet-'+di.id+'" placeholder="Drop-set..."></div></div>'
+        +'<div class="form-grid2"><div class="form-row"><label>Metodo</label><input id="fem-'+di.id+'" placeholder="Cadencia 3-1-1..."></div><div class="form-row"><label>Observacao</label><input id="feo-'+di.id+'" placeholder="Pegada pronada..."></div></div>'
+        +'</div>'
+        +'<div id="campos-func-'+di.id+'" style="display:none">'
+        +'<div class="form-row"><label>Prescricao livre</label><textarea id="fep-'+di.id+'" class="big" placeholder="4 rounds:&#10;10 Wall Balls..."></textarea></div>'
+        +'</div>'
+        +'<div class="form-actions"></div>';
+      fEx.querySelector('#tbm-'+di.id).onclick=function(){setTipoEx(di.id,'musc');};
+      fEx.querySelector('#tbf-'+di.id).onclick=function(){setTipoEx(di.id,'func');};
+      var bSaveEx=document.createElement('button');bSaveEx.className='btn-save';bSaveEx.textContent='Adicionar';bSaveEx.onclick=function(){salvarExercicio(di.id);};
+      var bCanEx=document.createElement('button');bCanEx.className='btn-cancel';bCanEx.textContent='Cancelar';bCanEx.onclick=function(){fEx.classList.remove('open');};
+      fEx.querySelector('.form-actions').appendChild(bSaveEx);fEx.querySelector('.form-actions').appendChild(bCanEx);
+      dbody.appendChild(fEx);
+      if(!exs.length){var emp2=document.createElement('div');emp2.className='empty-state';emp2.style.padding='.6rem';emp2.innerHTML='<p>Nenhum exercicio.</p>';dbody.appendChild(emp2);}
+      exs.forEach(function(ex,idx){
+        var isFunc=ex.tipo==='func';
+        var ei=document.createElement('div');ei.className='ex-item';
+        ei.innerHTML='<div class="ex-item-info">'
+          +'<div class="ex-item-nome">'+(idx+1)+'. '+ex.nome+(isFunc?'<span class="func-tag">&#9889; func</span>':'')+'</div>'
+          +'<div class="ex-item-sub">'+(isFunc?(ex.prescricao?ex.prescricao.substring(0,60)+(ex.prescricao.length>60?'...':''):'Prescricao livre'):(ex.series||'--')+' series x '+(ex.reps||'--')+' reps'+(ex.tecnica?' &middot; &#9889;'+ex.tecnica:'')+(ex.metodo?' &middot; '+ex.metodo:'')+(ex.obs?' &middot; '+ex.obs:''))+'</div>'
+          +'</div><div class="ex-item-actions"></div>';
+        var bEd2=document.createElement('button');bEd2.className='btn-icon';bEd2.title='Editar';bEd2.innerHTML='&#9998;';bEd2.onclick=function(){abrirEditEx(ex.id);};
+        var bUp=document.createElement('button');bUp.className='btn-icon';bUp.innerHTML='&#8593;';bUp.onclick=function(){moverEx(ex.id,-1,di.id);};
+        var bDn=document.createElement('button');bDn.className='btn-icon';bDn.innerHTML='&#8595;';bDn.onclick=function(){moverEx(ex.id,1,di.id);};
+        var bDe=document.createElement('button');bDe.className='btn-icon del';bDe.innerHTML='&#10005;';bDe.onclick=function(){deleteEx(ex.id);};
+        var ea=ei.querySelector('.ex-item-actions');
+        ea.appendChild(bEd2);ea.appendChild(bUp);ea.appendChild(bDn);ea.appendChild(bDe);
+        dbody.appendChild(ei);
+      });
+      db.appendChild(dbody);body.appendChild(db);
+    });
+    sb.appendChild(body);container.appendChild(sb);
+  });
+}
+function toggleSB(id){var el=document.getElementById('sb-'+id);if(el)el.classList.toggle('open-bloco');}
+function toggleEditSemana(id){
+  var el=document.getElementById('form-edit-sem-'+id);
+  if(el){el.classList.toggle('open');var sb=document.getElementById('sb-'+id);if(sb)sb.classList.add('open-bloco');}
+}
+function salvarEdicaoSemana(id){
+  var d=getData();
+  var idx=d.semanas.findIndex(function(s){return s.id===id;});
+  if(idx<0)return;
+  var numEl=document.getElementById('esn-'+id);
+  var obsEl=document.getElementById('eso-'+id);
+  if(numEl)d.semanas[idx].num=parseInt(numEl.value)||d.semanas[idx].num;
+  if(obsEl)d.semanas[idx].obs=obsEl.value.trim();
+  saveData(d);
+  renderListaSemanas();
+  setTimeout(function(){var sb=document.getElementById('sb-'+id);if(sb)sb.classList.add('open-bloco');},60);
+}
+function toggleDB(id){var el=document.getElementById('db-'+id);if(el)el.classList.toggle('open-dia');}
+function abrirFormDia(semId){var el=document.getElementById('form-dia-'+semId);if(el){el.classList.add('open');var sb=document.getElementById('sb-'+semId);if(sb)sb.classList.add('open-bloco');}}
+function abrirFormEx(diaId){var el=document.getElementById('form-ex-'+diaId);if(el){el.classList.add('open');var db=document.getElementById('db-'+diaId);if(db)db.classList.add('open-dia');}}
+
+function salvarSemana(){
+  var protId=state.editProtId;
+  var num=parseInt(document.getElementById('f-sem-num').value)||1;
+  var obs=document.getElementById('f-sem-obs').value.trim();
+  var d=getData();d.semanas.push({id:uid(),protocoloId:protId,num:num,obs:obs});saveData(d);
+  document.getElementById('f-sem-obs').value='';
+  document.getElementById('f-sem-num').value=d.semanas.filter(function(s){return s.protocoloId===protId;}).length+1;
+  document.getElementById('form-nova-semana').classList.remove('open');
+  renderListaSemanas();
+}
+function deleteSemana(id){
+  confirmDelete('Excluir semana','Todos os dias e exercicios serao removidos.',function(){
+    var d=getData();
+    var dias=d.dias.filter(function(di){return di.semanaId===id;}).map(function(di){return di.id;});
+    d.exercicios=d.exercicios.filter(function(e){return dias.indexOf(e.diaId)<0;});
+    d.dias=d.dias.filter(function(di){return di.semanaId!==id;});
+    d.semanas=d.semanas.filter(function(s){return s.id!==id;});
+    saveData(d);renderListaSemanas();
+  });
+}
+function salvarDia(semId){
+  var label=document.getElementById('fdl-'+semId).value.trim();if(!label)return alert('Informe o label do dia!');
+  var nome=document.getElementById('fdn-'+semId).value.trim();var obs=document.getElementById('fdo-'+semId).value.trim();
+  var d=getData();var ordem=d.dias.filter(function(di){return di.semanaId===semId;}).length+1;
+  d.dias.push({id:uid(),semanaId:semId,label:label,nome:nome,obs:obs,ordem:ordem});saveData(d);
+  document.getElementById('fdl-'+semId).value='';document.getElementById('fdn-'+semId).value='';document.getElementById('fdo-'+semId).value='';
+  document.getElementById('form-dia-'+semId).classList.remove('open');
+  renderListaSemanas();
+  setTimeout(function(){var sb=document.getElementById('sb-'+semId);if(sb)sb.classList.add('open-bloco');},60);
+}
+function deleteDia(id){
+  confirmDelete('Excluir dia','Todos os exercicios serao removidos.',function(){
+    var d=getData();d.exercicios=d.exercicios.filter(function(e){return e.diaId!==id;});d.dias=d.dias.filter(function(di){return di.id!==id;});saveData(d);renderListaSemanas();
+  });
+}
+function setTipoEx(diaId,tipo){
+  var tbm=document.getElementById('tbm-'+diaId);var tbf=document.getElementById('tbf-'+diaId);
+  var cm=document.getElementById('campos-musc-'+diaId);var cf=document.getElementById('campos-func-'+diaId);
+  if(!tbm||!tbf||!cm||!cf)return;
+  if(tipo==='func'){tbf.classList.add('ativo');tbm.classList.remove('ativo');cf.style.display='block';cm.style.display='none';}
+  else{tbm.classList.add('ativo');tbf.classList.remove('ativo');cm.style.display='block';cf.style.display='none';}
+}
+function salvarExercicio(diaId){
+  var nome=document.getElementById('fen-'+diaId).value.trim();if(!nome)return alert('Nome obrigatorio!');
+  var d=getData();var ordem=d.exercicios.filter(function(e){return e.diaId===diaId;}).length+1;
+  var tbf=document.getElementById('tbf-'+diaId);var tipo=tbf&&tbf.classList.contains('ativo')?'func':'musc';
+  var pepEl=document.getElementById('fep-'+diaId);
+  d.exercicios.push({id:uid(),diaId:diaId,nome:nome,ordem:ordem,tipo:tipo,
+    prescricao:tipo==='func'?(pepEl?pepEl.value.trim():''):'',
+    series:tipo==='musc'?document.getElementById('fes-'+diaId).value.trim():'',
+    reps:tipo==='musc'?document.getElementById('fer-'+diaId).value.trim():'',
+    tecnica:tipo==='musc'?document.getElementById('fet-'+diaId).value.trim():'',
+    metodo:tipo==='musc'?document.getElementById('fem-'+diaId).value.trim():'',
+    obs:tipo==='musc'?document.getElementById('feo-'+diaId).value.trim():''});
+  saveData(d);
+  ['fen-','fes-','fer-','fet-','fem-','feo-'].forEach(function(p){var el=document.getElementById(p+diaId);if(el)el.value='';});
+  if(pepEl)pepEl.value='';setTipoEx(diaId,'musc');
+  document.getElementById('form-ex-'+diaId).classList.remove('open');
+  renderListaSemanas();
+  setTimeout(function(){var db=document.getElementById('db-'+diaId);if(db)db.classList.add('open-dia');},60);
+}
+function deleteEx(id){
+  confirmDelete('Excluir exercicio','',function(){var d=getData();d.exercicios=d.exercicios.filter(function(e){return e.id!==id;});saveData(d);renderListaSemanas();});
+}
+function moverEx(id,dir,diaId){
+  var d=getData();
+  var exs=d.exercicios.filter(function(e){return e.diaId===diaId;}).sort(function(a,b){return a.ordem-b.ordem;});
+  var idx=exs.findIndex(function(e){return e.id===id;});var ni=idx+dir;
+  if(ni<0||ni>=exs.length)return;
+  var tmp=exs[idx].ordem;exs[idx].ordem=exs[ni].ordem;exs[ni].ordem=tmp;
+  exs.forEach(function(e){var r=d.exercicios.find(function(x){return x.id===e.id;});if(r)r.ordem=e.ordem;});
+  saveData(d);renderListaSemanas();
+  setTimeout(function(){var db=document.getElementById('db-'+diaId);if(db)db.classList.add('open-dia');},60);
+}
+
+// DUPLICAR DIA
+function abrirModalDupl(semId){
+  var d=getData();var lista=document.getElementById('dupl-lista');if(!lista)return;
+  var html='';
+  d.protocolos.forEach(function(prot){
+    var grupoHtml='';
+    d.semanas.filter(function(s){return s.protocoloId===prot.id;}).sort(function(a,b){return a.num-b.num;}).forEach(function(s){
+      d.dias.filter(function(di){return di.semanaId===s.id;}).sort(function(a,b){return a.ordem-b.ordem;}).forEach(function(di){
+        var nexs=d.exercicios.filter(function(e){return e.diaId===di.id;}).length;
+        grupoHtml+='<button class="dupl-dia-btn" onclick="duplicarDia(\''+di.id+'\',\''+semId+'\')">'
+          +'<span style="color:var(--muted);font-size:.72rem">'+prot.nome+' &rsaquo; Semana '+s.num+'</span><br>'
+          +'<b>'+di.label+'</b>'+(di.nome?' &mdash; '+di.nome:'')
+          +' <span style="font-size:.72rem;color:var(--muted2)">('+nexs+' ex.)</span>'
+          +'</button>';
+      });
+    });
+    if(grupoHtml)html+='<div class="dupl-group"><div class="dupl-group-title">'+prot.nome+'</div>'+grupoHtml+'</div>';
+  });
+  lista.innerHTML=html||'<p style="color:var(--muted);font-size:.85rem">Nenhum dia disponivel para copiar.</p>';
+  document.getElementById('modal-dupl').classList.add('open');
+  document.getElementById('modal-dupl').dataset.semId=semId;
+}
+function duplicarDia(diaOrigemId,semDestinoId){
+  var d=getData();
+  var diaOrig=d.dias.find(function(di){return di.id===diaOrigemId;});if(!diaOrig)return;
+  var exsOrig=d.exercicios.filter(function(e){return e.diaId===diaOrigemId;}).sort(function(a,b){return a.ordem-b.ordem;});
+  var novoDiaId=uid();
+  var novaOrdem=d.dias.filter(function(di){return di.semanaId===semDestinoId;}).length+1;
+  d.dias.push({id:novoDiaId,semanaId:semDestinoId,label:diaOrig.label,nome:diaOrig.nome,obs:diaOrig.obs,ordem:novaOrdem});
+  exsOrig.forEach(function(ex){
+    d.exercicios.push({id:uid(),diaId:novoDiaId,nome:ex.nome,ordem:ex.ordem,tipo:ex.tipo||'musc',
+      prescricao:ex.prescricao||'',series:ex.series||'',reps:ex.reps||'',
+      tecnica:ex.tecnica||'',metodo:ex.metodo||'',obs:ex.obs||''});
+  });
+  saveData(d);closeModal('modal-dupl');renderListaSemanas();
+  setTimeout(function(){var sb=document.getElementById('sb-'+semDestinoId);if(sb)sb.classList.add('open-bloco');var db=document.getElementById('db-'+novoDiaId);if(db)db.classList.add('open-dia');},80);
+}
+
+// ALUNOS
+function renderAdminAlunos(){
+  populateSelectProtocolos();
+  var d=getData();
+  var list=document.getElementById('list-alunos');
+  if(!d.alunos.length){
+    list.innerHTML='<div class="empty-state"><div>&#128100;</div><p>Nenhum aluno cadastrado.</p></div>';
+    return;
+  }
+  list.innerHTML='';
+  d.alunos.forEach(function(a){
+    var prot=null;
+    for(var i=0;i<d.protocolos.length;i++){if(d.protocolos[i].id===a.protocoloId){prot=d.protocolos[i];break;}}
+    var wrap=document.createElement('div');
+    wrap.className='admin-item';
+    // row principal
+    var row=document.createElement('div');
+    row.className='admin-item-row';
+    row.innerHTML='<div class="admin-item-info">'
+      +'<div class="admin-item-title">'+(a.nome||a.nick)+' <span style="color:var(--muted);font-size:.75rem">/ '+a.nick+'</span></div>'
+      +'<div class="admin-item-sub">'+(prot?'&#128203; '+prot.nome:'Sem protocolo')+'</div>'
+      +'</div>'
+      +'<div class="admin-item-actions">'
+      +'<button class="btn-icon bea" title="Editar">&#9998;</button>'
+      +'<button class="btn-icon del bda">&#10005;</button>'
+      +'</div>';
+    row.querySelector('.bea').addEventListener('click',function(){toggleEditAluno(a.id);});
+    row.querySelector('.bda').addEventListener('click',function(){deleteAluno(a.id);});
+    wrap.appendChild(row);
+    // form edicao
+    var form=document.createElement('div');
+    form.className='edit-aluno-form';
+    form.id='edit-aluno-'+a.id;
+    form.innerHTML='<div class="form-row"><label>Nome de exibicao</label><input id="ean-'+a.id+'" value="'+(a.nome||'').replace(/"/g,'&quot;')+'" placeholder="Nome completo"></div>'
+      +'<div class="form-row"><label>Protocolo</label>'
+      +'<select id="eap-'+a.id+'">'
+      +'<option value="">-- Sem protocolo --</option>'
+      +d.protocolos.map(function(p){return '<option value="'+p.id+'"'+(p.id===a.protocoloId?' selected':'')+'>'+p.nome+'</option>';}).join('')
+      +'</select></div>'
+      +'<div class="form-actions">'
+      +'<button class="btn-save bsa">Salvar</button>'
+      +'<button class="btn-cancel bca">Cancelar</button>'
+      +'</div>';
+    form.querySelector('.bsa').addEventListener('click',function(){salvarEdicaoAluno(a.id);});
+    form.querySelector('.bca').addEventListener('click',function(){toggleEditAluno(a.id);});
+    wrap.appendChild(form);
+    list.appendChild(wrap);
+  });
+}
+function toggleEditAluno(id){var el=document.getElementById('edit-aluno-'+id);if(el)el.classList.toggle('open');}
+function salvarEdicaoAluno(id){
+  var d=getData();var idx=d.alunos.findIndex(function(a){return a.id===id;});if(idx<0)return;
+  var nomeEl=document.getElementById('ean-'+id);var protEl=document.getElementById('eap-'+id);
+  if(nomeEl)d.alunos[idx].nome=nomeEl.value.trim();
+  if(protEl)d.alunos[idx].protocoloId=protEl.value;
+  saveData(d);toggleEditAluno(id);renderAdminAlunos();
+}
+function salvarAluno(){
+  var nick=document.getElementById('f-aluno-nick').value.trim().toLowerCase().replace(/\s+/g,'');
+  var nome=document.getElementById('f-aluno-nome').value.trim();
+  var protId=document.getElementById('f-aluno-protocolo').value;
+  if(!nick)return alert('Nick obrigatorio!');
+  var d=getData();for(var i=0;i<d.alunos.length;i++){if(d.alunos[i].nick===nick)return alert('Ja existe aluno com este nick!');}
+  d.alunos.push({id:uid(),nick:nick,nome:nome,protocoloId:protId});saveData(d);
+  document.getElementById('f-aluno-nick').value='';document.getElementById('f-aluno-nome').value='';document.getElementById('f-aluno-protocolo').value='';
+  toggleForm('form-novo-aluno');renderAdminAlunos();
+}
+function deleteAluno(id){
+  confirmDelete('Excluir aluno','O acesso deste aluno sera removido.',function(){var d=getData();d.alunos=d.alunos.filter(function(a){return a.id!==id;});saveData(d);renderAdminAlunos();});
+}
+function salvarCargasRelatorio(){
+  var inputs=document.querySelectorAll('#rel-conteudo .rel-peso-input');
+  var p=getPesos();var count=0;
+  inputs.forEach(function(inp){
+    var val=inp.value.trim();
+    var nick=inp.getAttribute('data-nick');
+    var exId=inp.getAttribute('data-exid');
+    if(val!==''&&nick&&exId){p[nick+'__'+exId]=val;count++;}
+  });
+  savePesos(p);
+  var ok=document.getElementById('rel-save-ok');
+  if(ok){ok.style.display='inline';setTimeout(function(){ok.style.display='none';},3000);}
+  if(count===0)alert('Nenhuma carga preenchida.');
+  else{/* feedback ja exibido */}
+}
+function exportarDados(){
+  var d=getData();
+  var p=getPesos();
+  var payload=JSON.stringify({data:d,pesos:p},null,2);
+  var blob=new Blob([payload],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  var hoje=new Date();
+  var ds=hoje.getFullYear()+'-'+(hoje.getMonth()+1).toString().padStart(2,'0')+'-'+hoje.getDate().toString().padStart(2,'0');
+  a.href=url;a.download='i9fit-backup-'+ds+'.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function importarDados(input){
+  var file=input.files[0];if(!file)return;
+  var status=document.getElementById('import-status');
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var payload=JSON.parse(e.target.result);
+      // Aceitar tanto {data,pesos} quanto o objeto data direto
+      var d=payload.data||payload;
+      var p=payload.pesos||{};
+      // Validar estrutura mínima
+      if(!d.protocolos||!d.alunos||!d.semanas||!d.dias||!d.exercicios){
+        throw new Error('Arquivo invalido: estrutura nao reconhecida.');
+      }
+      // Merge: preservar dados locais + adicionar/atualizar do backup
+      var existing=getData();
+      var existingPesos=getPesos();
+      ['protocolos','semanas','dias','exercicios','alunos'].forEach(function(k){
+        d[k].forEach(function(item){
+          var idx=existing[k].findIndex(function(e){return e.id===item.id;});
+          if(idx>=0){existing[k][idx]=item;}
+          else{existing[k].push(item);}
+        });
+      });
+      // Merge pesos
+      Object.keys(p).forEach(function(k){existingPesos[k]=p[k];});
+      saveData(existing);
+      savePesos(existingPesos);
+      // Feedback
+      status.textContent='\u2713 Importado com sucesso! '+d.protocolos.length+' protocolo(s), '+d.alunos.length+' aluno(s).';
+      status.className='import-status ok';status.style.display='block';
+      setTimeout(function(){status.style.display='none';},5000);
+      renderAdminHome();
+      input.value='';
+    } catch(err){
+      status.textContent='\u2717 Erro: '+err.message;
+      status.className='import-status err';status.style.display='block';
+      setTimeout(function(){status.style.display='none';},5000);
+      input.value='';
+    }
+  };
+  reader.readAsText(file);
+}
+function populateSelectProtocolos(){
+  var sel=document.getElementById('f-aluno-protocolo');if(!sel)return;
+  var d=getData();var cur=sel.value;
+  sel.innerHTML='<option value="">-- Selecionar --</option>'+d.protocolos.map(function(p){return '<option value="'+p.id+'"'+(p.id===cur?' selected':'')+'>'+p.nome+'</option>';}).join('');
+}
+
+// ===== EDITAR EXERCÍCIO =====
+var _editExId = null;
+function abrirEditEx(exId){
+  var d=getData();var ex=d.exercicios.find(function(e){return e.id===exId;});if(!ex)return;
+  _editExId=exId;
+  document.getElementById('ee-nome').value=ex.nome||'';
+  document.getElementById('ee-series').value=ex.series||'';
+  document.getElementById('ee-reps').value=ex.reps||'';
+  document.getElementById('ee-tecnica').value=ex.tecnica||'';
+  document.getElementById('ee-metodo').value=ex.metodo||'';
+  document.getElementById('ee-obs').value=ex.obs||'';
+  document.getElementById('ee-presc').value=ex.prescricao||'';
+  var tipo=ex.tipo||'musc';
+  setTipoEe(tipo);
+  document.getElementById('modal-edit-ex').classList.add('open');
+}
+function setTipoEe(tipo){
+  var tbm=document.getElementById('ee-tbm');var tbf=document.getElementById('ee-tbf');
+  var cm=document.getElementById('ee-campos-musc');var cf=document.getElementById('ee-campos-func');
+  if(tipo==='func'){tbf.classList.add('ativo');tbm.classList.remove('ativo');cf.style.display='block';cm.style.display='none';}
+  else{tbm.classList.add('ativo');tbf.classList.remove('ativo');cm.style.display='block';cf.style.display='none';}
+}
+function confirmarEditEx(){
+  if(!_editExId)return;
+  var d=getData();var idx=d.exercicios.findIndex(function(e){return e.id===_editExId;});if(idx<0)return;
+  var tbf=document.getElementById('ee-tbf');var tipo=tbf&&tbf.classList.contains('ativo')?'func':'musc';
+  d.exercicios[idx].nome=document.getElementById('ee-nome').value.trim();
+  d.exercicios[idx].tipo=tipo;
+  d.exercicios[idx].prescricao=tipo==='func'?document.getElementById('ee-presc').value.trim():'';
+  d.exercicios[idx].series=tipo==='musc'?document.getElementById('ee-series').value.trim():'';
+  d.exercicios[idx].reps=tipo==='musc'?document.getElementById('ee-reps').value.trim():'';
+  d.exercicios[idx].tecnica=tipo==='musc'?document.getElementById('ee-tecnica').value.trim():'';
+  d.exercicios[idx].metodo=tipo==='musc'?document.getElementById('ee-metodo').value.trim():'';
+  d.exercicios[idx].obs=tipo==='musc'?document.getElementById('ee-obs').value.trim():'';
+  saveData(d);closeModal('modal-edit-ex');
+  // manter blocos abertos
+  var ex=d.exercicios[idx];var diaId=ex.diaId;
+  renderListaSemanas();
+  setTimeout(function(){
+    var db=document.getElementById('db-'+diaId);if(db)db.classList.add('open-dia');
+    // abrir semana pai
+    var dia=d.dias.find(function(di){return di.id===diaId;});
+    if(dia){var sb=document.getElementById('sb-'+dia.semanaId);if(sb)sb.classList.add('open-bloco');}
+  },60);
+}
+
+// ===== RELATÓRIO =====
+function abrirRelConfig(){
+  var d=getData();
+  var container=document.getElementById('rel-alunos-config');
+  if(!d.alunos.length){container.innerHTML='<div class="empty-state"><div>&#128100;</div><p>Nenhum aluno cadastrado.</p></div>';showView('view-rel-config');return;}
+  var html='';
+  d.alunos.forEach(function(a){
+    var prot=d.protocolos.find(function(p){return p.id===a.protocoloId;});
+    var semanas=prot?d.semanas.filter(function(s){return s.protocoloId===prot.id;}).sort(function(a,b){return a.num-b.num;}):[]; 
+    var semOpts='<option value="">-- Semana --</option>'+semanas.map(function(s){return '<option value="'+s.id+'">Semana '+s.num+(s.obs?' - '+s.obs:'')+'</option>';}).join('');
+    html+='<div class="aluno-sel-item" id="asi-'+a.id+'">'
+      +'<div class="aluno-sel-row">'
+      +'<input type="checkbox" class="aluno-sel-check asel-chk" id="asel-'+a.id+'" data-aid="'+a.id+'">'
+      +'<label class="aluno-sel-nome" for="asel-'+a.id+'">'+(a.nome||a.nick)+' <span style="color:var(--muted);font-size:.78rem">/ '+a.nick+'</span></label>'
+      +'<span style="font-size:.75rem;color:var(--muted2)">'+(prot?prot.nome:'sem protocolo')+'</span>'
+      +'</div>'
+      +'<div class="aluno-sel-config" id="aconf-'+a.id+'">'
+      +'<select class="asel-sem" id="asel-sem-'+a.id+'" data-aid="'+a.id+'">'+semOpts+'</select>'
+      +'<select id="asel-dia-'+a.id+'"><option value="">-- Dia --</option></select>'
+      +'</div>'
+      +'</div>';
+  });
+  container.innerHTML=html;
+  showView('view-rel-config');
+}
+function toggleAlunoSel(el,alunoId){
+  var conf=document.getElementById('aconf-'+alunoId);
+  if(conf){if(el&&el.checked)conf.classList.add('show');else conf.classList.remove('show');}
+}
+// delegação de eventos para checkboxes e selects do relatório
+document.addEventListener('change',function(e){
+  if(e.target.classList.contains('asel-chk')){
+    var aid=e.target.getAttribute('data-aid');
+    var conf=document.getElementById('aconf-'+aid);
+    if(conf){if(e.target.checked)conf.classList.add('show');else conf.classList.remove('show');}
+  }
+  if(e.target.classList.contains('asel-sem')){
+    var aid=e.target.getAttribute('data-aid');
+    updateDiasSelect(aid);
+  }
+});
+function updateDiasSelect(alunoId){
+  var semId=document.getElementById('asel-sem-'+alunoId).value;
+  var selDia=document.getElementById('asel-dia-'+alunoId);
+  selDia.innerHTML='<option value="">-- Dia --</option>';
+  if(!semId)return;
+  var d=getData();
+  d.dias.filter(function(di){return di.semanaId===semId;}).sort(function(a,b){return a.ordem-b.ordem;})
+    .forEach(function(di){selDia.innerHTML+='<option value="'+di.id+'">'+di.label+(di.nome?' - '+di.nome:'')+'</option>';});
+}
+function gerarRelatorio(){
+  var d=getData();var pesos=getPesos();
+  var alunos=d.alunos.filter(function(a){var chk=document.getElementById('asel-'+a.id);return chk&&chk.checked;});
+  if(!alunos.length)return alert('Selecione ao menos um aluno.');
+  var cont=document.getElementById('rel-conteudo');
+  cont.innerHTML='';
+  var dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  alunos.forEach(function(a){
+    var diaId=document.getElementById('asel-dia-'+a.id)?document.getElementById('asel-dia-'+a.id).value:'';
+    var card=document.createElement('div');card.className='rel-card print-page';
+    if(!diaId){
+      card.innerHTML='<div class="rel-aluno">'+(a.nome||a.nick)+'</div><div class="rel-dia">Nenhum dia selecionado.</div>';
+      cont.appendChild(card);return;
+    }
+    var dia=d.dias.find(function(di){return di.id===diaId;});
+    var semana=dia?d.semanas.find(function(s){return s.id===dia.semanaId;}):null;
+    var prot=semana?d.protocolos.find(function(p){return p.id===semana.protocoloId;}):null;
+    var exs=d.exercicios.filter(function(e){return e.diaId===diaId;}).sort(function(a,b){return a.ordem-b.ordem;});
+    // header do card
+    var hdr=document.createElement('div');
+    hdr.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:.85rem';
+    hdr.innerHTML='<div><div class="rel-aluno">'+(a.nome||a.nick)+'</div>'
+      +'<div class="rel-dia">'+(prot?prot.nome+' &rsaquo; ':'')+(semana?'Semana '+semana.num+' &rsaquo; ':'')+(dia?dia.label+(dia.nome?' - '+dia.nome:''):'')+'</div></div>'
+      +'<div style="font-size:.75rem;color:var(--muted)">'+dataHoje+'</div>';
+    card.appendChild(hdr);
+    if(!exs.length){
+      var emp=document.createElement('p');emp.style.cssText='color:var(--muted);font-size:.85rem';emp.textContent='Nenhum exercicio neste dia.';
+      card.appendChild(emp);cont.appendChild(card);return;
+    }
+    exs.forEach(function(ex,i){
+      var isFunc=ex.tipo==='func';
+      var ultimoPeso=pesos[a.nick+'__'+ex.id];
+      var exDiv=document.createElement('div');exDiv.className='rel-ex';
+      // nome + meta
+      var nomeDiv=document.createElement('div');nomeDiv.className='rel-ex-nome';nomeDiv.textContent=(i+1)+'. '+ex.nome;exDiv.appendChild(nomeDiv);
+      if(!isFunc&&(ex.series||ex.reps)){
+        var metaDiv=document.createElement('div');metaDiv.className='rel-ex-meta';
+        metaDiv.textContent=(ex.series||'--')+' series x '+(ex.reps||'--')+' reps'+(ex.tecnica?' · '+ex.tecnica:'')+(ex.metodo?' · '+ex.metodo:'')+(ex.obs?' · '+ex.obs:'');
+        exDiv.appendChild(metaDiv);
+      }
+      if(isFunc&&ex.prescricao){
+        var prDiv=document.createElement('div');prDiv.className='rel-ex-presc';prDiv.textContent=ex.prescricao;exDiv.appendChild(prDiv);
+      }
+      // campo de peso editável
+      var pesoRow=document.createElement('div');pesoRow.className='rel-peso-edit';
+      var lbl=document.createElement('span');lbl.className='rel-peso-label';lbl.textContent='Carga:';
+      var ctrl=document.createElement('div');ctrl.className='rel-peso-ctrl';
+      var bMinus=document.createElement('button');bMinus.className='rel-peso-btn';bMinus.innerHTML='&#8722;';
+      var inp=document.createElement('input');
+      inp.className='rel-peso-input';
+      inp.type='number';inp.min='0';inp.step='0.5';
+      inp.placeholder='0';
+      inp.value=ultimoPeso||'';
+      inp.setAttribute('data-nick',a.nick);
+      inp.setAttribute('data-exid',ex.id);
+      var bPlus=document.createElement('button');bPlus.className='rel-peso-btn';bPlus.innerHTML='+';
+      var unit=document.createElement('span');unit.className='rel-peso-unit';unit.textContent='kg';
+      bMinus.onclick=function(){var v=Math.max(0,(parseFloat(inp.value)||0)-1);inp.value=v%1===0?v:v.toFixed(1);};
+      bPlus.onclick=function(){var v=(parseFloat(inp.value)||0)+1;inp.value=v%1===0?v:v.toFixed(1);};
+      ctrl.appendChild(bMinus);ctrl.appendChild(inp);ctrl.appendChild(bPlus);ctrl.appendChild(unit);
+      if(ultimoPeso){var ant=document.createElement('span');ant.className='rel-peso-anterior';ant.textContent='(anterior: '+ultimoPeso+' kg)';ctrl.appendChild(ant);}
+      pesoRow.appendChild(lbl);pesoRow.appendChild(ctrl);
+      exDiv.appendChild(pesoRow);
+      card.appendChild(exDiv);
+    });
+    cont.appendChild(card);
+  });
+  showView('view-relatorio');
+}
+
+
+
+
+
+// Disponibiliza as funcoes para os botoes onclick do HTML quando o script roda como modulo.
+Object.assign(window, {
+  abrirEditEx,
+  abrirEditarProtocolo,
+  abrirFormDia,
+  abrirFormEx,
+  abrirModalDupl,
+  abrirRelConfig,
+  adminTab,
+  ajustarPeso,
+  closeModal,
+  confirmDelete,
+  confirmarEditEx,
+  deleteAluno,
+  deleteDia,
+  deleteEx,
+  deleteProtocolo,
+  deleteSemana,
+  duplicarDia,
+  exportarDados,
+  gerarRelatorio,
+  getData,
+  getPesos,
+  importarDados,
+  loginAdmin,
+  loginAluno,
+  logout,
+  moverEx,
+  openDia,
+  openSemana,
+  populateSelectProtocolos,
+  renderAdminAlunos,
+  renderAdminHome,
+  renderAdminProtocolos,
+  renderDiasGrid,
+  renderListaSemanas,
+  renderSemanas,
+  salvarAluno,
+  salvarCargasRelatorio,
+  salvarDia,
+  salvarEdicaoAluno,
+  salvarEdicaoProt,
+  salvarEdicaoSemana,
+  salvarExercicio,
+  salvarPeso,
+  salvarProtocolo,
+  salvarSemana,
+  saveData,
+  savePesos,
+  setTipoEe,
+  setTipoEx,
+  showView,
+  toggleAlunoSel,
+  toggleConcluirDia,
+  toggleDB,
+  toggleEditAluno,
+  toggleEditProt,
+  toggleEditSemana,
+  toggleExFeito,
+  toggleForm,
+  toggleSB,
+  uid,
+  updateDiasSelect,
+  voltarAdmin,
+  voltarParaDias
+});
+__initHistoryNavigation();
+window.i9fitFirebase = { app, db, ref: SISTEMA_REF };
+</script>
+</body>
+</html>
