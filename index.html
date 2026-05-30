@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>i9Fit</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8f542">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="i9Treino">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 
@@ -2089,5 +2095,16 @@ Object.assign(window, {
 __initHistoryNavigation();
 window.i9fitFirebase = { app, db, ref: SISTEMA_REF };
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then(() => console.log('PWA ativo'))
+      .catch(err => console.error('Erro ao registrar PWA:', err));
+  });
+}
+</script>
+
 </body>
 </html>
