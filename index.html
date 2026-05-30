@@ -288,31 +288,6 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .import-status.ok{color:var(--done-text)}
 .import-status.err{color:var(--danger)}
 
-
-/* MEDIDAS E EVOLUCAO */
-.medidas-wrap{max-width:860px;margin:0 auto;padding:1.5rem}
-.medidas-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
-.medidas-card h3{font-size:1rem;font-weight:800;margin-bottom:.25rem}
-.medidas-card p{font-size:.82rem;color:var(--muted);line-height:1.5;margin-bottom:.85rem}
-.medidas-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
-.medidas-grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem}
-.medida-alerta{background:#2a210a;border:1px solid #4a3a12;color:#d6b64c;border-radius:var(--radius-sm);padding:.75rem .9rem;font-size:.82rem;line-height:1.5;margin-bottom:1rem}
-.medida-ok{background:var(--done);border:1px solid var(--done-border);color:var(--done-text);border-radius:var(--radius-sm);padding:.75rem .9rem;font-size:.82rem;line-height:1.5;margin-bottom:1rem}
-.medida-history{display:flex;flex-direction:column;gap:.65rem;margin-top:.75rem}
-.medida-item{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.9rem}
-.medida-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.65rem}
-.medida-item-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--accent)}
-.medida-item-sub{font-size:.75rem;color:var(--muted);margin-top:.15rem}
-.medida-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem;margin-top:.5rem}
-.medida-value{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.45rem .55rem;font-size:.75rem;color:var(--muted)}
-.medida-value span{display:block;color:var(--text);font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-top:.1rem}
-.medida-fotos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:.75rem}
-.medida-foto{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;min-height:90px;display:flex;align-items:center;justify-content:center;color:var(--muted2);font-size:.72rem;text-align:center}
-.medida-foto img{width:100%;height:120px;object-fit:cover;display:block}
-.btn-medidas{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.4rem .75rem;font-size:.78rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap}
-.btn-medidas:hover{border-color:var(--accent);color:var(--accent)}
-@media(max-width:640px){.medidas-grid,.medidas-grid3,.medida-values,.medida-fotos{grid-template-columns:1fr}.medidas-wrap{padding:1rem}.topbar-user{gap:.45rem;flex-wrap:wrap;justify-content:flex-end}}
-
 </style>
 </head>
 <body>
@@ -347,7 +322,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-semanas" class="view">
   <div class="topbar">
     <div class="topbar-logo">i9<span>Fit</span></div>
-    <div class="topbar-user">Ola, <strong id="user-display"></strong><button class="btn-medidas" onclick="abrirMedidasAlunoLogado()">Medidas</button><button class="btn-logout" onclick="logout()">Sair</button></div>
+    <div class="topbar-user">Ola, <strong id="user-display"></strong><button class="btn-logout" onclick="logout()">Sair</button></div>
   </div>
   <div class="page-header fade-in">
     <h2 id="protocolo-nome">Protocolo</h2>
@@ -380,61 +355,6 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
     <button class="btn-concluir" id="btn-concluir-dia" onclick="toggleConcluirDia()">&#10003; Marcar dia como concluido</button>
   </div>
   <div class="exercicios-list fade-in" id="exercicios-list"></div>
-</div>
-
-
-<!-- VIEW: MEDIDAS E EVOLUCAO -->
-<div id="view-medidas" class="view">
-  <div class="topbar">
-    <button class="btn-back" id="medidas-back" onclick="voltarMedidas()">&#8592; Voltar</button>
-    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">medidas</span></div>
-  </div>
-  <div class="medidas-wrap fade-in">
-    <div class="page-header" style="padding:0 0 1rem">
-      <h2 id="medidas-titulo">Medidas do aluno</h2>
-      <p id="medidas-subtitulo">Acompanhe a evolucao mensal.</p>
-    </div>
-    <div id="medidas-alerta"></div>
-    <div class="medidas-card">
-      <h3>Novo registro de medidas</h3>
-      <p>Preencha as medidas em centimetros. As fotos sao opcionais e ficam salvas junto ao historico do aluno.</p>
-      <div class="form-row"><label>Data do registro</label><input id="med-data" type="date"></div>
-      <div class="medidas-grid3">
-        <div class="form-row"><label>Peso corporal (kg)</label><input id="med-peso" type="number" step="0.1" placeholder="Ex: 72.5"></div>
-        <div class="form-row"><label>Torax (cm)</label><input id="med-torax" type="number" step="0.1"></div>
-        <div class="form-row"><label>Cintura (cm)</label><input id="med-cintura" type="number" step="0.1"></div>
-      </div>
-      <div class="medidas-grid3">
-        <div class="form-row"><label>Abdomen (cm)</label><input id="med-abdomen" type="number" step="0.1"></div>
-        <div class="form-row"><label>Quadril (cm)</label><input id="med-quadril" type="number" step="0.1"></div>
-        <div class="form-row"><label>Observacao</label><input id="med-obs" placeholder="Opcional"></div>
-      </div>
-      <div class="medidas-grid">
-        <div class="form-row"><label>Braco direito relaxado</label><input id="med-bracoDirRelaxado" type="number" step="0.1"></div>
-        <div class="form-row"><label>Braco esquerdo relaxado</label><input id="med-bracoEsqRelaxado" type="number" step="0.1"></div>
-        <div class="form-row"><label>Braco direito tensionado</label><input id="med-bracoDirTensionado" type="number" step="0.1"></div>
-        <div class="form-row"><label>Braco esquerdo tensionado</label><input id="med-bracoEsqTensionado" type="number" step="0.1"></div>
-        <div class="form-row"><label>Perna direita</label><input id="med-pernaDir" type="number" step="0.1"></div>
-        <div class="form-row"><label>Perna esquerda</label><input id="med-pernaEsq" type="number" step="0.1"></div>
-        <div class="form-row"><label>Panturrilha direita</label><input id="med-panturrilhaDir" type="number" step="0.1"></div>
-        <div class="form-row"><label>Panturrilha esquerda</label><input id="med-panturrilhaEsq" type="number" step="0.1"></div>
-      </div>
-      <div class="medidas-grid3">
-        <div class="form-row"><label>Foto frente</label><input id="med-fotoFrente" type="file" accept="image/*"></div>
-        <div class="form-row"><label>Foto lado</label><input id="med-fotoLado" type="file" accept="image/*"></div>
-        <div class="form-row"><label>Foto costas</label><input id="med-fotoCostas" type="file" accept="image/*"></div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-save" onclick="salvarMedidasAtual()">Salvar medidas</button>
-        <button class="btn-cancel" onclick="limparFormMedidas()">Limpar</button>
-      </div>
-    </div>
-    <div class="medidas-card">
-      <h3>Historico de evolucao</h3>
-      <p>O sistema usa o ultimo registro para avisar quando chegar perto de 30 dias sem atualizar.</p>
-      <div id="medidas-historico" class="medida-history"></div>
-    </div>
-  </div>
 </div>
 
 <!-- ADMIN: LISTA DE PROTOCOLOS / ALUNOS -->
@@ -640,8 +560,7 @@ const SISTEMA_REF = doc(db, "sistema", "i9fit");
 
 const __defaultStorage = {
   pt_data: JSON.stringify({alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]}),
-  pt_pesos: JSON.stringify({}),
-  pt_medidas: JSON.stringify({})
+  pt_pesos: JSON.stringify({})
 };
 
 let __storageCache = {};
@@ -751,15 +670,13 @@ await __carregarFirebase();
 
 
 var ADMIN_SENHA='admin123';
-var state={user:null,protocolo:null,semana:null,dia:null,editProtId:null,medidasAlunoId:null,medidasOrigem:null};
+var state={user:null,protocolo:null,semana:null,dia:null,editProtId:null};
 
 // STORAGE
 function getData(){try{return JSON.parse(localStorage.getItem('pt_data'))||{alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]};}catch(e){return{alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]};}}
 function saveData(d){localStorage.setItem('pt_data',JSON.stringify(d));}
 function getPesos(){try{return JSON.parse(localStorage.getItem('pt_pesos'))||{};}catch(e){return{};}}
 function savePesos(p){localStorage.setItem('pt_pesos',JSON.stringify(p));}
-function getMedidas(){try{return JSON.parse(localStorage.getItem('pt_medidas'))||{};}catch(e){return{};}}
-function saveMedidas(m){localStorage.setItem('pt_medidas',JSON.stringify(m));}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 
 // VIEWS
@@ -1358,11 +1275,9 @@ function renderAdminAlunos(){
       +'<div class="admin-item-sub">'+(prot?'&#128203; '+prot.nome:'Sem protocolo')+'</div>'
       +'</div>'
       +'<div class="admin-item-actions">'
-      +'<button class="btn-icon bma" title="Medidas">&#128207;</button>'
       +'<button class="btn-icon bea" title="Editar">&#9998;</button>'
       +'<button class="btn-icon del bda">&#10005;</button>'
       +'</div>';
-    row.querySelector('.bma').addEventListener('click',function(){abrirMedidasAlunoAdmin(a.id);});
     row.querySelector('.bea').addEventListener('click',function(){toggleEditAluno(a.id);});
     row.querySelector('.bda').addEventListener('click',function(){deleteAluno(a.id);});
     wrap.appendChild(row);
@@ -1425,8 +1340,7 @@ function salvarCargasRelatorio(){
 function exportarDados(){
   var d=getData();
   var p=getPesos();
-  var m=getMedidas();
-  var payload=JSON.stringify({data:d,pesos:p,medidas:m},null,2);
+  var payload=JSON.stringify({data:d,pesos:p},null,2);
   var blob=new Blob([payload],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
@@ -1446,7 +1360,6 @@ function importarDados(input){
       // Aceitar tanto {data,pesos} quanto objeto direto de importacao.
       var d=payload.data||payload;
       var p=payload.pesos||{};
-      var m=payload.medidas||{};
 
       // Normalizar estrutura: arquivos de protocolo podem vir sem alunos/pesos.
       d.alunos=d.alunos||[];
@@ -1570,12 +1483,9 @@ function importarDados(input){
       // Pesos somente em backup completo; preserva existentes e acrescenta chaves novas.
       var existingPesos=getPesos();
       Object.keys(p||{}).forEach(function(k){if(existingPesos[k]===undefined) existingPesos[k]=p[k];});
-      var existingMedidas=getMedidas();
-      Object.keys(m||{}).forEach(function(k){if(existingMedidas[k]===undefined) existingMedidas[k]=m[k];});
 
       saveData(existing);
       savePesos(existingPesos);
-      saveMedidas(existingMedidas);
       status.textContent='\u2713 Novo protocolo acrescentado! '+added.protocolos+' protocolo(s), '+added.semanas+' semana(s), '+added.dias+' dia(s), '+added.exercicios+' exercicio(s).';
       status.className='import-status ok';status.style.display='block';
       setTimeout(function(){status.style.display='none';},7000);
@@ -1594,89 +1504,6 @@ function populateSelectProtocolos(){
   var sel=document.getElementById('f-aluno-protocolo');if(!sel)return;
   var d=getData();var cur=sel.value;
   sel.innerHTML='<option value="">-- Selecionar --</option>'+d.protocolos.map(function(p){return '<option value="'+p.id+'"'+(p.id===cur?' selected':'')+'>'+p.nome+'</option>';}).join('');
-}
-
-
-// ===== MEDIDAS / FOTOS / EVOLUCAO =====
-var MEDIDA_CAMPOS = ['peso','torax','cintura','abdomen','quadril','bracoDirRelaxado','bracoEsqRelaxado','bracoDirTensionado','bracoEsqTensionado','pernaDir','pernaEsq','panturrilhaDir','panturrilhaEsq'];
-var MEDIDA_LABELS = {
-  peso:'Peso',torax:'Torax',cintura:'Cintura',abdomen:'Abdomen',quadril:'Quadril',
-  bracoDirRelaxado:'Braco D relaxado',bracoEsqRelaxado:'Braco E relaxado',
-  bracoDirTensionado:'Braco D tensionado',bracoEsqTensionado:'Braco E tensionado',
-  pernaDir:'Perna direita',pernaEsq:'Perna esquerda',panturrilhaDir:'Panturrilha direita',panturrilhaEsq:'Panturrilha esquerda'
-};
-function hojeISO(){return new Date().toISOString().slice(0,10);}
-function diasEntreDatas(a,b){var da=new Date(a+'T00:00:00');var db=new Date(b+'T00:00:00');return Math.floor((db-da)/(1000*60*60*24));}
-function alunoPorId(id){var d=getData();return d.alunos.find(function(a){return a.id===id;})||null;}
-function abrirMedidasAlunoLogado(){if(!state.user)return;state.medidasAlunoId=state.user.id;state.medidasOrigem='aluno';renderMedidas();showView('view-medidas');}
-function abrirMedidasAlunoAdmin(alunoId){state.medidasAlunoId=alunoId;state.medidasOrigem='admin';renderMedidas();showView('view-medidas');}
-function voltarMedidas(){if(state.medidasOrigem==='admin'){renderAdminAlunos();showView('view-admin');}else{renderSemanas();}}
-function limparFormMedidas(){
-  ['data','peso','torax','cintura','abdomen','quadril','obs','bracoDirRelaxado','bracoEsqRelaxado','bracoDirTensionado','bracoEsqTensionado','pernaDir','pernaEsq','panturrilhaDir','panturrilhaEsq','fotoFrente','fotoLado','fotoCostas'].forEach(function(k){var el=document.getElementById('med-'+k);if(el)el.value='';});
-  var data=document.getElementById('med-data');if(data)data.value=hojeISO();
-}
-function renderMedidas(){
-  var aluno=alunoPorId(state.medidasAlunoId);if(!aluno)return;
-  document.getElementById('medidas-titulo').textContent='Medidas - '+(aluno.nome||aluno.nick);
-  document.getElementById('medidas-subtitulo').textContent='Historico corporal, fotos comparativas e controle mensal de atualizacao.';
-  var back=document.getElementById('medidas-back');if(back)back.textContent=state.medidasOrigem==='admin'?'← Alunos':'← Treinos';
-  var data=document.getElementById('med-data');if(data&&!data.value)data.value=hojeISO();
-  renderAlertaMedidas(aluno.id);
-  renderHistoricoMedidas(aluno.id);
-}
-function renderAlertaMedidas(alunoId){
-  var box=document.getElementById('medidas-alerta');if(!box)return;
-  var arr=(getMedidas()[alunoId]||[]).slice().sort(function(a,b){return String(b.data).localeCompare(String(a.data));});
-  if(!arr.length){box.innerHTML='<div class="medida-alerta">Ainda nao existe registro de medidas para este aluno. Faca o primeiro registro hoje.</div>';return;}
-  var ultimo=arr[0];var diff=diasEntreDatas(ultimo.data,hojeISO());
-  if(diff>=30){box.innerHTML='<div class="medida-alerta">Ultima atualizacao ha '+diff+' dias. Ja passou de 30 dias: atualize as medidas e fotos.</div>';}
-  else{box.innerHTML='<div class="medida-ok">Ultima atualizacao ha '+diff+' dias. Proxima atualizacao sugerida em '+(30-diff)+' dia(s).</div>';}
-}
-function arquivoParaBase64(file){
-  return new Promise(function(resolve,reject){
-    if(!file){resolve('');return;}
-    var reader=new FileReader();
-    reader.onload=function(){resolve(reader.result||'');};
-    reader.onerror=function(){reject(new Error('Nao foi possivel ler a foto.'));};
-    reader.readAsDataURL(file);
-  });
-}
-async function salvarMedidasAtual(){
-  var aluno=alunoPorId(state.medidasAlunoId);if(!aluno)return alert('Aluno nao encontrado.');
-  var data=(document.getElementById('med-data').value||hojeISO());
-  var registro={id:uid(),data:data,origem:state.medidasOrigem==='admin'?'treinador':'aluno',criadoEm:new Date().toISOString(),obs:(document.getElementById('med-obs').value||'').trim(),fotos:{}};
-  MEDIDA_CAMPOS.forEach(function(k){var el=document.getElementById('med-'+k);registro[k]=el?el.value.trim():'';});
-  try{
-    registro.fotos.frente=await arquivoParaBase64(document.getElementById('med-fotoFrente').files[0]);
-    registro.fotos.lado=await arquivoParaBase64(document.getElementById('med-fotoLado').files[0]);
-    registro.fotos.costas=await arquivoParaBase64(document.getElementById('med-fotoCostas').files[0]);
-  }catch(err){return alert(err.message);}
-  var medidas=getMedidas();if(!Array.isArray(medidas[aluno.id]))medidas[aluno.id]=[];
-  medidas[aluno.id].push(registro);
-  saveMedidas(medidas);
-  limparFormMedidas();
-  renderMedidas();
-  alert('Medidas salvas com sucesso!');
-}
-function renderHistoricoMedidas(alunoId){
-  var hist=document.getElementById('medidas-historico');if(!hist)return;
-  var arr=(getMedidas()[alunoId]||[]).slice().sort(function(a,b){return String(b.data).localeCompare(String(a.data));});
-  if(!arr.length){hist.innerHTML='<div class="empty-state"><div>&#128207;</div><p>Nenhum registro de medidas ainda.</p></div>';return;}
-  hist.innerHTML=arr.map(function(r){
-    var values=MEDIDA_CAMPOS.map(function(k){var v=r[k];if(v===undefined||v==='')return '';var unit=k==='peso'?'kg':'cm';return '<div class="medida-value">'+MEDIDA_LABELS[k]+'<span>'+v+' '+unit+'</span></div>';}).filter(Boolean).join('');
-    var fotos=['frente','lado','costas'].map(function(k){var img=r.fotos&&r.fotos[k];return '<div class="medida-foto">'+(img?'<img src="'+img+'" alt="Foto '+k+'">':'Sem foto '+k)+'</div>';}).join('');
-    return '<div class="medida-item">'
-      +'<div class="medida-item-head"><div><div class="medida-item-title">'+formatarDataBR(r.data)+'</div><div class="medida-item-sub">Preenchido por: '+(r.origem==='treinador'?'Treinador':'Aluno')+(r.obs?' · '+r.obs:'')+'</div></div><button class="btn-icon del" onclick="excluirRegistroMedida(\''+alunoId+'\',\''+r.id+'\')">&#10005;</button></div>'
-      +'<div class="medida-values">'+values+'</div>'
-      +'<div class="medida-fotos">'+fotos+'</div>'
-      +'</div>';
-  }).join('');
-}
-function formatarDataBR(iso){try{return new Date(iso+'T00:00:00').toLocaleDateString('pt-BR');}catch(e){return iso||'';}}
-function excluirRegistroMedida(alunoId,regId){
-  confirmDelete('Excluir registro de medidas','Este registro e suas fotos serao removidos.',function(){
-    var medidas=getMedidas();medidas[alunoId]=(medidas[alunoId]||[]).filter(function(r){return r.id!==regId;});saveMedidas(medidas);renderMedidas();
-  });
 }
 
 // ===== EDITAR EXERCÍCIO =====
@@ -1851,16 +1678,6 @@ function gerarRelatorio(){
 
 // Disponibiliza as funcoes para os botoes onclick do HTML quando o script roda como modulo.
 Object.assign(window, {
-  abrirMedidasAlunoAdmin,
-  abrirMedidasAlunoLogado,
-  excluirRegistroMedida,
-  formatarDataBR,
-  getMedidas,
-  limparFormMedidas,
-  renderMedidas,
-  salvarMedidasAtual,
-  saveMedidas,
-  voltarMedidas,
   abrirEditEx,
   abrirEditarProtocolo,
   abrirFormDia,
