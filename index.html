@@ -274,6 +274,24 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 }
 
 
+
+/* FASE 1 - MULTIPLOS PROTOCOLOS POR ALUNO */
+.protocolos-escolha-wrap{padding:1.25rem 1.5rem 2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem}
+.card-protocolo-aluno{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.card-protocolo-aluno:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--surface2)}
+.card-protocolo-aluno::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
+.card-protocolo-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:var(--text);line-height:1.25}
+.card-protocolo-desc{font-size:.78rem;color:var(--muted);margin-top:.45rem;line-height:1.45}
+.card-protocolo-meta{font-size:.72rem;color:var(--muted2);margin-top:.75rem}
+.btn-switch-prot{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.35rem .7rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-switch-prot:hover{border-color:var(--accent);color:var(--accent)}
+.multi-prot-list{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.55rem .7rem;display:flex;flex-direction:column;gap:.35rem;max-height:190px;overflow-y:auto}
+.multi-prot-item{display:flex;align-items:center;gap:.55rem;font-size:.83rem;color:var(--text);cursor:pointer;line-height:1.35}
+.multi-prot-item input{width:auto!important;accent-color:var(--accent);cursor:pointer}
+.multi-prot-empty{font-size:.78rem;color:var(--muted);padding:.2rem 0}
+.aluno-prot-tags{display:flex;gap:.25rem;flex-wrap:wrap;margin-top:.25rem}
+.aluno-prot-tag{font-size:.68rem;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:.12rem .4rem;color:var(--muted)}
+
 /* BACKUP */
 .backup-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .backup-bar-info{flex:1;min-width:0}
@@ -287,6 +305,37 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .import-status{font-size:.78rem;margin-top:.5rem;display:none}
 .import-status.ok{color:var(--done-text)}
 .import-status.err{color:var(--danger)}
+
+
+/* FASE 2: AVALIACAO FISICA */
+.btn-evolucao{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.35rem .75rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-evolucao:hover{border-color:var(--accent);color:var(--accent)}
+.aviso-avaliacao{margin:1rem 1.5rem 0;background:#201a05;border:1px solid #4a3808;border-radius:var(--radius);padding:.9rem 1rem;display:none;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+.aviso-avaliacao strong{font-family:'Syne',sans-serif;color:var(--accent);font-size:.92rem}
+.aviso-avaliacao p{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+.av-wrap{max-width:920px;margin:0 auto;padding:1.5rem}
+.av-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.av-title{font-family:'Montserrat',sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.4px}
+.av-sub{font-size:.82rem;color:var(--muted);margin-top:.25rem}
+.av-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.av-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
+.av-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1rem}
+.av-card h3{font-size:.95rem;margin-bottom:.75rem;color:var(--text)}
+.av-card small{color:var(--muted);font-size:.72rem}
+.av-history{display:flex;flex-direction:column;gap:.65rem}
+.av-history-item{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.85rem}
+.av-history-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.55rem}
+.av-history-date{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent)}
+.av-history-meta{font-size:.72rem;color:var(--muted)}
+.av-measures{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.4rem;margin-top:.55rem}
+.av-measure{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:.35rem .5rem;font-size:.78rem;color:var(--muted)}
+.av-measure span{color:var(--text);font-weight:600}
+.av-fotos{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.55rem}
+.av-fotos a{font-size:.72rem;color:var(--accent);text-decoration:none;border:1px solid var(--border2);border-radius:5px;padding:.25rem .45rem}
+.av-form-note{font-size:.76rem;color:var(--muted);line-height:1.45;margin-bottom:.75rem}
+.av-pendente-bar{background:#201a05;border:1px solid #4a3808;color:var(--muted);border-radius:var(--radius-sm);padding:.7rem .9rem;font-size:.82rem;margin-bottom:.85rem}
+.av-pendente-bar strong{color:var(--accent)}
+@media(max-width:640px){.av-grid,.av-grid3{grid-template-columns:1fr}.av-wrap{padding:1rem}.aviso-avaliacao{margin:.85rem 1rem 0}}
 
 </style>
 </head>
@@ -302,6 +351,19 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
     <button class="btn-primary" onclick="loginAluno()">Entrar</button>
     <div class="login-admin-link" onclick="showView('view-admin-login')">Acesso do treinador</div>
   </div>
+</div>
+
+<!-- ESCOLHA DE PROTOCOLO DO ALUNO -->
+<div id="view-protocolos-aluno" class="view">
+  <div class="topbar">
+    <div class="topbar-logo">i9<span>Fit</span></div>
+    <div class="topbar-user">Ola, <strong id="protocolos-user"></strong><button class="btn-logout" onclick="logout()">Sair</button></div>
+  </div>
+  <div class="page-header fade-in">
+    <h2>Escolha seu protocolo</h2>
+    <p>Voce possui mais de um protocolo vinculado. Selecione qual deseja acessar agora.</p>
+  </div>
+  <div class="protocolos-escolha-wrap fade-in" id="grid-protocolos-aluno"></div>
 </div>
 
 <!-- LOGIN ADMIN -->
@@ -322,12 +384,13 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-semanas" class="view">
   <div class="topbar">
     <div class="topbar-logo">i9<span>Fit</span></div>
-    <div class="topbar-user">Ola, <strong id="user-display"></strong><button class="btn-logout" onclick="logout()">Sair</button></div>
+    <div class="topbar-user">Ola, <strong id="user-display"></strong><button class="btn-evolucao" onclick="abrirMinhasAvaliacoes()">Evolucao</button><button class="btn-switch-prot" id="btn-trocar-protocolo" onclick="voltarProtocolosAluno()" style="display:none">Trocar protocolo</button><button class="btn-logout" onclick="logout()">Sair</button></div>
   </div>
   <div class="page-header fade-in">
     <h2 id="protocolo-nome">Protocolo</h2>
     <p id="protocolo-desc"></p>
   </div>
+  <div class="aviso-avaliacao" id="aviso-avaliacao-aluno"></div>
   <div class="grid-semanas fade-in" id="grid-semanas"></div>
 </div>
 
@@ -374,12 +437,12 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
       <div class="backup-bar">
         <div class="backup-bar-info">
           <div class="backup-bar-title">&#128190; Backup dos dados</div>
-          <div class="backup-bar-sub">Exporte para backup. Importe novos protocolos em JSON sem substituir os existentes.</div>
+          <div class="backup-bar-sub">Exporte para salvar ou transferir para outro dispositivo. Importe para restaurar.</div>
         </div>
         <div>
           <div class="backup-actions">
             <button class="btn-export" onclick="exportarDados()">&#8595; Exportar JSON</button>
-            <label class="btn-import" style="cursor:pointer">&#8593; Importar novo protocolo JSON<input type="file" accept=".json" id="import-file" style="display:none" onchange="importarDados(this)"></label>
+            <label class="btn-import" style="cursor:pointer">&#8593; Importar JSON<input type="file" accept=".json" id="import-file" style="display:none" onchange="importarDados(this)"></label>
           </div>
           <div class="import-status" id="import-status"></div>
         </div>
@@ -408,8 +471,8 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
         <h4>Cadastrar aluno</h4>
         <div class="form-row"><label>Nick (login - sem espacos)</label><input id="f-aluno-nick" placeholder="ex: joao, ana123"></div>
         <div class="form-row"><label>Nome completo (opcional)</label><input id="f-aluno-nome" placeholder="Nome para exibicao"></div>
-        <div class="form-row"><label>Protocolo</label>
-          <select id="f-aluno-protocolo"><option value="">-- Selecionar --</option></select>
+        <div class="form-row"><label>Protocolos vinculados</label>
+          <div id="f-aluno-protocolos" class="multi-prot-list"><div class="multi-prot-empty">Crie protocolos para vincular ao aluno.</div></div>
         </div>
         <div class="form-actions">
           <button class="btn-save" onclick="salvarAluno()">Salvar</button>
@@ -505,6 +568,70 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
   </div>
 </div>
 
+
+<!-- VIEW: AVALIACAO FISICA / EVOLUCAO -->
+<div id="view-avaliacoes" class="view">
+  <div class="topbar">
+    <button class="btn-back" onclick="voltarAvaliacoes()">&#8592; Voltar</button>
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">evolucao</span></div>
+  </div>
+  <div class="av-wrap fade-in">
+    <div class="av-header">
+      <div>
+        <div class="av-title" id="av-aluno-nome">Evolucao do aluno</div>
+        <div class="av-sub" id="av-aluno-sub">Medidas corporais e fotos comparativas</div>
+      </div>
+      <button class="btn-add" onclick="toggleForm('form-nova-avaliacao')">+ Nova avaliacao</button>
+    </div>
+
+    <div class="form-card open" id="form-nova-avaliacao">
+      <h4>Nova avaliacao fisica</h4>
+      <p class="av-form-note">Preencha as medidas em centimetros. As fotos por upload direto serao ativadas na proxima fase com Firebase Storage; por enquanto, estes campos aceitam URL opcional da foto.</p>
+      <div class="form-grid3">
+        <div class="form-row"><label>Data</label><input id="av-data" type="date"></div>
+        <div class="form-row"><label>Torax</label><input id="av-torax" type="number" step="0.1" placeholder="cm"></div>
+        <div class="form-row"><label>Cintura</label><input id="av-cintura" type="number" step="0.1" placeholder="cm"></div>
+      </div>
+      <div class="form-grid3">
+        <div class="form-row"><label>Abdomen</label><input id="av-abdomen" type="number" step="0.1" placeholder="cm"></div>
+        <div class="form-row"><label>Quadril</label><input id="av-quadril" type="number" step="0.1" placeholder="cm"></div>
+        <div class="form-row"><label>Peso (opcional)</label><input id="av-peso" type="number" step="0.1" placeholder="kg"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Perna direita</label><input id="av-perna-dir" type="number" step="0.1" placeholder="cm"></div>
+        <div class="form-row"><label>Perna esquerda</label><input id="av-perna-esq" type="number" step="0.1" placeholder="cm"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Panturrilha direita</label><input id="av-pant-dir" type="number" step="0.1" placeholder="cm"></div>
+        <div class="form-row"><label>Panturrilha esquerda</label><input id="av-pant-esq" type="number" step="0.1" placeholder="cm"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Braco direito relaxado</label><input id="av-brd-rel" type="number" step="0.1" placeholder="cm"></div>
+        <div class="form-row"><label>Braco esquerdo relaxado</label><input id="av-bre-rel" type="number" step="0.1" placeholder="cm"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Braco direito tensionado</label><input id="av-brd-ten" type="number" step="0.1" placeholder="cm"></div>
+        <div class="form-row"><label>Braco esquerdo tensionado</label><input id="av-bre-ten" type="number" step="0.1" placeholder="cm"></div>
+      </div>
+      <div class="form-grid3">
+        <div class="form-row"><label>Foto frente URL</label><input id="av-foto-frente" placeholder="https://..."></div>
+        <div class="form-row"><label>Foto lado URL</label><input id="av-foto-lado" placeholder="https://..."></div>
+        <div class="form-row"><label>Foto costas URL</label><input id="av-foto-costas" placeholder="https://..."></div>
+      </div>
+      <div class="form-row"><label>Observacoes</label><textarea id="av-obs" placeholder="Observacoes sobre postura, evolucao, rotina..."></textarea></div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="salvarAvaliacaoFisica()">Salvar avaliacao</button>
+        <button class="btn-cancel" onclick="limparFormAvaliacao()">Limpar</button>
+      </div>
+    </div>
+
+    <div class="av-card">
+      <h3>Historico comparativo</h3>
+      <div id="av-historico" class="av-history"></div>
+    </div>
+  </div>
+</div>
+
 <!-- VIEW: CONFIG RELATÓRIO -->
 <div id="view-rel-config" class="view no-print">
   <div class="topbar">
@@ -542,7 +669,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC6xUfFJ59fXT1_eR1HDD7UPiQ8aakSkHY",
@@ -556,7 +683,21 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Documento antigo mantido apenas para leitura/migracao.
+// O sistema novo NAO grava mais todos os dados em sistema/i9fit,
+// porque esse documento ultrapassou o limite de 1 MB do Firestore.
 const SISTEMA_REF = doc(db, "sistema", "i9fit");
+
+const COLECOES_I9 = {
+  alunos: "alunos",
+  protocolos: "protocolos",
+  semanas: "semanas",
+  dias: "dias",
+  exercicios: "exercicios",
+  avaliacoes: "avaliacoes",
+  cargas: "cargas"
+};
 
 const __defaultStorage = {
   pt_data: JSON.stringify({alunos:[],protocolos:[],semanas:[],dias:[],exercicios:[]}),
@@ -566,10 +707,37 @@ const __defaultStorage = {
 let __storageCache = {};
 let __saveTimer = null;
 let __firebaseReady = false;
+let __salvandoFirebase = false;
 
-function __normalizarStorage(raw){
+function __safeDocId(id){
+  return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
+}
+
+function __deepClone(obj){
+  return JSON.parse(JSON.stringify(obj || {}));
+}
+
+function __ensureArrays(d){
+  d = d && typeof d === "object" ? d : {};
+  d.alunos = Array.isArray(d.alunos) ? d.alunos : [];
+  d.protocolos = Array.isArray(d.protocolos) ? d.protocolos : [];
+  d.semanas = Array.isArray(d.semanas) ? d.semanas : [];
+  d.dias = Array.isArray(d.dias) ? d.dias : [];
+  d.exercicios = Array.isArray(d.exercicios) ? d.exercicios : [];
+  return d;
+}
+
+async function __lerColecao(nome){
+  const snap = await getDocs(collection(db, nome));
+  return snap.docs.map(function(d){
+    const data = d.data() || {};
+    if(!data.id) data.id = decodeURIComponent(d.id);
+    return data;
+  });
+}
+
+function __normalizarStorageAntigo(raw){
   const storage = raw && raw.storage && typeof raw.storage === "object" ? raw.storage : {};
-  // Compatibilidade: caso o documento tenha sido salvo direto como dados do sistema
   if(!storage.pt_data && raw && (raw.alunos || raw.protocolos || raw.semanas || raw.dias || raw.exercicios)){
     storage.pt_data = JSON.stringify({
       alunos: raw.alunos || [],
@@ -582,46 +750,129 @@ function __normalizarStorage(raw){
   if(!storage.pt_pesos && raw && raw.pesos && typeof raw.pesos === "object"){
     storage.pt_pesos = JSON.stringify(raw.pesos);
   }
-  Object.keys(__defaultStorage).forEach((k)=>{
+  Object.keys(__defaultStorage).forEach(function(k){
     if(storage[k] === undefined || storage[k] === null) storage[k] = __defaultStorage[k];
   });
   return storage;
 }
 
-async function __carregarFirebase(){
-  try{
-    const snap = await getDoc(SISTEMA_REF);
-    __storageCache = __normalizarStorage(snap.exists() ? snap.data() : null);
-    __firebaseReady = true;
-    if(!snap.exists()){
-      await __salvarFirebaseAgora();
+async function __carregarDasColecoes(){
+  const alunos = await __lerColecao(COLECOES_I9.alunos);
+  const protocolos = await __lerColecao(COLECOES_I9.protocolos);
+  const semanas = await __lerColecao(COLECOES_I9.semanas);
+  const dias = await __lerColecao(COLECOES_I9.dias);
+  const exercicios = await __lerColecao(COLECOES_I9.exercicios);
+  const avaliacoes = await __lerColecao(COLECOES_I9.avaliacoes);
+  const cargasDocs = await __lerColecao(COLECOES_I9.cargas);
+
+  const porAluno = {};
+  avaliacoes.forEach(function(av){
+    if(!av.alunoId) return;
+    if(!porAluno[av.alunoId]) porAluno[av.alunoId] = [];
+    porAluno[av.alunoId].push(av);
+  });
+  alunos.forEach(function(a){
+    a.avaliacoes = porAluno[a.id] || [];
+  });
+
+  const pesos = {};
+  cargasDocs.forEach(function(c){
+    const chave = c.chave || c.id;
+    if(chave) pesos[chave] = c.valor;
+  });
+
+  const temDados = alunos.length || protocolos.length || semanas.length || dias.length || exercicios.length || avaliacoes.length || cargasDocs.length;
+  return {
+    temDados: !!temDados,
+    storage: {
+      pt_data: JSON.stringify(__ensureArrays({alunos, protocolos, semanas, dias, exercicios})),
+      pt_pesos: JSON.stringify(pesos || {})
     }
-  }catch(err){
-    console.error("Erro ao carregar Firestore:", err);
-    alert("Nao foi possivel conectar ao Firebase. Confira as regras do Firestore e a conexao com a internet.");
-    __storageCache = {...__defaultStorage};
+  };
+}
+
+async function __gravarColecaoCompleta(nome, itens, preparar){
+  itens = Array.isArray(itens) ? itens : [];
+  const colRef = collection(db, nome);
+  const existentes = await getDocs(colRef);
+  const idsNovos = new Set(itens.map(function(item){ return __safeDocId(item.id); }));
+
+  let ops = [];
+  existentes.forEach(function(d){
+    if(!idsNovos.has(d.id)) ops.push({tipo:"delete", ref:d.ref});
+  });
+
+  itens.forEach(function(item){
+    const payload = preparar ? preparar(item) : item;
+    const docId = __safeDocId(payload.id || item.id);
+    ops.push({tipo:"set", ref:doc(db, nome, docId), data:payload});
+  });
+
+  for(let i=0; i<ops.length; i+=450){
+    const batch = writeBatch(db);
+    ops.slice(i, i+450).forEach(function(op){
+      if(op.tipo === "delete") batch.delete(op.ref);
+      else batch.set(op.ref, op.data, {merge:false});
+    });
+    await batch.commit();
   }
 }
 
 async function __salvarFirebaseAgora(){
+  if(!__firebaseReady || __salvandoFirebase) return;
+  __salvandoFirebase = true;
   try{
-    await setDoc(SISTEMA_REF, {
-      storage: __storageCache,
+    const dados = __ensureArrays(JSON.parse(__storageCache.pt_data || __defaultStorage.pt_data));
+    const pesos = JSON.parse(__storageCache.pt_pesos || "{}") || {};
+
+    const alunosSemAvaliacoes = [];
+    const avaliacoes = [];
+    dados.alunos.forEach(function(aluno){
+      const alunoLimpo = __deepClone(aluno);
+      const avs = Array.isArray(alunoLimpo.avaliacoes) ? alunoLimpo.avaliacoes : [];
+      delete alunoLimpo.avaliacoes;
+      alunosSemAvaliacoes.push(alunoLimpo);
+      avs.forEach(function(av, idx){
+        const avLimpa = __deepClone(av);
+        avLimpa.alunoId = aluno.id;
+        avLimpa.id = avLimpa.id || (aluno.id + "_" + (avLimpa.data || "sem-data") + "_" + idx);
+        avaliacoes.push(avLimpa);
+      });
+    });
+
+    const cargas = Object.keys(pesos).map(function(chave){
+      return { id: __safeDocId(chave), chave: chave, valor: pesos[chave] };
+    });
+
+    await __gravarColecaoCompleta(COLECOES_I9.alunos, alunosSemAvaliacoes);
+    await __gravarColecaoCompleta(COLECOES_I9.protocolos, dados.protocolos);
+    await __gravarColecaoCompleta(COLECOES_I9.semanas, dados.semanas);
+    await __gravarColecaoCompleta(COLECOES_I9.dias, dados.dias);
+    await __gravarColecaoCompleta(COLECOES_I9.exercicios, dados.exercicios);
+    await __gravarColecaoCompleta(COLECOES_I9.avaliacoes, avaliacoes);
+    await __gravarColecaoCompleta(COLECOES_I9.cargas, cargas);
+
+    await setDoc(doc(db, "sistema", "i9fit_meta"), {
+      arquitetura: "colecoes_independentes",
+      colecoes: COLECOES_I9,
       updatedAt: serverTimestamp()
     }, { merge: true });
   }catch(err){
-    console.error("Erro ao salvar no Firestore:", err);
-    alert("Nao foi possivel salvar no Firebase. Confira as regras do Firestore.");
+    console.error("Erro ao salvar no Firestore em colecoes:", err);
+    alert("Nao foi possivel salvar no Firebase. Confira as regras do Firestore e a conexao com a internet.");
+  }finally{
+    __salvandoFirebase = false;
   }
 }
 
 function __agendarSaveFirebase(){
   if(!__firebaseReady) return;
   clearTimeout(__saveTimer);
-  __saveTimer = setTimeout(__salvarFirebaseAgora, 250);
+  __saveTimer = setTimeout(__salvarFirebaseAgora, 450);
 }
 
-// Shim de localStorage: mantém o código original funcionando, mas salva no Firestore.
+// Shim de localStorage: o restante do app continua funcionando igual,
+// mas agora os dados sao persistidos em colecoes independentes no Firestore.
 var localStorage = {
   getItem: function(key){
     return Object.prototype.hasOwnProperty.call(__storageCache, key) ? __storageCache[key] : null;
@@ -639,6 +890,28 @@ var localStorage = {
     __agendarSaveFirebase();
   }
 };
+
+async function __carregarFirebase(){
+  try{
+    const novo = await __carregarDasColecoes();
+    if(novo.temDados){
+      __storageCache = novo.storage;
+      __firebaseReady = true;
+      return;
+    }
+
+    // Primeira execucao depois da atualizacao: carrega o documento antigo
+    // sistema/i9fit e migra automaticamente para as colecoes independentes.
+    const snapAntigo = await getDoc(SISTEMA_REF);
+    __storageCache = __normalizarStorageAntigo(snapAntigo.exists() ? snapAntigo.data() : null);
+    __firebaseReady = true;
+    await __salvarFirebaseAgora();
+  }catch(err){
+    console.error("Erro ao carregar Firestore:", err);
+    alert("Nao foi possivel conectar ao Firebase. Confira as regras do Firestore e a conexao com a internet.");
+    __storageCache = {...__defaultStorage};
+  }
+}
 
 await __carregarFirebase();
 
@@ -737,6 +1010,144 @@ function confirmDelete(title,msg,cb){
 function closeModal(id){document.getElementById(id||'modal-confirm').classList.remove('open');}
 document.getElementById('modal-confirm-btn').onclick=function(){closeModal('modal-confirm');if(modalCb)modalCb();};
 
+
+// ===== FASE 1: MULTIPLOS PROTOCOLOS POR ALUNO =====
+function getAlunoProtocolosIds(aluno){
+  if(!aluno) return [];
+  if(Array.isArray(aluno.protocolosIds)) return aluno.protocolosIds.filter(Boolean);
+  if(Array.isArray(aluno.protocolos)){
+    return aluno.protocolos.map(function(p){return typeof p==='string'?p:(p&&p.id?p.id:'');}).filter(Boolean);
+  }
+  return aluno.protocoloId ? [aluno.protocoloId] : [];
+}
+function setAlunoProtocolosIds(aluno, ids){
+  ids=(ids||[]).filter(Boolean);
+  aluno.protocolosIds=ids;
+  aluno.protocoloId=ids[0]||''; // compatibilidade com dados antigos e relatórios existentes
+}
+function getProtocolosDoAluno(aluno,d){
+  var ids=getAlunoProtocolosIds(aluno);
+  return (d.protocolos||[]).filter(function(p){return ids.indexOf(p.id)!==-1;});
+}
+function getSelectedProtocolosFromContainer(id){
+  var box=document.getElementById(id);if(!box)return [];
+  return Array.from(box.querySelectorAll('input[type="checkbox"]:checked')).map(function(i){return i.value;});
+}
+function protocolosCheckboxesHtml(d, selectedIds){
+  selectedIds=selectedIds||[];
+  if(!d.protocolos||!d.protocolos.length){return '<div class="multi-prot-empty">Nenhum protocolo cadastrado.</div>';}
+  return d.protocolos.map(function(p){
+    return '<label class="multi-prot-item"><input type="checkbox" value="'+p.id+'" '+(selectedIds.indexOf(p.id)!==-1?'checked':'')+'> <span>'+p.nome+'</span></label>';
+  }).join('');
+}
+function renderEscolhaProtocolosAluno(){
+  var d=getData();
+  var aluno=state.user;if(!aluno)return showView('view-login');
+  var prots=getProtocolosDoAluno(aluno,d);
+  document.getElementById('protocolos-user').textContent=aluno.nome||aluno.nick;
+  var grid=document.getElementById('grid-protocolos-aluno');
+  if(!prots.length){
+    grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhum protocolo vinculado. Fale com seu treinador.</p></div>';
+    showView('view-protocolos-aluno');return;
+  }
+  grid.innerHTML=prots.map(function(p){
+    var semanas=d.semanas.filter(function(s){return s.protocoloId===p.id;});
+    return '<div class="card-protocolo-aluno" onclick="selecionarProtocoloAluno(\''+p.id+'\')">'
+      +'<div class="card-protocolo-title">'+p.nome+'</div>'
+      +(p.desc?'<div class="card-protocolo-desc">'+p.desc+'</div>':'')
+      +'<div class="card-protocolo-meta">'+semanas.length+' semana'+(semanas.length!==1?'s':'')+'</div>'
+      +'</div>';
+  }).join('');
+  showView('view-protocolos-aluno');
+}
+function selecionarProtocoloAluno(protId){
+  var d=getData();
+  var prot=d.protocolos.find(function(p){return p.id===protId;});
+  if(!prot)return alert('Protocolo nao encontrado.');
+  state.protocolo=prot;state.semana=null;state.dia=null;
+  renderSemanas();
+}
+function voltarProtocolosAluno(){
+  if(!state.user)return showView('view-login');
+  renderEscolhaProtocolosAluno();
+}
+function alunoTemMultiplosProtocolos(aluno){return getAlunoProtocolosIds(aluno).length>1;}
+
+
+
+// ===== FASE 2: AVALIACAO FISICA / EVOLUCAO =====
+var avaliacaoContexto={alunoId:null,origem:'aluno'};
+var camposAvaliacao=['torax','cintura','abdomen','quadril','peso','pernaDireita','pernaEsquerda','panturrilhaDireita','panturrilhaEsquerda','bracoDireitoRelaxado','bracoEsquerdoRelaxado','bracoDireitoTensionado','bracoEsquerdoTensionado'];
+var labelsAvaliacao={torax:'Torax',cintura:'Cintura',abdomen:'Abdomen',quadril:'Quadril',peso:'Peso',pernaDireita:'Perna dir.',pernaEsquerda:'Perna esq.',panturrilhaDireita:'Panturrilha dir.',panturrilhaEsquerda:'Panturrilha esq.',bracoDireitoRelaxado:'Braco dir. relax.',bracoEsquerdoRelaxado:'Braco esq. relax.',bracoDireitoTensionado:'Braco dir. tens.',bracoEsquerdoTensionado:'Braco esq. tens.'};
+function hojeISO(){return new Date().toISOString().slice(0,10);}
+function addDiasISO(data,dias){var dt=data?new Date(data+'T12:00:00'):new Date();dt.setDate(dt.getDate()+dias);return dt.toISOString().slice(0,10);}
+function formatDataBR(data){if(!data)return '';var p=data.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:data;}
+function getAlunoById(d,id){return (d.alunos||[]).find(function(a){return a.id===id;});}
+function getAvaliacoesAluno(aluno){if(!aluno)return [];if(!Array.isArray(aluno.avaliacoes))aluno.avaliacoes=[];return aluno.avaliacoes.sort(function(a,b){return (b.data||'').localeCompare(a.data||'');});}
+function ultimaAvaliacao(aluno){var avs=getAvaliacoesAluno(aluno);return avs.length?avs[0]:null;}
+function avaliacaoPendente(aluno){var ult=ultimaAvaliacao(aluno);if(!ult)return true;var prox=ult.proximaAvaliacao||addDiasISO(ult.data,30);return prox<=hojeISO();}
+function renderAvisoAvaliacaoAluno(){
+  var box=document.getElementById('aviso-avaliacao-aluno');if(!box||!state.user)return;
+  var d=getData();var aluno=getAlunoById(d,state.user.id)||state.user;var ult=ultimaAvaliacao(aluno);
+  if(!avaliacaoPendente(aluno)){box.style.display='none';box.innerHTML='';return;}
+  var msg=ult?'Ja passaram 30 dias da ultima avaliacao. Atualize suas medidas e fotos.':'Voce ainda nao possui avaliacao fisica cadastrada.';
+  box.innerHTML='<div><strong>Atualizacao de evolucao</strong><p>'+msg+'</p></div><button class="btn-add" onclick="abrirMinhasAvaliacoes()">Atualizar agora</button>';
+  box.style.display='flex';
+}
+function abrirMinhasAvaliacoes(){if(!state.user)return showView('view-login');abrirAvaliacoesAluno(state.user.id,'aluno');}
+function abrirAvaliacoesAluno(alunoId,origem){avaliacaoContexto={alunoId:alunoId,origem:origem||'aluno'};renderAvaliacoes();showView('view-avaliacoes');}
+function voltarAvaliacoes(){if(avaliacaoContexto.origem==='admin'){renderAdminHome();showView('view-admin');return;}if(state.protocolo){renderSemanas();}else{renderEscolhaProtocolosAluno();}}
+function valorInput(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+function setValor(id,val){var el=document.getElementById(id);if(el)el.value=val||'';}
+function limparFormAvaliacao(){
+  ['av-torax','av-cintura','av-abdomen','av-quadril','av-peso','av-perna-dir','av-perna-esq','av-pant-dir','av-pant-esq','av-brd-rel','av-bre-rel','av-brd-ten','av-bre-ten','av-foto-frente','av-foto-lado','av-foto-costas','av-obs'].forEach(function(id){setValor(id,'');});
+  setValor('av-data',hojeISO());
+}
+function renderAvaliacoes(){
+  var d=getData();var aluno=getAlunoById(d,avaliacaoContexto.alunoId);
+  if(!aluno){alert('Aluno nao encontrado.');return;}
+  document.getElementById('av-aluno-nome').textContent='Evolucao - '+(aluno.nome||aluno.nick);
+  var ult=ultimaAvaliacao(aluno);
+  document.getElementById('av-aluno-sub').textContent=ult?'Ultima avaliacao: '+formatDataBR(ult.data)+' | Proxima: '+formatDataBR(ult.proximaAvaliacao||addDiasISO(ult.data,30)):'Nenhuma avaliacao cadastrada.';
+  limparFormAvaliacao();
+  var hist=document.getElementById('av-historico');var avs=getAvaliacoesAluno(aluno);
+  if(!avs.length){hist.innerHTML='<div class="empty-state"><div>&#128207;</div><p>Nenhuma avaliacao cadastrada ainda.</p></div>';return;}
+  hist.innerHTML=avs.map(function(av){
+    var medidas=camposAvaliacao.map(function(k){var v=av[k];if(v===undefined||v===null||v==='')return '';var un=k==='peso'?'kg':'cm';return '<div class="av-measure">'+labelsAvaliacao[k]+': <span>'+v+' '+un+'</span></div>';}).filter(Boolean).join('');
+    var fotos='';
+    if(av.fotos){['frente','lado','costas'].forEach(function(k){if(av.fotos[k])fotos+='<a href="'+av.fotos[k]+'" target="_blank">Foto '+k+'</a>';});}
+    return '<div class="av-history-item">'
+      +'<div class="av-history-top"><div><div class="av-history-date">'+formatDataBR(av.data)+'</div><div class="av-history-meta">Proxima avaliacao: '+formatDataBR(av.proximaAvaliacao||addDiasISO(av.data,30))+' | Preenchido por: '+(av.autor||'sistema')+'</div></div>'
+      +'<button class="btn-icon del" onclick="deleteAvaliacaoFisica(\''+av.id+'\')">&#10005;</button></div>'
+      +'<div class="av-measures">'+(medidas||'<div class="av-measure">Sem medidas preenchidas.</div>')+'</div>'
+      +(fotos?'<div class="av-fotos">'+fotos+'</div>':'')
+      +(av.obs?'<div class="ex-prescricao" style="margin-top:.6rem">'+av.obs+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+function salvarAvaliacaoFisica(){
+  var d=getData();var aluno=getAlunoById(d,avaliacaoContexto.alunoId);if(!aluno)return alert('Aluno nao encontrado.');
+  if(!Array.isArray(aluno.avaliacoes))aluno.avaliacoes=[];
+  var data=valorInput('av-data')||hojeISO();
+  var av={id:uid(),data:data,proximaAvaliacao:addDiasISO(data,30),autor:avaliacaoContexto.origem==='admin'?'treinador':'aluno',criadoEm:new Date().toISOString(),
+    torax:valorInput('av-torax'),cintura:valorInput('av-cintura'),abdomen:valorInput('av-abdomen'),quadril:valorInput('av-quadril'),peso:valorInput('av-peso'),
+    pernaDireita:valorInput('av-perna-dir'),pernaEsquerda:valorInput('av-perna-esq'),panturrilhaDireita:valorInput('av-pant-dir'),panturrilhaEsquerda:valorInput('av-pant-esq'),
+    bracoDireitoRelaxado:valorInput('av-brd-rel'),bracoEsquerdoRelaxado:valorInput('av-bre-rel'),bracoDireitoTensionado:valorInput('av-brd-ten'),bracoEsquerdoTensionado:valorInput('av-bre-ten'),
+    fotos:{frente:valorInput('av-foto-frente'),lado:valorInput('av-foto-lado'),costas:valorInput('av-foto-costas')},obs:valorInput('av-obs')};
+  aluno.avaliacoes.push(av);
+  if(state.user&&state.user.id===aluno.id)state.user=aluno;
+  saveData(d);renderAvaliacoes();renderAdminAlunos();alert('Avaliacao salva com sucesso!');
+}
+function deleteAvaliacaoFisica(avId){
+  confirmDelete('Excluir avaliacao','Esta avaliacao sera removida do historico.',function(){
+    var d=getData();var aluno=getAlunoById(d,avaliacaoContexto.alunoId);if(!aluno||!Array.isArray(aluno.avaliacoes))return;
+    aluno.avaliacoes=aluno.avaliacoes.filter(function(av){return av.id!==avId;});
+    if(state.user&&state.user.id===aluno.id)state.user=aluno;
+    saveData(d);renderAvaliacoes();renderAdminAlunos();
+  });
+}
+function countAvaliacoesPendentes(d){return (d.alunos||[]).filter(function(a){return avaliacaoPendente(a);}).length;}
+
 // LOGIN ALUNO
 function loginAluno(){
   var nick=document.getElementById('login-input').value.trim().toLowerCase();
@@ -746,11 +1157,13 @@ function loginAluno(){
   if(!aluno){document.getElementById('login-error').style.display='block';return;}
   document.getElementById('login-error').style.display='none';
   state.user=aluno;
-  state.protocolo=null;for(var i=0;i<d.protocolos.length;i++){if(d.protocolos[i].id===aluno.protocoloId){state.protocolo=d.protocolos[i];break;}}
-  renderSemanas();
+  state.protocolo=null;state.semana=null;state.dia=null;
+  var prots=getProtocolosDoAluno(aluno,d);
+  if(prots.length===1){state.protocolo=prots[0];renderSemanas();}
+  else{renderEscolhaProtocolosAluno();}
 }
 document.getElementById('login-input').addEventListener('keydown',function(e){if(e.key==='Enter')loginAluno();});
-function logout(){state.user=null;state.protocolo=null;document.getElementById('login-input').value='';showView('view-login');}
+function logout(){state.user=null;state.protocolo=null;state.semana=null;state.dia=null;document.getElementById('login-input').value='';showView('view-login');}
 
 // LOGIN ADMIN
 function loginAdmin(){
@@ -767,15 +1180,27 @@ document.getElementById('admin-senha-input').addEventListener('keydown',function
 function renderSemanas(){
   var d=getData();
   var prot=state.protocolo;
-  // recarregar protocolo caso tenha mudado
-  if(state.user){var up=null;for(var i=0;i<d.alunos.length;i++){if(d.alunos[i].id===state.user.id){up=d.alunos[i];break;}}if(up){state.user=up;state.protocolo=null;for(var i=0;i<d.protocolos.length;i++){if(d.protocolos[i].id===up.protocoloId){state.protocolo=d.protocolos[i];break;}}prot=state.protocolo;}}
+  // recarregar aluno e protocolo caso tenham mudado no admin
+  if(state.user){
+    var up=null;for(var i=0;i<d.alunos.length;i++){if(d.alunos[i].id===state.user.id){up=d.alunos[i];break;}}
+    if(up){
+      state.user=up;
+      var prots=getProtocolosDoAluno(up,d);
+      if(prot && !prots.find(function(p){return p.id===prot.id;})) prot=null;
+      if(!prot && prots.length===1) prot=prots[0];
+      if(!prot && prots.length>1){renderEscolhaProtocolosAluno();return;}
+      state.protocolo=prot;
+    }
+  }
   document.getElementById('user-display').textContent=state.user.nome||state.user.nick;
+  var btnTrocar=document.getElementById('btn-trocar-protocolo');
+  if(btnTrocar)btnTrocar.style.display=alunoTemMultiplosProtocolos(state.user)?'inline-block':'none';
   document.getElementById('protocolo-nome').textContent=prot?prot.nome:'Sem protocolo';
   document.getElementById('protocolo-desc').textContent=prot?(prot.desc||''):'Peca ao treinador para vincular um protocolo.';
   var nick=state.user.nick;
   var semanas=prot?d.semanas.filter(function(s){return s.protocoloId===prot.id;}).sort(function(a,b){return a.num-b.num;}):[];
   var grid=document.getElementById('grid-semanas');
-  if(!semanas.length){grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhuma semana cadastrada.</p></div>';showView('view-semanas');return;}
+  if(!semanas.length){grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhuma semana cadastrada.</p></div>';renderAvisoAvaliacaoAluno();showView('view-semanas');return;}
   grid.innerHTML=semanas.map(function(s){
     var dias=d.dias.filter(function(di){return di.semanaId===s.id;});
     var concl=dias.length>0&&dias.every(function(di){return localStorage.getItem(nick+'__dia__'+di.id)==='1';});
@@ -787,8 +1212,10 @@ function renderSemanas(){
       +'<div class="semana-check">&#10003; Concluida</div>'
       +'</div>';
   }).join('');
+  renderAvisoAvaliacaoAluno();
   showView('view-semanas');
 }
+
 
 function openSemana(id){
   var d=getData();
@@ -920,7 +1347,7 @@ function renderAdminProtocolos(){
   list.innerHTML='';
   d.protocolos.forEach(function(p){
     var nsem=d.semanas.filter(function(s){return s.protocoloId===p.id;}).length;
-    var nalunos=d.alunos.filter(function(a){return a.protocoloId===p.id;}).length;
+    var nalunos=d.alunos.filter(function(a){return getAlunoProtocolosIds(a).indexOf(p.id)!==-1;}).length;
     // wrapper
     var wrap=document.createElement('div');
     wrap.className='admin-item';
@@ -1257,14 +1684,20 @@ function renderAdminAlunos(){
   populateSelectProtocolos();
   var d=getData();
   var list=document.getElementById('list-alunos');
+  var pend=countAvaliacoesPendentes(d);
+  var pendHtml=pend?'<div class="av-pendente-bar"><strong>'+pend+'</strong> aluno'+(pend!==1?'s':'')+' com avaliacao pendente ou sem avaliacao.</div>':'';
   if(!d.alunos.length){
-    list.innerHTML='<div class="empty-state"><div>&#128100;</div><p>Nenhum aluno cadastrado.</p></div>';
+    list.innerHTML=pendHtml+'<div class="empty-state"><div>&#128100;</div><p>Nenhum aluno cadastrado.</p></div>';
     return;
   }
-  list.innerHTML='';
+  list.innerHTML=pendHtml;
   d.alunos.forEach(function(a){
-    var prot=null;
-    for(var i=0;i<d.protocolos.length;i++){if(d.protocolos[i].id===a.protocoloId){prot=d.protocolos[i];break;}}
+    var ids=getAlunoProtocolosIds(a);
+    var prots=d.protocolos.filter(function(p){return ids.indexOf(p.id)!==-1;});
+    var protResumo=prots.length?('<div class="aluno-prot-tags">'+prots.map(function(p){return '<span class="aluno-prot-tag">'+p.nome+'</span>';}).join('')+'</div>'):'Sem protocolo';
+    var ultAv=ultimaAvaliacao(a);
+    var avResumo=ultAv?('Ultima avaliacao: '+formatDataBR(ultAv.data)+' | Proxima: '+formatDataBR(ultAv.proximaAvaliacao||addDiasISO(ultAv.data,30))):'Sem avaliacao fisica';
+    var avPend=avaliacaoPendente(a);
     var wrap=document.createElement('div');
     wrap.className='admin-item';
     // row principal
@@ -1272,12 +1705,15 @@ function renderAdminAlunos(){
     row.className='admin-item-row';
     row.innerHTML='<div class="admin-item-info">'
       +'<div class="admin-item-title">'+(a.nome||a.nick)+' <span style="color:var(--muted);font-size:.75rem">/ '+a.nick+'</span></div>'
-      +'<div class="admin-item-sub">'+(prot?'&#128203; '+prot.nome:'Sem protocolo')+'</div>'
+      +'<div class="admin-item-sub">&#128203; '+protResumo+'</div>'
+      +'<div class="admin-item-sub">&#128207; '+avResumo+(avPend?' <span class="tag" style="color:var(--accent)">Pendente</span>':'')+'</div>'
       +'</div>'
       +'<div class="admin-item-actions">'
+      +'<button class="btn-icon bava" title="Avaliacoes">&#128207;</button>'
       +'<button class="btn-icon bea" title="Editar">&#9998;</button>'
       +'<button class="btn-icon del bda">&#10005;</button>'
       +'</div>';
+    row.querySelector('.bava').addEventListener('click',function(){abrirAvaliacoesAluno(a.id,'admin');});
     row.querySelector('.bea').addEventListener('click',function(){toggleEditAluno(a.id);});
     row.querySelector('.bda').addEventListener('click',function(){deleteAluno(a.id);});
     wrap.appendChild(row);
@@ -1286,11 +1722,8 @@ function renderAdminAlunos(){
     form.className='edit-aluno-form';
     form.id='edit-aluno-'+a.id;
     form.innerHTML='<div class="form-row"><label>Nome de exibicao</label><input id="ean-'+a.id+'" value="'+(a.nome||'').replace(/"/g,'&quot;')+'" placeholder="Nome completo"></div>'
-      +'<div class="form-row"><label>Protocolo</label>'
-      +'<select id="eap-'+a.id+'">'
-      +'<option value="">-- Sem protocolo --</option>'
-      +d.protocolos.map(function(p){return '<option value="'+p.id+'"'+(p.id===a.protocoloId?' selected':'')+'>'+p.nome+'</option>';}).join('')
-      +'</select></div>'
+      +'<div class="form-row"><label>Protocolos vinculados</label>'
+      +'<div id="eap-'+a.id+'" class="multi-prot-list">'+protocolosCheckboxesHtml(d,ids)+'</div></div>'
       +'<div class="form-actions">'
       +'<button class="btn-save bsa">Salvar</button>'
       +'<button class="btn-cancel bca">Cancelar</button>'
@@ -1304,20 +1737,24 @@ function renderAdminAlunos(){
 function toggleEditAluno(id){var el=document.getElementById('edit-aluno-'+id);if(el)el.classList.toggle('open');}
 function salvarEdicaoAluno(id){
   var d=getData();var idx=d.alunos.findIndex(function(a){return a.id===id;});if(idx<0)return;
-  var nomeEl=document.getElementById('ean-'+id);var protEl=document.getElementById('eap-'+id);
+  var nomeEl=document.getElementById('ean-'+id);
+  var ids=getSelectedProtocolosFromContainer('eap-'+id);
   if(nomeEl)d.alunos[idx].nome=nomeEl.value.trim();
-  if(protEl)d.alunos[idx].protocoloId=protEl.value;
-  saveData(d);toggleEditAluno(id);renderAdminAlunos();
+  setAlunoProtocolosIds(d.alunos[idx],ids);
+  saveData(d);toggleEditAluno(id);renderAdminAlunos();renderAdminProtocolos();
 }
 function salvarAluno(){
   var nick=document.getElementById('f-aluno-nick').value.trim().toLowerCase().replace(/\s+/g,'');
   var nome=document.getElementById('f-aluno-nome').value.trim();
-  var protId=document.getElementById('f-aluno-protocolo').value;
+  var ids=getSelectedProtocolosFromContainer('f-aluno-protocolos');
   if(!nick)return alert('Nick obrigatorio!');
   var d=getData();for(var i=0;i<d.alunos.length;i++){if(d.alunos[i].nick===nick)return alert('Ja existe aluno com este nick!');}
-  d.alunos.push({id:uid(),nick:nick,nome:nome,protocoloId:protId});saveData(d);
-  document.getElementById('f-aluno-nick').value='';document.getElementById('f-aluno-nome').value='';document.getElementById('f-aluno-protocolo').value='';
-  toggleForm('form-novo-aluno');renderAdminAlunos();
+  var novo={id:uid(),nick:nick,nome:nome,protocoloId:''};
+  setAlunoProtocolosIds(novo,ids);
+  d.alunos.push(novo);saveData(d);
+  document.getElementById('f-aluno-nick').value='';document.getElementById('f-aluno-nome').value='';
+  populateSelectProtocolos();
+  toggleForm('form-novo-aluno');renderAdminAlunos();renderAdminProtocolos();
 }
 function deleteAluno(id){
   confirmDelete('Excluir aluno','O acesso deste aluno sera removido.',function(){var d=getData();d.alunos=d.alunos.filter(function(a){return a.id!==id;});saveData(d);renderAdminAlunos();});
@@ -1357,154 +1794,48 @@ function importarDados(input){
   reader.onload=function(e){
     try{
       var payload=JSON.parse(e.target.result);
-      // Aceitar tanto {data,pesos} quanto objeto direto de importacao.
+      // Aceitar tanto {data,pesos} quanto o objeto data direto
       var d=payload.data||payload;
       var p=payload.pesos||{};
-
-      // Normalizar estrutura: arquivos de protocolo podem vir sem alunos/pesos.
-      d.alunos=d.alunos||[];
-      d.protocolos=d.protocolos||[];
-      d.semanas=d.semanas||[];
-      d.dias=d.dias||[];
-      d.exercicios=d.exercicios||[];
-
-      if(!Array.isArray(d.protocolos)||!Array.isArray(d.semanas)||!Array.isArray(d.dias)||!Array.isArray(d.exercicios)){
-        throw new Error('Arquivo invalido: estrutura de protocolo nao reconhecida.');
+      // Validar estrutura mínima
+      if(!d.protocolos||!d.alunos||!d.semanas||!d.dias||!d.exercicios){
+        throw new Error('Arquivo invalido: estrutura nao reconhecida.');
       }
-      if(!d.protocolos.length){
-        throw new Error('Arquivo sem protocolos para importar.');
-      }
-
+      // Merge: preservar dados locais + adicionar/atualizar do backup
       var existing=getData();
-      ['alunos','protocolos','semanas','dias','exercicios'].forEach(function(k){
-        if(!Array.isArray(existing[k])) existing[k]=[];
-      });
-
-      // IMPORTACAO DE NOVO PROTOCOLO:
-      // sempre cria novos IDs para nao substituir protocolo/semana/dia/exercicio existente.
-      var mapaProt={};
-      var mapaSem={};
-      var mapaDia={};
-      var added={protocolos:0,semanas:0,dias:0,exercicios:0,alunos:0};
-
-      d.protocolos.forEach(function(prot){
-        var oldId=String(prot.id||uid());
-        var newId=uid();
-        mapaProt[oldId]=newId;
-        existing.protocolos.push({
-          id:newId,
-          nome:prot.nome||'Novo Protocolo',
-          desc:prot.desc||''
-        });
-        added.protocolos++;
-      });
-
-      d.semanas.forEach(function(sem){
-        var oldId=String(sem.id||uid());
-        var oldProtId=String(sem.protocoloId||'');
-        var newProtId=mapaProt[oldProtId];
-        // Se o arquivo tiver uma semana sem protocoloId, vincula ao primeiro protocolo importado.
-        if(!newProtId && d.protocolos[0]) newProtId=mapaProt[String(d.protocolos[0].id)];
-        if(!newProtId) return;
-        var newId=uid();
-        mapaSem[oldId]=newId;
-        existing.semanas.push({
-          id:newId,
-          protocoloId:newProtId,
-          num:Number(sem.num||sem.numero||1),
-          obs:sem.obs||''
-        });
-        added.semanas++;
-      });
-
-      d.dias.forEach(function(di){
-        var oldId=String(di.id||uid());
-        var oldSemId=String(di.semanaId||'');
-        var newSemId=mapaSem[oldSemId];
-        // Se o arquivo tiver dia sem semanaId, vincula a primeira semana importada.
-        if(!newSemId && d.semanas[0]) newSemId=mapaSem[String(d.semanas[0].id)];
-        if(!newSemId) return;
-        var newId=uid();
-        mapaDia[oldId]=newId;
-        existing.dias.push({
-          id:newId,
-          semanaId:newSemId,
-          label:di.label||di.nome||'Treino',
-          nome:di.label? (di.nome||'') : '',
-          obs:di.obs||'',
-          ordem:Number(di.ordem||existing.dias.filter(function(x){return x.semanaId===newSemId;}).length+1)
-        });
-        added.dias++;
-      });
-
-      d.exercicios.forEach(function(ex){
-        var oldDiaId=String(ex.diaId||ex.diald||'');
-        var newDiaId=mapaDia[oldDiaId];
-        // Se o arquivo tiver exercicio sem diaId, vincula ao primeiro dia importado.
-        if(!newDiaId && d.dias[0]) newDiaId=mapaDia[String(d.dias[0].id)];
-        if(!newDiaId) return;
-        existing.exercicios.push({
-          id:uid(),
-          diaId:newDiaId,
-          nome:ex.nome||'',
-          ordem:Number(ex.ordem||existing.exercicios.filter(function(x){return x.diaId===newDiaId;}).length+1),
-          tipo:ex.tipo||'musc',
-          prescricao:ex.prescricao||'',
-          series:ex.series!==undefined?String(ex.series):'',
-          reps:ex.reps!==undefined?String(ex.reps):(ex.repeticoes!==undefined?String(ex.repeticoes):''),
-          tecnica:ex.tecnica||'',
-          metodo:ex.metodo||'',
-          obs:ex.obs||''
-        });
-        added.exercicios++;
-      });
-
-      // Alunos: opcional. Se vierem no arquivo, adiciona com novo ID/nick ajustado se necessario.
-      d.alunos.forEach(function(a){
-        if(!a.nick) return;
-        var nickBase=String(a.nick).toLowerCase().trim();
-        var nick=nickBase;
-        var n=2;
-        while(existing.alunos.find(function(x){return String(x.nick).toLowerCase()===nick;})){
-          nick=nickBase+'_'+n;n++;
-        }
-        var ids=(a.protocolosIds||a.protocolos||[]).map(function(pid){return mapaProt[String(pid)];}).filter(Boolean);
-        if(!ids.length && a.protocoloId && mapaProt[String(a.protocoloId)]) ids=[mapaProt[String(a.protocoloId)]];
-        existing.alunos.push({
-          id:uid(),
-          nick:nick,
-          nome:a.nome||'',
-          protocoloId:ids[0]||'',
-          protocolosIds:ids
-        });
-        added.alunos++;
-      });
-
-      // Pesos somente em backup completo; preserva existentes e acrescenta chaves novas.
       var existingPesos=getPesos();
-      Object.keys(p||{}).forEach(function(k){if(existingPesos[k]===undefined) existingPesos[k]=p[k];});
-
+      ['protocolos','semanas','dias','exercicios','alunos'].forEach(function(k){
+        d[k].forEach(function(item){
+          var idx=existing[k].findIndex(function(e){return e.id===item.id;});
+          if(idx>=0){existing[k][idx]=item;}
+          else{existing[k].push(item);}
+        });
+      });
+      // Merge pesos
+      Object.keys(p).forEach(function(k){existingPesos[k]=p[k];});
       saveData(existing);
       savePesos(existingPesos);
-      status.textContent='\u2713 Novo protocolo acrescentado! '+added.protocolos+' protocolo(s), '+added.semanas+' semana(s), '+added.dias+' dia(s), '+added.exercicios+' exercicio(s).';
+      // Feedback
+      status.textContent='\u2713 Importado com sucesso! '+d.protocolos.length+' protocolo(s), '+d.alunos.length+' aluno(s).';
       status.className='import-status ok';status.style.display='block';
-      setTimeout(function(){status.style.display='none';},7000);
+      setTimeout(function(){status.style.display='none';},5000);
       renderAdminHome();
       input.value='';
     } catch(err){
       status.textContent='\u2717 Erro: '+err.message;
       status.className='import-status err';status.style.display='block';
-      setTimeout(function(){status.style.display='none';},7000);
+      setTimeout(function(){status.style.display='none';},5000);
       input.value='';
     }
   };
   reader.readAsText(file);
 }
 function populateSelectProtocolos(){
-  var sel=document.getElementById('f-aluno-protocolo');if(!sel)return;
-  var d=getData();var cur=sel.value;
-  sel.innerHTML='<option value="">-- Selecionar --</option>'+d.protocolos.map(function(p){return '<option value="'+p.id+'"'+(p.id===cur?' selected':'')+'>'+p.nome+'</option>';}).join('');
+  var d=getData();
+  var box=document.getElementById('f-aluno-protocolos');
+  if(box)box.innerHTML=protocolosCheckboxesHtml(d,[]);
 }
+
 
 // ===== EDITAR EXERCÍCIO =====
 var _editExId = null;
@@ -1683,6 +2014,12 @@ Object.assign(window, {
   abrirFormDia,
   abrirFormEx,
   abrirModalDupl,
+  abrirAvaliacoesAluno,
+  abrirMinhasAvaliacoes,
+  deleteAvaliacaoFisica,
+  limparFormAvaliacao,
+  salvarAvaliacaoFisica,
+  voltarAvaliacoes,
   abrirRelConfig,
   adminTab,
   ajustarPeso,
@@ -1701,6 +2038,13 @@ Object.assign(window, {
   getPesos,
   importarDados,
   loginAdmin,
+  getAlunoProtocolosIds,
+  setAlunoProtocolosIds,
+  getProtocolosDoAluno,
+  renderEscolhaProtocolosAluno,
+  selecionarProtocoloAluno,
+  voltarProtocolosAluno,
+  alunoTemMultiplosProtocolos,
   loginAluno,
   logout,
   moverEx,
