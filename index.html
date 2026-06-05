@@ -1893,19 +1893,41 @@ function confirmarEditEx(){
 function abrirRelConfig(){
   var d=getData();
   var container=document.getElementById('rel-alunos-config');
-  if(!d.alunos.length){container.innerHTML='<div class="empty-state"><div>&#128100;</div><p>Nenhum aluno cadastrado.</p></div>';showView('view-rel-config');return;}
+  if(!d.alunos.length){
+    container.innerHTML='<div class="empty-state"><div>&#128100;</div><p>Nenhum aluno cadastrado.</p></div>';
+    showView('view-rel-config');
+    return;
+  }
+
   var html='';
   d.alunos.forEach(function(a){
-    var prot=d.protocolos.find(function(p){return p.id===a.protocoloId;});
-    var semanas=prot?d.semanas.filter(function(s){return s.protocoloId===prot.id;}).sort(function(a,b){return a.num-b.num;}):[]; 
-    var semOpts='<option value="">-- Semana --</option>'+semanas.map(function(s){return '<option value="'+s.id+'">Semana '+s.num+(s.obs?' - '+s.obs:'')+'</option>';}).join('');
+    var protocolosAluno=getProtocolosDoAluno(a,d);
+    if(!protocolosAluno.length && a.protocoloId){
+      var protFallback=d.protocolos.find(function(p){return p.id===a.protocoloId;});
+      if(protFallback) protocolosAluno=[protFallback];
+    }
+
+    var protSelecionado=protocolosAluno[0] || null;
+    var protOpts='<option value="">-- Protocolo --</option>'+protocolosAluno.map(function(p){
+      return '<option value="'+p.id+'" '+(protSelecionado&&p.id===protSelecionado.id?'selected':'')+'>'+p.nome+'</option>';
+    }).join('');
+
+    var semanas=protSelecionado
+      ? d.semanas.filter(function(s){return s.protocoloId===protSelecionado.id;}).sort(function(a,b){return a.num-b.num;})
+      : [];
+
+    var semOpts='<option value="">-- Semana --</option>'+semanas.map(function(s){
+      return '<option value="'+s.id+'">Semana '+s.num+(s.obs?' - '+s.obs:'')+'</option>';
+    }).join('');
+
     html+='<div class="aluno-sel-item" id="asi-'+a.id+'">'
       +'<div class="aluno-sel-row">'
       +'<input type="checkbox" class="aluno-sel-check asel-chk" id="asel-'+a.id+'" data-aid="'+a.id+'">'
       +'<label class="aluno-sel-nome" for="asel-'+a.id+'">'+(a.nome||a.nick)+' <span style="color:var(--muted);font-size:.78rem">/ '+a.nick+'</span></label>'
-      +'<span style="font-size:.75rem;color:var(--muted2)">'+(prot?prot.nome:'sem protocolo')+'</span>'
+      +'<span style="font-size:.75rem;color:var(--muted2)">'+(protocolosAluno.length?protocolosAluno.length+' protocolo'+(protocolosAluno.length>1?'s':''):'sem protocolo')+'</span>'
       +'</div>'
       +'<div class="aluno-sel-config" id="aconf-'+a.id+'">'
+      +'<select class="asel-prot" id="asel-prot-'+a.id+'" data-aid="'+a.id+'">'+protOpts+'</select>'
       +'<select class="asel-sem" id="asel-sem-'+a.id+'" data-aid="'+a.id+'">'+semOpts+'</select>'
       +'<select id="asel-dia-'+a.id+'"><option value="">-- Dia --</option></select>'
       +'</div>'
@@ -1914,10 +1936,12 @@ function abrirRelConfig(){
   container.innerHTML=html;
   showView('view-rel-config');
 }
+
 function toggleAlunoSel(el,alunoId){
   var conf=document.getElementById('aconf-'+alunoId);
   if(conf){if(el&&el.checked)conf.classList.add('show');else conf.classList.remove('show');}
 }
+
 // delegação de eventos para checkboxes e selects do relatório
 document.addEventListener('change',function(e){
   if(e.target.classList.contains('asel-chk')){
@@ -1925,20 +1949,49 @@ document.addEventListener('change',function(e){
     var conf=document.getElementById('aconf-'+aid);
     if(conf){if(e.target.checked)conf.classList.add('show');else conf.classList.remove('show');}
   }
+  if(e.target.classList.contains('asel-prot')){
+    var aid=e.target.getAttribute('data-aid');
+    updateSemanasSelect(aid);
+  }
   if(e.target.classList.contains('asel-sem')){
     var aid=e.target.getAttribute('data-aid');
     updateDiasSelect(aid);
   }
 });
+
+function updateSemanasSelect(alunoId){
+  var protEl=document.getElementById('asel-prot-'+alunoId);
+  var semEl=document.getElementById('asel-sem-'+alunoId);
+  var diaEl=document.getElementById('asel-dia-'+alunoId);
+  if(!semEl) return;
+
+  var protId=protEl ? protEl.value : '';
+  semEl.innerHTML='<option value="">-- Semana --</option>';
+  if(diaEl) diaEl.innerHTML='<option value="">-- Dia --</option>';
+
+  if(!protId) return;
+
+  var d=getData();
+  d.semanas
+    .filter(function(s){return s.protocoloId===protId;})
+    .sort(function(a,b){return a.num-b.num;})
+    .forEach(function(s){
+      semEl.innerHTML+='<option value="'+s.id+'">Semana '+s.num+(s.obs?' - '+s.obs:'')+'</option>';
+    });
+}
+
 function updateDiasSelect(alunoId){
-  var semId=document.getElementById('asel-sem-'+alunoId).value;
+  var semEl=document.getElementById('asel-sem-'+alunoId);
+  var semId=semEl ? semEl.value : '';
   var selDia=document.getElementById('asel-dia-'+alunoId);
+  if(!selDia) return;
   selDia.innerHTML='<option value="">-- Dia --</option>';
   if(!semId)return;
   var d=getData();
   d.dias.filter(function(di){return di.semanaId===semId;}).sort(function(a,b){return a.ordem-b.ordem;})
     .forEach(function(di){selDia.innerHTML+='<option value="'+di.id+'">'+di.label+(di.nome?' - '+di.nome:'')+'</option>';});
 }
+
 function gerarRelatorio(){
   var d=getData();var pesos=getPesos();
   var alunos=d.alunos.filter(function(a){var chk=document.getElementById('asel-'+a.id);return chk&&chk.checked;});
@@ -1948,14 +2001,20 @@ function gerarRelatorio(){
   var dataHoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   alunos.forEach(function(a){
     var diaId=document.getElementById('asel-dia-'+a.id)?document.getElementById('asel-dia-'+a.id).value:'';
+    var protId=document.getElementById('asel-prot-'+a.id)?document.getElementById('asel-prot-'+a.id).value:'';
     var card=document.createElement('div');card.className='rel-card print-page';
+    if(!protId){
+      card.innerHTML='<div class="rel-aluno">'+(a.nome||a.nick)+'</div><div class="rel-dia">Nenhum protocolo selecionado.</div>';
+      cont.appendChild(card);return;
+    }
     if(!diaId){
-      card.innerHTML='<div class="rel-aluno">'+(a.nome||a.nick)+'</div><div class="rel-dia">Nenhum dia selecionado.</div>';
+      var protSel=d.protocolos.find(function(p){return p.id===protId;});
+      card.innerHTML='<div class="rel-aluno">'+(a.nome||a.nick)+'</div><div class="rel-dia">'+(protSel?protSel.nome+' — ':'')+'Nenhuma semana/dia selecionado.</div>';
       cont.appendChild(card);return;
     }
     var dia=d.dias.find(function(di){return di.id===diaId;});
     var semana=dia?d.semanas.find(function(s){return s.id===dia.semanaId;}):null;
-    var prot=semana?d.protocolos.find(function(p){return p.id===semana.protocoloId;}):null;
+    var prot=semana?d.protocolos.find(function(p){return p.id===semana.protocoloId;}):d.protocolos.find(function(p){return p.id===protId;});
     var exs=d.exercicios.filter(function(e){return e.diaId===diaId;}).sort(function(a,b){return a.ordem-b.ordem;});
     // header do card
     var hdr=document.createElement('div');
@@ -2104,6 +2163,20 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('Erro ao registrar PWA:', err));
   });
 }
+</script>
+
+
+<script>
+window.addEventListener('load', function(){
+  try{
+    if(window.dados && Array.isArray(window.dados.alunos)){
+      window.dados.alunos.sort((a,b)=>(((a.nome||a.nick)||'').localeCompare(((b.nome||b.nick)||''),'pt-BR',{sensitivity:'base'})));
+    }
+    if(window.dados && Array.isArray(window.dados.protocolos)){
+      window.dados.protocolos.sort((a,b)=>((a.nome||'').localeCompare((b.nome||''),'pt-BR',{sensitivity:'base'})));
+    }
+  }catch(e){}
+});
 </script>
 
 </body>
