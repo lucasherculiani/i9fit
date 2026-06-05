@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>i9Fit</title>
+<!-- Versao: relatorio com protocolo + ordenacao A-Z de alunos/protocolos -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#c8f542">
 <meta name="mobile-web-app-capable" content="yes">
@@ -733,6 +734,28 @@ function __ensureArrays(d){
   return d;
 }
 
+
+// ORDENACAO GLOBAL A-Z
+function nomeAlunoOrdenacao(a){
+  return String((a && (a.nome || a.nick)) || '').trim();
+}
+function nomeProtocoloOrdenacao(p){
+  return String((p && p.nome) || '').trim();
+}
+function ordenarAlunosAZ(alunos){
+  return (Array.isArray(alunos) ? alunos.slice() : []).sort(function(a,b){
+    return nomeAlunoOrdenacao(a).localeCompare(nomeAlunoOrdenacao(b),'pt-BR',{sensitivity:'base'});
+  });
+}
+function ordenarProtocolosAZ(protocolos){
+  return (Array.isArray(protocolos) ? protocolos.slice() : []).sort(function(a,b){
+    return nomeProtocoloOrdenacao(a).localeCompare(nomeProtocoloOrdenacao(b),'pt-BR',{sensitivity:'base'});
+  });
+}
+function nomeAlunoExibicao(a){
+  return String((a && (a.nome || a.nick)) || '').trim();
+}
+
 async function __lerColecao(nome){
   const snap = await getDocs(collection(db, nome));
   return snap.docs.map(function(d){
@@ -763,8 +786,8 @@ function __normalizarStorageAntigo(raw){
 }
 
 async function __carregarDasColecoes(){
-  const alunos = await __lerColecao(COLECOES_I9.alunos);
-  const protocolos = await __lerColecao(COLECOES_I9.protocolos);
+  const alunos = ordenarAlunosAZ(await __lerColecao(COLECOES_I9.alunos));
+  const protocolos = ordenarProtocolosAZ(await __lerColecao(COLECOES_I9.protocolos));
   const semanas = await __lerColecao(COLECOES_I9.semanas);
   const dias = await __lerColecao(COLECOES_I9.dias);
   const exercicios = await __lerColecao(COLECOES_I9.exercicios);
@@ -1351,7 +1374,7 @@ function renderAdminProtocolos(){
     return;
   }
   list.innerHTML='';
-  d.protocolos.forEach(function(p){
+  ordenarProtocolosAZ(d.protocolos).forEach(function(p){
     var nsem=d.semanas.filter(function(s){return s.protocoloId===p.id;}).length;
     var nalunos=d.alunos.filter(function(a){return getAlunoProtocolosIds(a).indexOf(p.id)!==-1;}).length;
     // wrapper
@@ -1697,9 +1720,9 @@ function renderAdminAlunos(){
     return;
   }
   list.innerHTML=pendHtml;
-  d.alunos.forEach(function(a){
+  ordenarAlunosAZ(d.alunos).forEach(function(a){
     var ids=getAlunoProtocolosIds(a);
-    var prots=d.protocolos.filter(function(p){return ids.indexOf(p.id)!==-1;});
+    var prots=ordenarProtocolosAZ(d.protocolos.filter(function(p){return ids.indexOf(p.id)!==-1;}));
     var protResumo=prots.length?('<div class="aluno-prot-tags">'+prots.map(function(p){return '<span class="aluno-prot-tag">'+p.nome+'</span>';}).join('')+'</div>'):'Sem protocolo';
     var ultAv=ultimaAvaliacao(a);
     var avResumo=ultAv?('Ultima avaliacao: '+formatDataBR(ultAv.data)+' | Proxima: '+formatDataBR(ultAv.proximaAvaliacao||addDiasISO(ultAv.data,30))):'Sem avaliacao fisica';
@@ -1710,7 +1733,7 @@ function renderAdminAlunos(){
     var row=document.createElement('div');
     row.className='admin-item-row';
     row.innerHTML='<div class="admin-item-info">'
-      +'<div class="admin-item-title">'+(a.nome||a.nick)+' <span style="color:var(--muted);font-size:.75rem">/ '+a.nick+'</span></div>'
+      +'<div class="admin-item-title">'+nomeAlunoExibicao(a)+' <span style="color:var(--muted);font-size:.75rem">/ '+a.nick+'</span></div>'
       +'<div class="admin-item-sub">&#128203; '+protResumo+'</div>'
       +'<div class="admin-item-sub">&#128207; '+avResumo+(avPend?' <span class="tag" style="color:var(--accent)">Pendente</span>':'')+'</div>'
       +'</div>'
@@ -1900,8 +1923,8 @@ function abrirRelConfig(){
   }
 
   var html='';
-  d.alunos.forEach(function(a){
-    var protocolosAluno=getProtocolosDoAluno(a,d);
+  ordenarAlunosAZ(d.alunos).forEach(function(a){
+    var protocolosAluno=ordenarProtocolosAZ(getProtocolosDoAluno(a,d));
     if(!protocolosAluno.length && a.protocoloId){
       var protFallback=d.protocolos.find(function(p){return p.id===a.protocoloId;});
       if(protFallback) protocolosAluno=[protFallback];
@@ -1923,7 +1946,7 @@ function abrirRelConfig(){
     html+='<div class="aluno-sel-item" id="asi-'+a.id+'">'
       +'<div class="aluno-sel-row">'
       +'<input type="checkbox" class="aluno-sel-check asel-chk" id="asel-'+a.id+'" data-aid="'+a.id+'">'
-      +'<label class="aluno-sel-nome" for="asel-'+a.id+'">'+(a.nome||a.nick)+' <span style="color:var(--muted);font-size:.78rem">/ '+a.nick+'</span></label>'
+      +'<label class="aluno-sel-nome" for="asel-'+a.id+'">'+nomeAlunoExibicao(a)+' <span style="color:var(--muted);font-size:.78rem">/ '+a.nick+'</span></label>'
       +'<span style="font-size:.75rem;color:var(--muted2)">'+(protocolosAluno.length?protocolosAluno.length+' protocolo'+(protocolosAluno.length>1?'s':''):'sem protocolo')+'</span>'
       +'</div>'
       +'<div class="aluno-sel-config" id="aconf-'+a.id+'">'
@@ -1994,7 +2017,7 @@ function updateDiasSelect(alunoId){
 
 function gerarRelatorio(){
   var d=getData();var pesos=getPesos();
-  var alunos=d.alunos.filter(function(a){var chk=document.getElementById('asel-'+a.id);return chk&&chk.checked;});
+  var alunos=ordenarAlunosAZ(d.alunos).filter(function(a){var chk=document.getElementById('asel-'+a.id);return chk&&chk.checked;});
   if(!alunos.length)return alert('Selecione ao menos um aluno.');
   var cont=document.getElementById('rel-conteudo');
   cont.innerHTML='';
@@ -2004,12 +2027,12 @@ function gerarRelatorio(){
     var protId=document.getElementById('asel-prot-'+a.id)?document.getElementById('asel-prot-'+a.id).value:'';
     var card=document.createElement('div');card.className='rel-card print-page';
     if(!protId){
-      card.innerHTML='<div class="rel-aluno">'+(a.nome||a.nick)+'</div><div class="rel-dia">Nenhum protocolo selecionado.</div>';
+      card.innerHTML='<div class="rel-aluno">'+nomeAlunoExibicao(a)+'</div><div class="rel-dia">Nenhum protocolo selecionado.</div>';
       cont.appendChild(card);return;
     }
     if(!diaId){
       var protSel=d.protocolos.find(function(p){return p.id===protId;});
-      card.innerHTML='<div class="rel-aluno">'+(a.nome||a.nick)+'</div><div class="rel-dia">'+(protSel?protSel.nome+' — ':'')+'Nenhuma semana/dia selecionado.</div>';
+      card.innerHTML='<div class="rel-aluno">'+nomeAlunoExibicao(a)+'</div><div class="rel-dia">'+(protSel?protSel.nome+' — ':'')+'Nenhuma semana/dia selecionado.</div>';
       cont.appendChild(card);return;
     }
     var dia=d.dias.find(function(di){return di.id===diaId;});
@@ -2019,7 +2042,7 @@ function gerarRelatorio(){
     // header do card
     var hdr=document.createElement('div');
     hdr.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem;margin-bottom:.85rem';
-    hdr.innerHTML='<div><div class="rel-aluno">'+(a.nome||a.nick)+'</div>'
+    hdr.innerHTML='<div><div class="rel-aluno">'+nomeAlunoExibicao(a)+'</div>'
       +'<div class="rel-dia">'+(prot?prot.nome+' &rsaquo; ':'')+(semana?'Semana '+semana.num+' &rsaquo; ':'')+(dia?dia.label+(dia.nome?' - '+dia.nome:''):'')+'</div></div>'
       +'<div style="font-size:.75rem;color:var(--muted)">'+dataHoje+'</div>';
     card.appendChild(hdr);
@@ -2163,20 +2186,6 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('Erro ao registrar PWA:', err));
   });
 }
-</script>
-
-
-<script>
-window.addEventListener('load', function(){
-  try{
-    if(window.dados && Array.isArray(window.dados.alunos)){
-      window.dados.alunos.sort((a,b)=>(((a.nome||a.nick)||'').localeCompare(((b.nome||b.nick)||''),'pt-BR',{sensitivity:'base'})));
-    }
-    if(window.dados && Array.isArray(window.dados.protocolos)){
-      window.dados.protocolos.sort((a,b)=>((a.nome||'').localeCompare((b.nome||''),'pt-BR',{sensitivity:'base'})));
-    }
-  }catch(e){}
-});
 </script>
 
 </body>
