@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>i9Treino — Seu treino, do seu jeito, em qualquer lugar</title>
+<meta name="theme-color" content="#0d0d0d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0d0d;
+    --surface:#161616;
+    --surface2:#1e1e1e;
+    --surface3:#262626;
+    --border:#2e2e2e;
+    --accent:#c8f542;
+    --accent2:#a8d932;
+    --text:#f5f5f0;
+    --text-dim:#9a9a93;
+    --text-dimmer:#6b6b66;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Outfit',sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4,.display{
+    font-family:'Sora',sans-serif;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    line-height:1.08;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 24px;}
+  .accent{color:var(--accent);}
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(13,13,13,0.85);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+  }
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 24px;max-width:1140px;margin:0 auto;
+  }
+  .logo{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;
+    letter-spacing:-0.03em;
+  }
+  .logo span{color:var(--accent);}
+  .nav-cta{
+    background:var(--accent);color:var(--bg);
+    padding:10px 22px;border-radius:999px;
+    font-weight:700;font-size:0.92rem;
+    transition:transform .15s ease, box-shadow .15s ease;
+    white-space:nowrap;
+  }
+  .nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px -8px var(--accent);}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    padding:90px 0 80px;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:'';
+    position:absolute;
+    top:-200px;right:-200px;
+    width:600px;height:600px;
+    background:radial-gradient(circle, rgba(200,245,66,0.18), transparent 70%);
+    pointer-events:none;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:48px;
+    align-items:center;
+    position:relative;
+    z-index:1;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    padding:7px 16px;border-radius:999px;
+    font-size:0.82rem;color:var(--text-dim);
+    margin-bottom:24px;
+    font-weight:500;
+  }
+  .eyebrow::before{
+    content:'';width:7px;height:7px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 0 rgba(200,245,66,0.5);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(200,245,66,0.5);}
+    70%{box-shadow:0 0 0 8px rgba(200,245,66,0);}
+    100%{box-shadow:0 0 0 0 rgba(200,245,66,0);}
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 5.5vw, 3.8rem);
+    margin-bottom:20px;
+  }
+  .hero p.lead{
+    font-size:1.1rem;color:var(--text-dim);
+    max-width:480px;margin-bottom:32px;
+  }
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    padding:16px 28px;border-radius:999px;
+    font-weight:700;font-size:1rem;
+    border:none;cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+    font-family:'Outfit',sans-serif;
+  }
+  .btn-primary{
+    background:var(--accent);color:var(--bg);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px -10px var(--accent);}
+  .btn-ghost{
+    background:transparent;color:var(--text);
+    border:1px solid var(--border);
+  }
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+  .hero-proof{
+    display:flex;gap:28px;flex-wrap:wrap;
+    color:var(--text-dim);font-size:0.88rem;
+  }
+  .hero-proof div{display:flex;align-items:center;gap:8px;}
+  .hero-proof svg{flex-shrink:0;color:var(--accent);}
+
+  /* Hero visual */
+  .hero-visual{
+    position:relative;
+    display:flex;justify-content:center;
+  }
+  .phone{
+    width:280px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:32px;
+    padding:18px;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,0.8);
+    position:relative;
+  }
+  .phone-screen{
+    background:var(--bg);
+    border-radius:20px;
+    padding:20px 16px;
+    min-height:420px;
+  }
+  .phone-app-name{font-size:1.05rem;font-weight:800;margin-bottom:4px;}
+  .phone-app-sub{font-size:0.78rem;color:var(--text-dim);margin-bottom:20px;}
+  .phone-card{
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:14px;margin-bottom:12px;
+  }
+  .phone-card-title{font-size:0.85rem;font-weight:700;margin-bottom:6px;}
+  .phone-card-meta{font-size:0.74rem;color:var(--text-dim);}
+  .phone-row{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:10px;padding-top:10px;border-top:1px solid var(--border);
+  }
+  .phone-tag{
+    display:inline-block;
+    background:rgba(200,245,66,0.12);color:var(--accent);
+    font-size:0.7rem;font-weight:700;
+    padding:3px 10px;border-radius:999px;
+  }
+  .load-input{
+    background:var(--surface3);border:1px solid var(--border);
+    border-radius:8px;padding:6px 10px;
+    font-size:0.78rem;color:var(--text);
+    width:56px;text-align:center;
+    font-family:'Outfit',sans-serif;
+  }
+  .float-badge{
+    position:absolute;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:12px 16px;
+    display:flex;align-items:center;gap:10px;
+    box-shadow:0 20px 50px -20px rgba(0,0,0,0.7);
+    font-size:0.82rem;font-weight:600;
+  }
+  .float-badge.b1{top:60px;left:-30px;}
+  .float-badge.b2{bottom:90px;right:-36px;}
+  .float-badge svg{color:var(--accent);}
+
+  /* ---------- Sections shared ---------- */
+  section{padding:90px 0;}
+  .section-head{
+    text-align:center;max-width:680px;margin:0 auto 56px;
+  }
+  .section-head .eyebrow{margin-bottom:18px;}
+  .section-head h2{font-size:clamp(1.9rem, 4vw, 2.7rem);margin-bottom:14px;}
+  .section-head p{color:var(--text-dim);font-size:1.05rem;}
+
+  /* ---------- Problem section ---------- */
+  .problem{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .problem-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  }
+  .problem-card{
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:28px;
+  }
+  .problem-card .icon{
+    width:46px;height:46px;border-radius:12px;
+    background:var(--surface3);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;color:var(--accent);
+  }
+  .problem-card h3{font-size:1.1rem;margin-bottom:10px;font-weight:700;}
+  .problem-card p{color:var(--text-dim);font-size:0.94rem;}
+
+  /* ---------- Modalidades ---------- */
+  .modalities-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:18px;
+  }
+  .mod-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:26px 22px;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .mod-card:hover{border-color:var(--accent);transform:translateY(-4px);}
+  .mod-num{
+    font-family:'Sora',sans-serif;font-weight:800;
+    font-size:0.78rem;color:var(--text-dimmer);
+    letter-spacing:0.08em;margin-bottom:14px;
+  }
+  .mod-card h3{font-size:1.15rem;margin-bottom:8px;}
+  .mod-card p{color:var(--text-dim);font-size:0.88rem;}
+
+  /* ---------- Protocolos por gênero/frequência ---------- */
+  .protocols{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .protocols-tabs{
+    display:flex;justify-content:center;gap:10px;margin-bottom:40px;flex-wrap:wrap;
+  }
+  .ptab{
+    background:var(--surface2);border:1px solid var(--border);
+    color:var(--text-dim);font-weight:700;font-size:0.9rem;
+    padding:11px 24px;border-radius:999px;cursor:pointer;
+    transition:all .15s ease;font-family:'Outfit',sans-serif;
+  }
+  .ptab.active{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+  .ptab:hover:not(.active){border-color:var(--accent);color:var(--accent);}
+
+  .freq-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:56px;
+  }
+  .freq-card{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:16px;padding:22px 14px;text-align:center;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .freq-card:hover{border-color:var(--accent);transform:translateY(-3px);}
+  .freq-num{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:2rem;
+    color:var(--accent);line-height:1;margin-bottom:4px;
+  }
+  .freq-label{font-size:0.78rem;color:var(--text-dim);font-weight:600;}
+  .freq-level{font-size:0.74rem;color:var(--text-dimmer);margin-top:6px;}
+
+  .objectives-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:56px;
+  }
+  .objective-card{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:16px;padding:24px 20px;
+  }
+  .objective-card .icon{
+    width:42px;height:42px;border-radius:11px;
+    background:var(--surface3);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:14px;color:var(--accent);
+  }
+  .objective-card h4{font-size:1.02rem;margin-bottom:8px;font-weight:700;}
+  .objective-card p{color:var(--text-dim);font-size:0.86rem;}
+
+  .muscle-block h3.sub-h{
+    font-size:1.3rem;text-align:center;margin-bottom:8px;
+  }
+  .muscle-block .sub-p{
+    text-align:center;color:var(--text-dim);font-size:0.95rem;
+    max-width:560px;margin:0 auto 32px;
+  }
+  .muscle-grid{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
+    gap:10px;
+  }
+  .muscle-chip{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:12px;padding:16px 14px;
+    text-align:center;font-size:0.88rem;font-weight:600;
+    color:var(--text-dim);
+    transition:all .15s ease;
+  }
+  .muscle-chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+
+  /* ---------- Como funciona ---------- */
+  .how{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .how-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    gap:0;position:relative;
+  }
+  .how-step{
+    padding:0 20px;position:relative;
+  }
+  .how-step:not(:last-child)::after{
+    content:'';position:absolute;top:24px;right:-2px;
+    width:calc(100% - 48px);height:1px;
+    background:repeating-linear-gradient(to right, var(--border) 0 6px, transparent 6px 12px);
+    display:none;
+  }
+  @media(min-width:860px){
+    .how-step:not(:last-child)::after{display:block;}
+  }
+  .how-step .step-num{
+    font-family:'Sora',sans-serif;font-weight:800;
+    font-size:2.4rem;color:var(--accent);
+    margin-bottom:14px;line-height:1;
+  }
+  .how-step h3{font-size:1.05rem;margin-bottom:8px;}
+  .how-step p{color:var(--text-dim);font-size:0.88rem;}
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+    align-items:stretch;
+  }
+  .price-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:32px 28px;
+    display:flex;flex-direction:column;
+    position:relative;
+  }
+  .price-card.featured{
+    border-color:var(--accent);
+    background:linear-gradient(160deg, var(--surface2), var(--surface));
+  }
+  .price-badge{
+    position:absolute;top:-13px;right:28px;
+    background:var(--accent);color:var(--bg);
+    font-size:0.74rem;font-weight:800;
+    padding:5px 14px;border-radius:999px;
+    letter-spacing:0.04em;
+  }
+  .price-card h3{font-size:1.2rem;margin-bottom:6px;}
+  .price-card .price-tagline{color:var(--text-dim);font-size:0.86rem;margin-bottom:22px;}
+  .price-value{
+    display:flex;align-items:baseline;gap:6px;margin-bottom:6px;
+  }
+  .price-value .currency{font-size:1.1rem;color:var(--text-dim);font-weight:600;}
+  .price-value .amount{
+    font-family:'Sora',sans-serif;font-weight:800;font-size:2.6rem;
+  }
+  .price-value .period{color:var(--text-dim);font-size:0.92rem;}
+  .price-note{font-size:0.8rem;color:var(--text-dimmer);margin-bottom:24px;}
+  .price-features{list-style:none;margin-bottom:28px;flex-grow:1;}
+  .price-features li{
+    display:flex;gap:10px;align-items:flex-start;
+    font-size:0.9rem;color:var(--text-dim);
+    margin-bottom:12px;
+  }
+  .price-features li svg{flex-shrink:0;margin-top:2px;color:var(--accent);}
+  .price-features li.muted{color:var(--text-dimmer);}
+  .price-features li.muted svg{color:var(--text-dimmer);}
+  .price-cta{
+    display:block;text-align:center;
+    padding:14px 0;border-radius:999px;
+    font-weight:700;font-size:0.96rem;
+    border:1px solid var(--border);
+    transition:all .15s ease;
+  }
+  .price-card.featured .price-cta{
+    background:var(--accent);color:var(--bg);border-color:var(--accent);
+  }
+  .price-cta:hover{border-color:var(--accent);color:var(--accent);}
+  .price-card.featured .price-cta:hover{
+    background:var(--accent2);color:var(--bg);
+  }
+  .pricing-disclaimer{
+    text-align:center;color:var(--text-dimmer);font-size:0.85rem;
+    margin-top:32px;
+  }
+
+  /* ---------- Depoimentos / social proof placeholder ---------- */
+  .social{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .social-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+  }
+  .social-card{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:18px;padding:26px;
+  }
+  .social-stars{color:var(--accent);font-size:0.9rem;margin-bottom:14px;letter-spacing:2px;}
+  .social-card p{font-size:0.92rem;color:var(--text-dim);margin-bottom:18px;}
+  .social-author{display:flex;align-items:center;gap:12px;}
+  .social-avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--surface3);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:0.85rem;color:var(--accent);
+  }
+  .social-name{font-weight:600;font-size:0.9rem;}
+  .social-role{font-size:0.78rem;color:var(--text-dimmer);}
+
+  /* ---------- FAQ ---------- */
+  .faq-list{max-width:760px;margin:0 auto;}
+  .faq-item{
+    border-bottom:1px solid var(--border);
+  }
+  .faq-q{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:22px 4px;cursor:pointer;
+    font-weight:600;font-size:1rem;
+  }
+  .faq-q svg{transition:transform .25s ease;color:var(--accent);flex-shrink:0;}
+  .faq-item.open .faq-q svg{transform:rotate(45deg);}
+  .faq-a{
+    max-height:0;overflow:hidden;
+    transition:max-height .3s ease;
+  }
+  .faq-a p{padding:0 4px 22px;color:var(--text-dim);font-size:0.92rem;max-width:640px;}
+  .faq-item.open .faq-a{max-height:240px;}
+
+  /* ---------- Final CTA ---------- */
+  .final-cta{
+    position:relative;
+    text-align:center;
+    background:linear-gradient(160deg, var(--surface2), var(--bg));
+    border-top:1px solid var(--border);
+    overflow:hidden;
+  }
+  .final-cta::before{
+    content:'';position:absolute;
+    bottom:-300px;left:50%;transform:translateX(-50%);
+    width:800px;height:600px;
+    background:radial-gradient(circle, rgba(200,245,66,0.12), transparent 70%);
+    pointer-events:none;
+  }
+  .final-cta h2{font-size:clamp(1.9rem,4.5vw,2.8rem);margin-bottom:16px;position:relative;}
+  .final-cta p{color:var(--text-dim);max-width:520px;margin:0 auto 32px;position:relative;}
+  .final-cta .hero-actions{justify-content:center;position:relative;}
+
+  /* ---------- Footer ---------- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:36px 0;
+    text-align:center;
+    color:var(--text-dimmer);font-size:0.84rem;
+  }
+  footer .logo{font-size:1.1rem;margin-bottom:10px;display:block;}
+
+  /* ---------- WhatsApp floating button ---------- */
+  .wa-float{
+    position:fixed;bottom:22px;right:22px;z-index:200;
+    width:58px;height:58px;border-radius:50%;
+    background:var(--accent);color:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 30px -8px rgba(200,245,66,0.5);
+    transition:transform .2s ease;
+  }
+  .wa-float:hover{transform:scale(1.08);}
+
+  /* ---------- Responsive ---------- */
+  @media(max-width:920px){
+    .hero-grid{grid-template-columns:1fr;text-align:center;}
+    .hero p.lead{margin-left:auto;margin-right:auto;}
+    .hero-actions{justify-content:center;}
+    .hero-proof{justify-content:center;}
+    .hero-visual{margin-top:20px;}
+    .problem-grid, .social-grid{grid-template-columns:1fr;}
+    .modalities-grid{grid-template-columns:1fr;}
+    .how-grid{grid-template-columns:repeat(2,1fr);gap:36px 0;}
+    .pricing-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto;}
+    .freq-grid{grid-template-columns:repeat(3,1fr);}
+    .objectives-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:520px){
+    .how-grid{grid-template-columns:1fr;}
+    .freq-grid{grid-template-columns:repeat(2,1fr);}
+    .objectives-grid{grid-template-columns:1fr;}
+    section{padding:64px 0;}
+    .float-badge{display:none;}
+    .phone{width:100%;max-width:280px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">i9<span>Treino</span></div>
+    <a href="#planos" class="nav-cta">Quero treinar</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Treino online com acompanhamento real</div>
+      <h1>Seu treino, na sua mão, <span class="accent">do seu jeito.</span></h1>
+      <p class="lead">Musculação, CrossFit, HYROX ou corrida — protocolos completos, organizados por semana, com suas cargas salvas automaticamente toda vez que você treina.</p>
+      <div class="hero-actions">
+        <a href="#planos" class="btn btn-primary">Quero meu protocolo</a>
+        <a href="#como-funciona" class="btn btn-ghost">Como funciona</a>
+      </div>
+      <div class="hero-proof">
+        <div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+          Protocolo pronto na hora
+        </div>
+        <div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+          Acompanhamento de evolução
+        </div>
+        <div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+          Funciona no celular, sem instalar nada
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-app-name">i9<span class="accent">Treino</span></div>
+          <div class="phone-app-sub">Semana 3 · Treino B — Peito e Tríceps</div>
+
+          <div class="phone-card">
+            <span class="phone-tag">Em andamento</span>
+            <div class="phone-card-title" style="margin-top:10px;">Supino reto com halter</div>
+            <div class="phone-card-meta">4 séries · 8 a 15 repetições</div>
+            <div class="phone-row">
+              <span class="phone-card-meta">Carga (kg)</span>
+              <input class="load-input" value="22" readonly>
+            </div>
+          </div>
+
+          <div class="phone-card">
+            <div class="phone-card-title">Crucifixo inverso</div>
+            <div class="phone-card-meta">3 séries · 8 a 15 repetições</div>
+            <div class="phone-row">
+              <span class="phone-card-meta">Carga (kg)</span>
+              <input class="load-input" value="14" readonly>
+            </div>
+          </div>
+
+          <div class="phone-card">
+            <div class="phone-card-title">Tríceps corda</div>
+            <div class="phone-card-meta">3 séries · 8 a 15 repetições</div>
+            <div class="phone-row">
+              <span class="phone-card-meta">Carga (kg)</span>
+              <input class="load-input" value="18" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="float-badge b1">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Carga salva automaticamente
+      </div>
+      <div class="float-badge b2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        8 semanas de protocolo
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMA / DOR -->
+<section class="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Por que a maioria desiste</div>
+      <h2>Treinar sozinho não é o problema. <br>Treinar sem direção, sim.</h2>
+      <p>Se você já tentou academia, app genérico ou "treino de internet" e não foi pra frente, o motivo provavelmente não foi falta de esforço.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h3>Treino sem progressão</h3>
+        <p>Você repete a mesma carga, o mesmo treino, sem saber se está evoluindo ou só ocupando espaço na academia.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3>Falta de organização</h3>
+        <p>Treino anotado em papel, no Bloco de Notas ou só na memória — fácil esquecer o que fez na última semana.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Zero acompanhamento</h3>
+        <p>Ninguém ajusta o treino conforme você evolui, mede sua evolução ou avisa quando é hora de reavaliar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODALIDADES -->
+<section id="modalidades">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Treine do seu jeito</div>
+      <h2>Um protocolo pra cada objetivo</h2>
+      <p>Escolha sua modalidade e receba um protocolo completo, estruturado por semanas — pronto pra seguir desde o primeiro treino.</p>
+    </div>
+    <div class="modalities-grid">
+      <div class="mod-card">
+        <div class="mod-num">MUSCULAÇÃO</div>
+        <h3>Academia</h3>
+        <p>Protocolos masculinos e femininos, do iniciante ao avançado, com frequência de 3x a 6x por semana.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-num">FUNCIONAL</div>
+        <h3>CrossFit</h3>
+        <p>WODs com formato, esquema de repetições, movimentos e carga sugerida — registre seu tempo e progrida.</p>
+      </div>
+      <div class="mod-card">
+        <div class="mod-num">ENDURANCE</div>
+        <h3>Corrida</h3>
+        <p>Aquecimento, tiros, intervalos com tempo e distância, desaquecimento e total da sessão calculado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROTOCOLOS POR GÊNERO, FREQUÊNCIA, OBJETIVO E GRUPO MUSCULAR -->
+<section class="protocols" id="protocolos">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Protocolo de musculação</div>
+      <h2>Um protocolo feito pra você, não genérico</h2>
+      <p>Masculino ou feminino, de 3 a 7 dias por semana — e com foco no que você precisa: emagrecer, ganhar massa, ficar mais forte, mais definido ou trabalhar uma região específica do corpo.</p>
+    </div>
+
+    <div class="protocols-tabs">
+      <div class="ptab active">Feminino</div>
+      <div class="ptab">Masculino</div>
+    </div>
+
+    <div class="freq-grid">
+      <div class="freq-card">
+        <div class="freq-num">3x</div>
+        <div class="freq-label">por semana</div>
+        <div class="freq-level">Iniciante</div>
+      </div>
+      <div class="freq-card">
+        <div class="freq-num">4x</div>
+        <div class="freq-label">por semana</div>
+        <div class="freq-level">Iniciante / Avançado</div>
+      </div>
+      <div class="freq-card">
+        <div class="freq-num">5x</div>
+        <div class="freq-label">por semana</div>
+        <div class="freq-level">Iniciante / Avançado</div>
+      </div>
+      <div class="freq-card">
+        <div class="freq-num">6x</div>
+        <div class="freq-label">por semana</div>
+        <div class="freq-level">Avançado</div>
+      </div>
+      <div class="freq-card">
+        <div class="freq-num">7x</div>
+        <div class="freq-label">por semana</div>
+        <div class="freq-level">Alta performance</div>
+      </div>
+    </div>
+
+    <div class="objectives-grid">
+      <div class="objective-card">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 22v-6M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M16 12h6M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg>
+        </div>
+        <h4>Emagrecimento</h4>
+        <p>Volume de treino e organização pensados para maximizar gasto calórico sem perder força.</p>
+      </div>
+      <div class="objective-card">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v18M18 3v18M2 9h4M2 15h4M18 9h4M18 15h4M6 12h12"/></svg>
+        </div>
+        <h4>Ganho de massa</h4>
+        <p>Protocolos de hipertrofia com faixa de 8 a 15 repetições e progressão de carga semana a semana.</p>
+      </div>
+      <div class="objective-card">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4 12 6.5 9.5 4 5 8.5 7.5 11 5 13.5 9.5 18 12 15.5 14.5 18 19 13.5 16.5 11 19 8.5z"/></svg>
+        </div>
+        <h4>Força</h4>
+        <p>Foco em cargas mais altas e exercícios compostos para sair mais forte de cada ciclo.</p>
+      </div>
+      <div class="objective-card">
+        <div class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h4>Definição</h4>
+        <p>Combinação de técnicas e volume para destacar o trabalho muscular já construído.</p>
+      </div>
+    </div>
+
+    <div class="muscle-block">
+      <h3 class="sub-h">Foco específico por região do corpo</h3>
+      <p class="sub-p">Quer puxar um ponto fraco? O protocolo pode priorizar a região que você escolher.</p>
+      <div class="muscle-grid">
+        <div class="muscle-chip">Peito</div>
+        <div class="muscle-chip">Costas</div>
+        <div class="muscle-chip">Ombros</div>
+        <div class="muscle-chip">Trapézio</div>
+        <div class="muscle-chip">Bíceps</div>
+        <div class="muscle-chip">Tríceps</div>
+        <div class="muscle-chip">Antebraço</div>
+        <div class="muscle-chip">Abdômen</div>
+        <div class="muscle-chip">Quadríceps</div>
+        <div class="muscle-chip">Posterior</div>
+        <div class="muscle-chip">Glúteos</div>
+        <div class="muscle-chip">Panturrilha</div>
+        <div class="muscle-chip">Braços</div>
+        <div class="muscle-chip">Perna completa</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="how" id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Do zero ao primeiro treino</div>
+      <h2>Como funciona</h2>
+      <p>Simples assim — sem planilha, sem complicação.</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="step-num">01</div>
+        <h3>Você escolhe seu plano</h3>
+        <p>Defina a modalidade e a frequência semanal que combinam com sua rotina.</p>
+      </div>
+      <div class="how-step">
+        <div class="step-num">02</div>
+        <h3>Recebe seu acesso</h3>
+        <p>Login liberado direto pelo WhatsApp — sem instalar app, funciona no navegador do celular.</p>
+      </div>
+      <div class="how-step">
+        <div class="step-num">03</div>
+        <h3>Treina semana a semana</h3>
+        <p>Protocolo organizado por dias, com séries, repetições e técnica de cada exercício.</p>
+      </div>
+      <div class="how-step">
+        <div class="step-num">04</div>
+        <h3>Acompanha sua evolução</h3>
+        <p>Suas cargas ficam salvas e você registra medidas para ver o progresso real.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section id="planos">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Planos</div>
+      <h2>Escolha como quer treinar</h2>
+      <p>Sem fidelidade, sem letra miúda. Cancele quando quiser.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <div class="price-card">
+        <h3>Mensal</h3>
+        <div class="price-tagline">Pra testar sem compromisso</div>
+        <div class="price-value">
+          <span class="currency">R$</span>
+          <span class="amount">79</span>
+          <span class="period">,90/mês</span>
+        </div>
+        <div class="price-note">Cobrança mensal recorrente</div>
+        <ul class="price-features">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Acesso completo à plataforma</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Protocolo da sua modalidade</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Memória de carga automática</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Registro de evolução física</li>
+        </ul>
+        <a href="#" class="price-cta" data-plan="Mensal" data-valor="R$ 79,90/mês">Quero esse plano</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-badge">Mais escolhido</div>
+        <h3>Trimestral</h3>
+        <div class="price-tagline">Pra quem quer ver resultado de verdade</div>
+        <div class="price-value">
+          <span class="currency">R$</span>
+          <span class="amount">64</span>
+          <span class="period">,90/mês</span>
+        </div>
+        <div class="price-note">R$ 194,70 cobrado a cada 3 meses · economia de ~19%</div>
+        <ul class="price-features">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Tudo do plano Mensal</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Reavaliação física a cada 30 dias</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Ajuste de protocolo ao final do ciclo</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Prioridade no suporte via WhatsApp</li>
+        </ul>
+        <a href="#" class="price-cta" data-plan="Trimestral" data-valor="R$ 194,70 (3x R$ 64,90)">Quero esse plano</a>
+      </div>
+
+      <div class="price-card">
+        <h3>Semestral</h3>
+        <div class="price-tagline">Compromisso com o processo</div>
+        <div class="price-value">
+          <span class="currency">R$</span>
+          <span class="amount">54</span>
+          <span class="period">,90/mês</span>
+        </div>
+        <div class="price-note">R$ 329,40 cobrado a cada 6 meses · economia de ~31%</div>
+        <ul class="price-features">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Tudo do plano Trimestral</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Periodização completa em ciclos</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Acompanhamento próximo da evolução</li>
+          <li class="muted"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Melhor custo por mês</li>
+        </ul>
+        <a href="#" class="price-cta" data-plan="Semestral" data-valor="R$ 329,40 (6x R$ 54,90)">Quero esse plano</a>
+      </div>
+
+    </div>
+    <p class="pricing-disclaimer">Valores sugeridos para lançamento — ajustáveis conforme posicionamento. Ao escolher um plano, você é direcionado ao WhatsApp para confirmar os dados e receber o link de pagamento.</p>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="social">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Quem treina com a gente</div>
+      <h2>Resultado de quem decidiu começar</h2>
+      <p>Exemplos de como o i9Treino pode transformar a rotina de quem treina com a gente.</p>
+    </div>
+    <div class="social-grid">
+      <div class="social-card">
+        <div class="social-stars">★★★★★</div>
+        <p>"Eu odiava academia, sempre achei tudo muito confuso. Com o i9Treino eu abro o celular e já sei exatamente o que fazer em cada série. Em 3 meses perdi 6kg sem passar fome."</p>
+        <div class="social-author">
+          <div class="social-avatar">M</div>
+          <div>
+            <div class="social-name">Mariana T.</div>
+            <div class="social-role">Plano Trimestral</div>
+          </div>
+        </div>
+      </div>
+      <div class="social-card">
+        <div class="social-stars">★★★★★</div>
+        <p>"O que mais me ganhou foi a memória de carga. Não preciso mais anotar nada — abro o treino e já está lá o peso que usei na semana passada. Hoje treino 5x por semana sem enrolação."</p>
+        <div class="social-author">
+          <div class="social-avatar">R</div>
+          <div>
+            <div class="social-name">Rafael S.</div>
+            <div class="social-role">Plano Mensal</div>
+          </div>
+        </div>
+      </div>
+      <div class="social-card">
+        <div class="social-stars">★★★★★</div>
+        <p>"Comecei sem nunca ter pegado em peso na vida, com bastante vergonha. O protocolo foi montado pro meu ritmo e hoje já estou na fase avançada. Valeu cada centavo."</p>
+        <div class="social-author">
+          <div class="social-avatar">C</div>
+          <div>
+            <div class="social-name">Camila O.</div>
+            <div class="social-role">Plano Semestral</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Dúvidas</div>
+      <h2>Perguntas frequentes</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">Como funciona o pagamento?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a"><p>Ao escolher o plano, você é direcionado para o WhatsApp com os dados já preenchidos. Lá você recebe o link de pagamento (Pix ou cartão) e, assim que confirmado, seu acesso é liberado.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Preciso instalar algum aplicativo?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a"><p>Não. O i9Treino funciona direto no navegador do celular ou computador. Se preferir, é possível adicionar à tela inicial como um app, mas isso é opcional.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Posso trocar de modalidade depois?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a"><p>Sim. Basta avisar pelo WhatsApp e seu protocolo é ajustado para a modalidade ou objetivo que você quiser seguir.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">E se eu nunca treinei antes?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a"><p>Sem problema. Os protocolos têm versões para iniciantes, com técnica de execução explicada em cada exercício — você começa no seu ritmo.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Posso cancelar quando quiser?
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="faq-a"><p>Sim, não há fidelidade. É só avisar antes da próxima cobrança pelo WhatsApp.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="final-cta">
+  <div class="wrap">
+    <h2>Seu próximo treino já <span class="accent">pode começar.</span></h2>
+    <p>Fale agora pelo WhatsApp, escolha seu plano e receba seu acesso ao i9Treino ainda hoje.</p>
+    <div class="hero-actions">
+      <a href="#planos" class="btn btn-primary">Ver planos e começar</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="logo">i9<span class="accent">Treino</span></span>
+    <div>Treine onde estiver — musculação, CrossFit, HYROX e corrida em um só lugar.</div>
+  </div>
+</footer>
+
+<!-- WhatsApp flutuante -->
+<a class="wa-float" id="waFloat" href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 4.99L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.13-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm5.78 14.07c-.24.68-1.41 1.32-1.94 1.4-.5.08-1.13.11-1.82-.11-.41-.13-.95-.31-1.64-.6-2.88-1.24-4.76-4.13-4.9-4.32-.14-.19-1.18-1.57-1.18-2.99 0-1.42.74-2.12 1-2.41.26-.29.57-.36.76-.36.19 0 .38.002.55.01.18.008.41-.07.64.48.24.58.81 2 .88 2.15.07.15.12.32.02.51-.1.19-.15.31-.3.48-.15.17-.31.38-.45.51-.15.14-.3.29-.13.58.17.29.76 1.25 1.62 2.02 1.12 1 2.06 1.31 2.36 1.46.3.15.47.13.65-.05.18-.18.74-.86.93-1.16.19-.3.39-.25.65-.15.27.1 1.69.8 1.98.94.29.15.48.22.55.34.07.13.07.74-.17 1.42z"/></svg>
+</a>
+
+<script>
+  // ====== CONFIGURAÇÃO ======
+  // Substitua pelo número real do WhatsApp (formato: DDI+DDD+número, só dígitos)
+  const WHATSAPP_NUMBER = "5514991042051";
+
+  // Botão flutuante: mensagem genérica
+  document.getElementById('waFloat').href =
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Oi! Quero saber mais sobre o i9Treino 💪")}`;
+
+  // Botões de plano: mensagem com plano e valor pré-preenchidos
+  document.querySelectorAll('.price-cta').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const plano = btn.dataset.plan;
+      const valor = btn.dataset.valor;
+      const msg = `Oi! Quero assinar o plano ${plano} do i9Treino (${valor}). Pode me enviar o link de pagamento?`;
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+  });
+
+  // Tabs Feminino/Masculino (toggle visual)
+  document.querySelectorAll('.ptab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-q').addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+
+</body>
+</html>
