@@ -1100,9 +1100,13 @@ function escapeCheckpoint(v){
   return String(v===undefined||v===null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
 function normalizarCheckpoint(aluno){
-  var cp=aluno&&aluno.metasCheckpoint;
+  var cp=aluno&&(aluno.metasCheckpoint||aluno.checkpoint);
   if(!cp||typeof cp!=='object')return {ativo:false,colunas:[],linhas:[]};
-  return {ativo:cp.ativo!==false,colunas:Array.isArray(cp.colunas)?cp.colunas:[],linhas:Array.isArray(cp.linhas)?cp.linhas:[]};
+  return {
+    ativo:cp.ativo!==false,
+    colunas:Array.isArray(cp.colunas)?cp.colunas:[],
+    linhas:Array.isArray(cp.linhas)?cp.linhas:[]
+  };
 }
 function renderCheckpointAluno(containerId,aluno){
   var box=document.getElementById(containerId);if(!box)return;
@@ -1840,14 +1844,37 @@ function renderAdminAlunos(){
   });
 }
 function toggleEditAluno(id){var el=document.getElementById('edit-aluno-'+id);if(el)el.classList.toggle('open');}
-function salvarEdicaoAluno(id){
-  var d=getData();var idx=d.alunos.findIndex(function(a){return a.id===id;});if(idx<0)return;
+async function salvarEdicaoAluno(id){
+  var d=getData();
+  var idx=d.alunos.findIndex(function(a){return a.id===id;});
+  if(idx<0)return;
+
   var nomeEl=document.getElementById('ean-'+id);
   var ids=getSelectedProtocolosFromContainer('eap-'+id);
   if(nomeEl)d.alunos[idx].nome=nomeEl.value.trim();
   d.alunos[idx].metasCheckpoint=lerCheckpointEditor(id);
   setAlunoProtocolosIds(d.alunos[idx],ids);
-  saveData(d);toggleEditAluno(id);renderAdminAlunos();renderAdminProtocolos();
+
+  // Atualiza imediatamente o cache usado pela tela.
+  saveData(d);
+  if(state.user&&state.user.id===id)state.user=__deepClone(d.alunos[idx]);
+
+  // Grava diretamente o documento do aluno no Firestore. Isso evita que o
+  // checkpoint desapareça ao atualizar ou abrir em outro aparelho antes do
+  // salvamento geral em segundo plano terminar.
+  try{
+    var alunoFirebase=__deepClone(d.alunos[idx]);
+    delete alunoFirebase.avaliacoes;
+    await setDoc(doc(db,COLECOES_I9.alunos,__safeDocId(alunoFirebase.id)),alunoFirebase,{merge:false});
+
+    toggleEditAluno(id);
+    renderAdminAlunos();
+    renderAdminProtocolos();
+    alert('Aluno e checkpoint salvos com sucesso!');
+  }catch(err){
+    console.error('Erro ao salvar aluno/checkpoint:',err);
+    alert('Os dados ficaram nesta tela, mas não foi possível confirmar o salvamento no Firebase. Verifique a conexão e as regras do Firestore.');
+  }
 }
 function salvarAluno(){
   var nick=document.getElementById('f-aluno-nick').value.trim().toLowerCase().replace(/\s+/g,'');
