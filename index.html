@@ -344,6 +344,30 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .av-pendente-bar strong{color:var(--accent)}
 @media(max-width:640px){.av-grid,.av-grid3{grid-template-columns:1fr}.av-wrap{padding:1rem}.aviso-avaliacao{margin:.85rem 1rem 0}}
 
+
+/* METAS QUANTITATIVAS - CHECKPOINT */
+.checkpoint-aluno-wrap{padding:1rem 1.5rem 0}
+.checkpoint-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden}
+.checkpoint-title{font-family:'Montserrat',sans-serif;font-size:1rem;font-weight:900;color:var(--accent);padding:1rem 1.1rem;border-bottom:1px solid var(--border);letter-spacing:.02em}
+.checkpoint-scroll{overflow-x:auto}
+.checkpoint-table{width:100%;border-collapse:collapse;min-width:420px}
+.checkpoint-table th,.checkpoint-table td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:.75rem .85rem;text-align:left;font-size:.84rem;white-space:pre-wrap;vertical-align:top}
+.checkpoint-table th{background:var(--surface2);font-family:'Syne',sans-serif;font-weight:700;color:var(--text)}
+.checkpoint-table td{color:var(--muted)}
+.checkpoint-table tr:last-child td{border-bottom:none}.checkpoint-table th:last-child,.checkpoint-table td:last-child{border-right:none}
+.checkpoint-editor{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem;margin-top:.75rem}
+.checkpoint-editor-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-bottom:.65rem}
+.checkpoint-editor-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+.checkpoint-edit-scroll{overflow-x:auto}
+.checkpoint-edit-table{border-collapse:separate;border-spacing:4px;min-width:100%}
+.checkpoint-edit-table input{min-width:125px;width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:.5rem .6rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none}
+.checkpoint-edit-table th input{font-weight:700;color:var(--accent)}
+.checkpoint-edit-table input:focus{border-color:var(--accent)}
+.checkpoint-remove{width:28px;height:28px;background:transparent;border:1px solid var(--border2);border-radius:5px;color:var(--muted);cursor:pointer}
+.checkpoint-remove:hover{border-color:var(--danger);color:var(--danger)}
+.checkpoint-empty{font-size:.78rem;color:var(--muted);padding:.4rem 0}
+@media(max-width:640px){.checkpoint-aluno-wrap{padding:.85rem 1rem 0}}
+
 </style>
 </head>
 <body>
@@ -370,6 +394,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
     <h2>Escolha seu protocolo</h2>
     <p>Voce possui mais de um protocolo vinculado. Selecione qual deseja acessar agora.</p>
   </div>
+  <div id="checkpoint-protocolos-aluno"></div>
   <div class="protocolos-escolha-wrap fade-in" id="grid-protocolos-aluno"></div>
 </div>
 
@@ -398,6 +423,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
     <p id="protocolo-desc"></p>
   </div>
   <div class="aviso-avaliacao" id="aviso-avaliacao-aluno"></div>
+  <div id="checkpoint-semanas-aluno"></div>
   <div class="grid-semanas fade-in" id="grid-semanas"></div>
 </div>
 
@@ -1069,11 +1095,58 @@ function protocolosCheckboxesHtml(d, selectedIds){
     return '<label class="multi-prot-item"><input type="checkbox" value="'+p.id+'" '+(selectedIds.indexOf(p.id)!==-1?'checked':'')+'> <span>'+p.nome+'</span></label>';
   }).join('');
 }
+
+function escapeCheckpoint(v){
+  return String(v===undefined||v===null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+function normalizarCheckpoint(aluno){
+  var cp=aluno&&aluno.metasCheckpoint;
+  if(!cp||typeof cp!=='object')return {ativo:false,colunas:[],linhas:[]};
+  return {ativo:cp.ativo!==false,colunas:Array.isArray(cp.colunas)?cp.colunas:[],linhas:Array.isArray(cp.linhas)?cp.linhas:[]};
+}
+function renderCheckpointAluno(containerId,aluno){
+  var box=document.getElementById(containerId);if(!box)return;
+  var cp=normalizarCheckpoint(aluno);
+  if(!cp.ativo||!cp.colunas.length){box.innerHTML='';return;}
+  var head=cp.colunas.map(function(c){return '<th>'+escapeCheckpoint(c)+'</th>';}).join('');
+  var body=cp.linhas.map(function(l){return '<tr>'+cp.colunas.map(function(_,i){return '<td>'+escapeCheckpoint((l||[])[i]||'')+'</td>';}).join('')+'</tr>';}).join('');
+  if(!body)body='<tr><td colspan="'+cp.colunas.length+'" style="color:var(--muted)">Nenhum valor cadastrado.</td></tr>';
+  box.innerHTML='<div class="checkpoint-aluno-wrap fade-in"><div class="checkpoint-card"><div class="checkpoint-title">METAS QUANTITATIVAS - CHECKPOINT</div><div class="checkpoint-scroll"><table class="checkpoint-table"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table></div></div></div>';
+}
+function checkpointEditorHtml(alunoId,cp){
+  cp=cp||{ativo:false,colunas:[],linhas:[]};
+  var cols=cp.colunas||[], linhas=cp.linhas||[];
+  var head=cols.map(function(c,i){return '<th><div style="display:flex;gap:.3rem;align-items:center"><input data-cp-col="'+i+'" value="'+escapeCheckpoint(c)+'" placeholder="Nome da coluna"><button type="button" class="checkpoint-remove" onclick="checkpointRemoverColuna(\''+alunoId+'\','+i+')">×</button></div></th>';}).join('');
+  var body=linhas.map(function(l,r){return '<tr>'+cols.map(function(_,c){return '<td><input data-cp-cell="'+r+'-'+c+'" value="'+escapeCheckpoint((l||[])[c]||'')+'" placeholder="Valor ou texto"></td>';}).join('')+'<td><button type="button" class="checkpoint-remove" onclick="checkpointRemoverLinha(\''+alunoId+'\','+r+')">×</button></td></tr>';}).join('');
+  return '<div class="checkpoint-editor"><div class="checkpoint-editor-head"><label class="multi-prot-item"><input type="checkbox" id="cp-ativo-'+alunoId+'" '+(cp.ativo?'checked':'')+'> Exibir para o aluno</label><div class="checkpoint-editor-actions"><button type="button" class="btn-add-ghost" onclick="checkpointAdicionarColuna(\''+alunoId+'\')">+ Coluna</button><button type="button" class="btn-add-ghost" onclick="checkpointAdicionarLinha(\''+alunoId+'\')">+ Linha</button></div></div>'+(cols.length?'<div class="checkpoint-edit-scroll"><table class="checkpoint-edit-table" id="cp-table-'+alunoId+'"><thead><tr>'+head+'<th></th></tr></thead><tbody>'+body+'</tbody></table></div>':'<div class="checkpoint-empty">Adicione pelo menos uma coluna para começar.</div>')+'</div>';
+}
+function lerCheckpointEditor(alunoId){
+  var table=document.getElementById('cp-table-'+alunoId), ativo=document.getElementById('cp-ativo-'+alunoId);
+  if(!table)return {ativo:!!(ativo&&ativo.checked),colunas:[],linhas:[]};
+  var colunas=Array.from(table.querySelectorAll('[data-cp-col]')).map(function(i){return i.value.trim();});
+  var linhas=Array.from(table.querySelectorAll('tbody tr')).map(function(tr){return Array.from(tr.querySelectorAll('[data-cp-cell]')).map(function(i){return i.value.trim();});});
+  return {ativo:!!(ativo&&ativo.checked),colunas:colunas,linhas:linhas};
+}
+function atualizarCheckpointTemporario(alunoId,acao,indice){
+  var d=getData(), aluno=d.alunos.find(function(a){return a.id===alunoId;});if(!aluno)return;
+  var cp=lerCheckpointEditor(alunoId);if(!cp.colunas.length)cp=normalizarCheckpoint(aluno);
+  if(acao==='addCol'){cp.colunas.push('Nova coluna');cp.linhas.forEach(function(l){l.push('');});}
+  if(acao==='addRow'){if(!cp.colunas.length)cp.colunas.push('Meta');cp.linhas.push(cp.colunas.map(function(){return '';}));}
+  if(acao==='delCol'){cp.colunas.splice(indice,1);cp.linhas.forEach(function(l){l.splice(indice,1);});}
+  if(acao==='delRow')cp.linhas.splice(indice,1);
+  aluno.metasCheckpoint=cp;saveData(d);renderAdminAlunos();var form=document.getElementById('edit-aluno-'+alunoId);if(form)form.classList.add('open');
+}
+function checkpointAdicionarColuna(id){atualizarCheckpointTemporario(id,'addCol');}
+function checkpointAdicionarLinha(id){atualizarCheckpointTemporario(id,'addRow');}
+function checkpointRemoverColuna(id,i){atualizarCheckpointTemporario(id,'delCol',i);}
+function checkpointRemoverLinha(id,i){atualizarCheckpointTemporario(id,'delRow',i);}
+
 function renderEscolhaProtocolosAluno(){
   var d=getData();
   var aluno=state.user;if(!aluno)return showView('view-login');
   var prots=getProtocolosDoAluno(aluno,d);
   document.getElementById('protocolos-user').textContent=aluno.nome||aluno.nick;
+  renderCheckpointAluno('checkpoint-protocolos-aluno',aluno);
   var grid=document.getElementById('grid-protocolos-aluno');
   if(!prots.length){
     grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhum protocolo vinculado. Fale com seu treinador.</p></div>';
@@ -1222,6 +1295,7 @@ function renderSemanas(){
     }
   }
   document.getElementById('user-display').textContent=state.user.nome||state.user.nick;
+  renderCheckpointAluno('checkpoint-semanas-aluno',state.user);
   var btnTrocar=document.getElementById('btn-trocar-protocolo');
   if(btnTrocar)btnTrocar.style.display=alunoTemMultiplosProtocolos(state.user)?'inline-block':'none';
   document.getElementById('protocolo-nome').textContent=prot?prot.nome:'Sem protocolo';
@@ -1736,6 +1810,7 @@ function renderAdminAlunos(){
       +'<div class="admin-item-title">'+nomeAlunoExibicao(a)+' <span style="color:var(--muted);font-size:.75rem">/ '+a.nick+'</span></div>'
       +'<div class="admin-item-sub">&#128203; '+protResumo+'</div>'
       +'<div class="admin-item-sub">&#128207; '+avResumo+(avPend?' <span class="tag" style="color:var(--accent)">Pendente</span>':'')+'</div>'
+      +'<div class="admin-item-sub">&#127919; Checkpoint: '+(normalizarCheckpoint(a).colunas.length?(normalizarCheckpoint(a).ativo?'Ativo':'Oculto'):'Nao configurado')+'</div>'
       +'</div>'
       +'<div class="admin-item-actions">'
       +'<button class="btn-icon bava" title="Avaliacoes">&#128207;</button>'
@@ -1753,6 +1828,7 @@ function renderAdminAlunos(){
     form.innerHTML='<div class="form-row"><label>Nome de exibicao</label><input id="ean-'+a.id+'" value="'+(a.nome||'').replace(/"/g,'&quot;')+'" placeholder="Nome completo"></div>'
       +'<div class="form-row"><label>Protocolos vinculados</label>'
       +'<div id="eap-'+a.id+'" class="multi-prot-list">'+protocolosCheckboxesHtml(d,ids)+'</div></div>'
+      +'<div class="form-row"><label>METAS QUANTITATIVAS - CHECKPOINT</label>'+checkpointEditorHtml(a.id,normalizarCheckpoint(a))+'</div>'
       +'<div class="form-actions">'
       +'<button class="btn-save bsa">Salvar</button>'
       +'<button class="btn-cancel bca">Cancelar</button>'
@@ -1769,6 +1845,7 @@ function salvarEdicaoAluno(id){
   var nomeEl=document.getElementById('ean-'+id);
   var ids=getSelectedProtocolosFromContainer('eap-'+id);
   if(nomeEl)d.alunos[idx].nome=nomeEl.value.trim();
+  d.alunos[idx].metasCheckpoint=lerCheckpointEditor(id);
   setAlunoProtocolosIds(d.alunos[idx],ids);
   saveData(d);toggleEditAluno(id);renderAdminAlunos();renderAdminProtocolos();
 }
@@ -2169,6 +2246,10 @@ Object.assign(window, {
   toggleExFeito,
   toggleForm,
   toggleSB,
+  checkpointAdicionarColuna,
+  checkpointAdicionarLinha,
+  checkpointRemoverColuna,
+  checkpointRemoverLinha,
   uid,
   updateDiasSelect,
   voltarAdmin,
