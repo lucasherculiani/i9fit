@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-20-sync-v7-servidor-confirmado";
+const I9_BUILD = "2026-07-20-sync-v8-leituras-otimizadas";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -1140,20 +1140,22 @@ async function __refrescarDoFirebase(){
   }
 }
 
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible') __refrescarDoFirebase();
-});
-window.addEventListener('focus', function(){ __refrescarDoFirebase(); });
-window.addEventListener('online', function(){ __refrescarDoFirebase(); });
-window.addEventListener('pageshow', function(event){
-  if(event.persisted) __refrescarDoFirebase();
-});
+// A sincronizacao de leitura fica exclusivamente a cargo do onSnapshot.
+// Nao buscar novamente ao receber foco, voltar ao app, reconectar ou restaurar pagina,
+// pois isso duplicava leituras do Firestore.
 
 // Sincronizacao em tempo real entre navegador, PWA e outros aparelhos.
 // Quando outro app altera conclusoes ou cargas, a tela aberta recebe a mudanca
 // sem precisar fechar, recarregar ou trocar de aplicativo.
+let __syncTempoRealIniciada = false;
+let __unsubscribeEstado = null;
+let __unsubscribeCargas = null;
+
 function __iniciarSincronizacaoTempoReal(){
-  onSnapshot(collection(db, COLECOES_I9.estado), function(snap){
+  if(__syncTempoRealIniciada) return;
+  __syncTempoRealIniciada = true;
+
+  __unsubscribeEstado = onSnapshot(collection(db, COLECOES_I9.estado), function(snap){
     let mudou = false;
     snap.docChanges().forEach(function(change){
       const item = change.doc.data() || {};
@@ -1181,7 +1183,7 @@ function __iniciarSincronizacaoTempoReal(){
     }
   }, function(err){ console.error('Erro na sincronizacao em tempo real do progresso:', err); });
 
-  onSnapshot(collection(db, COLECOES_I9.cargas), function(snap){
+  __unsubscribeCargas = onSnapshot(collection(db, COLECOES_I9.cargas), function(snap){
     let pesos = {};
     try{ pesos = JSON.parse(__storageCache.pt_pesos || '{}') || {}; }catch(e){ pesos = {}; }
     let mudou = false;
@@ -1201,7 +1203,9 @@ function __iniciarSincronizacaoTempoReal(){
       __lastSyncedStorage = __deepClone(__storageCache);
       __rerenderViewAtual();
     }
-  }, function(err){ console.error('Erro na sincronizacao em tempo real das cargas:', err); });
+  }, function(err){
+    console.error('Erro na sincronizacao em tempo real das cargas:', err);
+  });
 }
 
 await __carregarFirebase();
