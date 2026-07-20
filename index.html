@@ -702,7 +702,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC6xUfFJ59fXT1_eR1HDD7UPiQ8aakSkHY",
@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-20-sync-v6-cache-e-id-aluno";
+const I9_BUILD = "2026-07-20-sync-v6-tempo-real-cargas";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -980,6 +980,36 @@ function __agendarSaveFirebase(){
 
 // Salva marcacoes de treino imediatamente em um documento individual.
 // Isso evita perder a conclusao quando o aluno fecha ou troca de pagina logo apos marcar.
+async function __salvarCargaImediata(chave, valor){
+  const valorTexto = String(valor);
+  const docId = __safeDocId(chave);
+  let pesos = {};
+  try{ pesos = JSON.parse(__storageCache.pt_pesos || '{}') || {}; }catch(e){ pesos = {}; }
+  const anterior = Object.prototype.hasOwnProperty.call(pesos, chave) ? pesos[chave] : null;
+  pesos[chave] = valorTexto;
+  __storageCache.pt_pesos = JSON.stringify(pesos);
+
+  try{
+    await setDoc(doc(db, COLECOES_I9.cargas, docId), {
+      id: docId,
+      chave: chave,
+      valor: valorTexto,
+      updatedAt: serverTimestamp()
+    }, {merge:false});
+
+    if(!__lastSyncedStorage) __lastSyncedStorage = __deepClone(__storageCache);
+    else __lastSyncedStorage.pt_pesos = __storageCache.pt_pesos;
+    return true;
+  }catch(err){
+    console.error('Erro ao salvar carga imediatamente:', err);
+    if(anterior === null) delete pesos[chave];
+    else pesos[chave] = anterior;
+    __storageCache.pt_pesos = JSON.stringify(pesos);
+    alert('Nao foi possivel salvar a carga. Verifique sua internet e tente novamente.');
+    return false;
+  }
+}
+
 async function __salvarEstadoImediato(chave, valor){
   const valorTexto = String(valor);
   const docId = __safeDocId(chave);
@@ -1109,7 +1139,56 @@ window.addEventListener('pageshow', function(event){
   if(event.persisted) __refrescarDoFirebase();
 });
 
+// Sincronizacao em tempo real entre navegador, PWA e outros aparelhos.
+// Quando outro app altera conclusoes ou cargas, a tela aberta recebe a mudanca
+// sem precisar fechar, recarregar ou trocar de aplicativo.
+let __ignorarPrimeiroSnapshotEstado = true;
+let __ignorarPrimeiroSnapshotCargas = true;
+
+function __iniciarSincronizacaoTempoReal(){
+  onSnapshot(collection(db, COLECOES_I9.estado), function(snap){
+    if(__ignorarPrimeiroSnapshotEstado){ __ignorarPrimeiroSnapshotEstado = false; return; }
+    let mudou = false;
+    snap.docChanges().forEach(function(change){
+      const item = change.doc.data() || {};
+      const chave = item.chave;
+      if(!chave) return;
+      if(change.type === 'removed'){
+        if(Object.prototype.hasOwnProperty.call(__storageCache, chave)){ delete __storageCache[chave]; mudou = true; }
+      }else{
+        const valor = String(item.valor ?? '');
+        if(__storageCache[chave] !== valor){ __storageCache[chave] = valor; mudou = true; }
+      }
+    });
+    if(mudou){ __lastSyncedStorage = __deepClone(__storageCache); __rerenderViewAtual(); }
+  }, function(err){ console.error('Erro na sincronizacao em tempo real do progresso:', err); });
+
+  onSnapshot(collection(db, COLECOES_I9.cargas), function(snap){
+    if(__ignorarPrimeiroSnapshotCargas){ __ignorarPrimeiroSnapshotCargas = false; return; }
+    let pesos = {};
+    try{ pesos = JSON.parse(__storageCache.pt_pesos || '{}') || {}; }catch(e){ pesos = {}; }
+    let mudou = false;
+    snap.docChanges().forEach(function(change){
+      const item = change.doc.data() || {};
+      const chave = item.chave;
+      if(!chave) return;
+      if(change.type === 'removed'){
+        if(Object.prototype.hasOwnProperty.call(pesos, chave)){ delete pesos[chave]; mudou = true; }
+      }else{
+        const valor = String(item.valor ?? '');
+        if(pesos[chave] !== valor){ pesos[chave] = valor; mudou = true; }
+      }
+    });
+    if(mudou){
+      __storageCache.pt_pesos = JSON.stringify(pesos);
+      __lastSyncedStorage = __deepClone(__storageCache);
+      __rerenderViewAtual();
+    }
+  }, function(err){ console.error('Erro na sincronizacao em tempo real das cargas:', err); });
+}
+
 await __carregarFirebase();
+__iniciarSincronizacaoTempoReal();
 console.log("i9Fit build", I9_BUILD);
 
 
@@ -1452,7 +1531,7 @@ function renderSemanas(){
   if(!semanas.length){grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhuma semana cadastrada.</p></div>';renderAvisoAvaliacaoAluno();showView('view-semanas');return;}
   grid.innerHTML=semanas.map(function(s){
     var dias=d.dias.filter(function(di){return di.semanaId===s.id;});
-    var concl=dias.length>0&&dias.every(function(di){return (localStorage.getItem(__chaveAlunoProgresso()+'__dia__'+di.id)==='1'||localStorage.getItem(nick+'__dia__'+di.id)==='1');});
+    var concl=dias.length>0&&dias.every(function(di){return localStorage.getItem(nick+'__dia__'+di.id)==='1';});
     return '<div class="card-semana'+(concl?' concluida':'')+'" onclick="openSemana(\''+s.id+'\')">'
       +'<div class="semana-num">'+s.num+'</div>'
       +'<div class="semana-label">Semana</div>'
@@ -1487,7 +1566,7 @@ function renderDiasGrid(){
   if(!dias.length){grid.innerHTML='<div class="empty-state"><div>&#128197;</div><p>Nenhum dia cadastrado.</p></div>';return;}
   grid.innerHTML=dias.map(function(di){
     var exs=d.exercicios.filter(function(e){return e.diaId===di.id;});
-    var concl=(localStorage.getItem(__chaveAlunoProgresso()+'__dia__'+di.id)==='1'||localStorage.getItem(nick+'__dia__'+di.id)==='1');
+    var concl=localStorage.getItem(nick+'__dia__'+di.id)==='1';
     return '<div class="card-dia'+(concl?' concluido':'')+'" onclick="openDia(\''+di.id+'\')">'
       +'<div class="dia-label">'+di.label+'</div>'
       +'<div class="dia-nome">'+(di.nome||'')+'</div>'
@@ -1512,7 +1591,7 @@ function openDia(id){
   document.getElementById('dia-desc').textContent=dia.obs||'';
   document.getElementById('breadcrumb-treino').innerHTML='<span onclick="renderSemanas()">'+(prot?prot.nome:'Protocolo')+'</span><span class="sep">&#8250;</span><span onclick="voltarParaDias()">Semana '+(sem?sem.num:'')+'</span><span class="sep">&#8250;</span><span>'+dia.label+'</span>';
   // botao concluir dia
-  var diaConcl=(localStorage.getItem(__chaveAlunoProgresso()+'__dia__'+id)==='1'||localStorage.getItem(nick+'__dia__'+id)==='1');
+  var diaConcl=localStorage.getItem(nick+'__dia__'+id)==='1';
   var btnC=document.getElementById('btn-concluir-dia');
   if(btnC){if(diaConcl){btnC.classList.add('concluido');btnC.textContent='\u2713 Dia concluido!';}else{btnC.classList.remove('concluido');btnC.textContent='\u2713 Marcar dia como concluido';}}
   // exercicios
@@ -1523,7 +1602,7 @@ function openDia(id){
   list.innerHTML=exs.map(function(ex,i){
     var key=nick+'__'+ex.id;
     var ultimo=pesos[key]!==undefined?pesos[key]:'';
-    var exFeito=(localStorage.getItem(__chaveAlunoProgresso()+'__ex__'+ex.id+'__'+id)==='1'||localStorage.getItem(nick+'__ex__'+ex.id+'__'+id)==='1');
+    var exFeito=localStorage.getItem(nick+'__ex__'+ex.id+'__'+id)==='1';
     return '<div class="card-exercicio'+(exFeito?' feito':'')+'" id="cex-'+i+'">'
       +'<div class="ex-check-row">'
       +'<div class="ex-nome">'+ex.nome+'</div>'
@@ -1546,11 +1625,8 @@ function openDia(id){
   showView('view-treino');
 }
 
-function __chaveAlunoProgresso(){
-  return state.user && state.user.id ? 'aluno_'+state.user.id : (state.user ? state.user.nick : 'sem_aluno');
-}
-function toggleExFeito(nick,diaId,exId,idx){
-  var key=__chaveAlunoProgresso()+'__ex__'+exId+'__'+diaId;
+async function toggleExFeito(nick,diaId,exId,idx){
+  var key=nick+'__ex__'+exId+'__'+diaId;
   var atual=localStorage.getItem(key)==='1';
   var novoValor=atual?'0':'1';
   var card=document.getElementById('cex-'+idx);
@@ -1569,7 +1645,7 @@ function toggleExFeito(nick,diaId,exId,idx){
 
 async function toggleConcluirDia(){
   var nick=state.user.nick;var diaId=state.dia?state.dia.id:'';if(!diaId)return;
-  var key=__chaveAlunoProgresso()+'__dia__'+diaId;
+  var key=nick+'__dia__'+diaId;
   var atual=localStorage.getItem(key)==='1';
   var novoValor=atual?'0':'1';
   var btn=document.getElementById('btn-concluir-dia');
@@ -1589,7 +1665,7 @@ function ajustarPeso(inputId,delta,nick,exId){
   input.value=novo%1===0?novo:novo.toFixed(1);
   salvarPeso(nick,exId,input.value);
 }
-function salvarPeso(nick,exId,val){if(val==='')return;var p=getPesos();p[nick+'__'+exId]=val;savePesos(p);}
+function salvarPeso(nick,exId,val){if(val==='')return;return __salvarCargaImediata(nick+'__'+exId,val);}
 
 // ========== AREA ADMIN ==========
 
@@ -2447,25 +2523,13 @@ window.i9fitFirebase = { app, db, ref: SISTEMA_REF };
 </script>
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const reg = await navigator.serviceWorker.register('./service-worker.js?v=20260720v6', { updateViaCache: 'none' });
-      await reg.update();
-      console.log('PWA ativo e atualizado', I9_BUILD);
-    } catch (err) {
-      console.error('Erro ao registrar/atualizar PWA:', err);
-    }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then(() => console.log('PWA ativo'))
+      .catch(err => console.error('Erro ao registrar PWA:', err));
   });
 }
-// Remove caches antigos que poderiam manter uma versao anterior do index.
-window.addEventListener('load', async () => {
-  try {
-    if ('caches' in window) {
-      const nomes = await caches.keys();
-      await Promise.all(nomes.filter(n => n !== 'i9treino-v6').map(n => caches.delete(n)));
-    }
-  } catch(e) { console.warn('Nao foi possivel limpar cache antigo:', e); }
-});
 </script>
 
 </body>
