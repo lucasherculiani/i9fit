@@ -702,7 +702,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, writeBatch, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, getDocsFromServer, writeBatch, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC6xUfFJ59fXT1_eR1HDD7UPiQ8aakSkHY",
@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-20-sync-v6-tempo-real-cargas";
+const I9_BUILD = "2026-07-20-sync-v7-servidor-confirmado";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -787,7 +787,15 @@ function nomeAlunoExibicao(a){
 }
 
 async function __lerColecao(nome){
-  const snap = await getDocs(collection(db, nome));
+  // Sempre tenta buscar a versão confirmada no servidor. Isso evita que outro
+  // celular/PWA abra usando uma leitura antiga mantida na memória do SDK.
+  let snap;
+  try{
+    snap = await getDocsFromServer(collection(db, nome));
+  }catch(err){
+    console.warn('Leitura direta do servidor falhou; usando fallback:', nome, err);
+    snap = await getDocs(collection(db, nome));
+  }
   return snap.docs.map(function(d){
     const data = d.data() || {};
     if(!data.id) data.id = decodeURIComponent(d.id);
@@ -1121,7 +1129,8 @@ async function __refrescarDoFirebase(){
     const novo = await __carregarDasColecoes();
     if(novo.temDados){
       __storageCache = novo.storage;
-      __lastSyncedStorage = __deepClone(__storageCache);
+      if(!__lastSyncedStorage) __lastSyncedStorage = __deepClone(__storageCache);
+      else __lastSyncedStorage.pt_pesos = __storageCache.pt_pesos;
       __rerenderViewAtual();
     }
   }catch(err){
@@ -1135,6 +1144,7 @@ document.addEventListener('visibilitychange', function(){
   if(document.visibilityState === 'visible') __refrescarDoFirebase();
 });
 window.addEventListener('focus', function(){ __refrescarDoFirebase(); });
+window.addEventListener('online', function(){ __refrescarDoFirebase(); });
 window.addEventListener('pageshow', function(event){
   if(event.persisted) __refrescarDoFirebase();
 });
@@ -1142,12 +1152,8 @@ window.addEventListener('pageshow', function(event){
 // Sincronizacao em tempo real entre navegador, PWA e outros aparelhos.
 // Quando outro app altera conclusoes ou cargas, a tela aberta recebe a mudanca
 // sem precisar fechar, recarregar ou trocar de aplicativo.
-let __ignorarPrimeiroSnapshotEstado = true;
-let __ignorarPrimeiroSnapshotCargas = true;
-
 function __iniciarSincronizacaoTempoReal(){
   onSnapshot(collection(db, COLECOES_I9.estado), function(snap){
-    if(__ignorarPrimeiroSnapshotEstado){ __ignorarPrimeiroSnapshotEstado = false; return; }
     let mudou = false;
     snap.docChanges().forEach(function(change){
       const item = change.doc.data() || {};
@@ -1160,11 +1166,22 @@ function __iniciarSincronizacaoTempoReal(){
         if(__storageCache[chave] !== valor){ __storageCache[chave] = valor; mudou = true; }
       }
     });
-    if(mudou){ __lastSyncedStorage = __deepClone(__storageCache); __rerenderViewAtual(); }
+    if(mudou){
+      if(!__lastSyncedStorage) __lastSyncedStorage = __deepClone(__storageCache);
+      else{
+        snap.docChanges().forEach(function(change){
+          const item = change.doc.data() || {};
+          const chave = item.chave;
+          if(!chave) return;
+          if(change.type === 'removed') delete __lastSyncedStorage[chave];
+          else __lastSyncedStorage[chave] = String(item.valor ?? '');
+        });
+      }
+      __rerenderViewAtual();
+    }
   }, function(err){ console.error('Erro na sincronizacao em tempo real do progresso:', err); });
 
   onSnapshot(collection(db, COLECOES_I9.cargas), function(snap){
-    if(__ignorarPrimeiroSnapshotCargas){ __ignorarPrimeiroSnapshotCargas = false; return; }
     let pesos = {};
     try{ pesos = JSON.parse(__storageCache.pt_pesos || '{}') || {}; }catch(e){ pesos = {}; }
     let mudou = false;

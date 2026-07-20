@@ -1,4 +1,4 @@
-const CACHE_NAME = "i9treino-pwa-v3-20260720";
+const CACHE_NAME = "i9treino-pwa-v4-20260720-sync7";
 
 self.addEventListener("install", event => { self.skipWaiting(); });
 self.addEventListener("activate", event => {
