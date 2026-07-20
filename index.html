@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-20-sync-v4-autorefresh";
+const I9_BUILD = "2026-07-20-sync-v5-progresso-imediato";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -976,6 +976,34 @@ function __agendarSaveFirebase(){
   __saveRequested = true;
   clearTimeout(__saveTimer);
   __saveTimer = setTimeout(__salvarFirebaseAgora, 0);
+}
+
+// Salva marcacoes de treino imediatamente em um documento individual.
+// Isso evita perder a conclusao quando o aluno fecha ou troca de pagina logo apos marcar.
+async function __salvarEstadoImediato(chave, valor){
+  const valorTexto = String(valor);
+  const docId = __safeDocId(chave);
+  const valorAnterior = Object.prototype.hasOwnProperty.call(__storageCache, chave) ? __storageCache[chave] : null;
+
+  __storageCache[chave] = valorTexto;
+  try{
+    await setDoc(doc(db, COLECOES_I9.estado, docId), {
+      id: docId,
+      chave: chave,
+      valor: valorTexto,
+      updatedAt: serverTimestamp()
+    }, {merge:false});
+
+    if(!__lastSyncedStorage) __lastSyncedStorage = __deepClone(__storageCache);
+    else __lastSyncedStorage[chave] = valorTexto;
+    return true;
+  }catch(err){
+    console.error('Erro ao salvar progresso imediatamente:', err);
+    if(valorAnterior === null) delete __storageCache[chave];
+    else __storageCache[chave] = valorAnterior;
+    alert('Nao foi possivel salvar a conclusao. Verifique sua internet e tente novamente.');
+    return false;
+  }
 }
 
 // Shim de localStorage: o restante do app continua funcionando igual,
@@ -1518,23 +1546,38 @@ function openDia(id){
   showView('view-treino');
 }
 
-function toggleExFeito(nick,diaId,exId,idx){
+async function toggleExFeito(nick,diaId,exId,idx){
   var key=nick+'__ex__'+exId+'__'+diaId;
   var atual=localStorage.getItem(key)==='1';
-  localStorage.setItem(key,atual?'0':'1');
+  var novoValor=atual?'0':'1';
   var card=document.getElementById('cex-'+idx);
   var btn=card?card.querySelector('.ex-check-btn'):null;
+
   if(card)card.classList.toggle('feito',!atual);
-  if(btn){btn.classList.toggle('feito',!atual);btn.textContent=(!atual?'\u2713 Feito':'\u2713 Marcar');}
+  if(btn){btn.classList.toggle('feito',!atual);btn.textContent=(!atual?'\u2713 Feito':'\u2713 Marcar');btn.disabled=true;}
+
+  var salvou=await __salvarEstadoImediato(key,novoValor);
+  if(btn)btn.disabled=false;
+  if(!salvou){
+    if(card)card.classList.toggle('feito',atual);
+    if(btn){btn.classList.toggle('feito',atual);btn.textContent=(atual?'\u2713 Feito':'\u2713 Marcar');}
+  }
 }
 
-function toggleConcluirDia(){
+async function toggleConcluirDia(){
   var nick=state.user.nick;var diaId=state.dia?state.dia.id:'';if(!diaId)return;
   var key=nick+'__dia__'+diaId;
   var atual=localStorage.getItem(key)==='1';
-  localStorage.setItem(key,atual?'0':'1');
+  var novoValor=atual?'0':'1';
   var btn=document.getElementById('btn-concluir-dia');
-  if(btn){btn.classList.toggle('concluido',!atual);btn.textContent=!atual?'\u2713 Dia concluido!':'\u2713 Marcar dia como concluido';}
+
+  if(btn){btn.classList.toggle('concluido',!atual);btn.textContent=!atual?'\u2713 Salvando...':'Removendo conclusao...';btn.disabled=true;}
+  var salvou=await __salvarEstadoImediato(key,novoValor);
+  if(btn){
+    btn.disabled=false;
+    btn.classList.toggle('concluido',salvou?!atual:atual);
+    btn.textContent=salvou?(!atual?'\u2713 Dia concluido!':'\u2713 Marcar dia como concluido'):(atual?'\u2713 Dia concluido!':'\u2713 Marcar dia como concluido');
+  }
 }
 
 function ajustarPeso(inputId,delta,nick,exId){
