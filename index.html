@@ -729,7 +729,8 @@ const COLECOES_I9 = {
   dias: "dias",
   exercicios: "exercicios",
   avaliacoes: "avaliacoes",
-  cargas: "cargas"
+  cargas: "cargas",
+  estado: "estado"
 };
 
 const __defaultStorage = {
@@ -741,6 +742,7 @@ let __storageCache = {};
 let __saveTimer = null;
 let __firebaseReady = false;
 let __salvandoFirebase = false;
+let __saveRequested = false;
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -819,6 +821,7 @@ async function __carregarDasColecoes(){
   const exercicios = await __lerColecao(COLECOES_I9.exercicios);
   const avaliacoes = await __lerColecao(COLECOES_I9.avaliacoes);
   const cargasDocs = await __lerColecao(COLECOES_I9.cargas);
+  const estadoDocs = await __lerColecao(COLECOES_I9.estado);
 
   const porAluno = {};
   avaliacoes.forEach(function(av){
@@ -836,13 +839,18 @@ async function __carregarDasColecoes(){
     if(chave) pesos[chave] = c.valor;
   });
 
-  const temDados = alunos.length || protocolos.length || semanas.length || dias.length || exercicios.length || avaliacoes.length || cargasDocs.length;
+  const estado = {};
+  estadoDocs.forEach(function(item){
+    if(item.chave !== undefined) estado[item.chave] = String(item.valor ?? '');
+  });
+
+  const temDados = alunos.length || protocolos.length || semanas.length || dias.length || exercicios.length || avaliacoes.length || cargasDocs.length || estadoDocs.length;
   return {
     temDados: !!temDados,
-    storage: {
+    storage: Object.assign(estado, {
       pt_data: JSON.stringify(__ensureArrays({alunos, protocolos, semanas, dias, exercicios})),
       pt_pesos: JSON.stringify(pesos || {})
-    }
+    })
   };
 }
 
@@ -874,11 +882,16 @@ async function __gravarColecaoCompleta(nome, itens, preparar){
 }
 
 async function __salvarFirebaseAgora(){
-  if(!__firebaseReady || __salvandoFirebase) return;
+  if(!__firebaseReady) return;
+  __saveRequested = true;
+  if(__salvandoFirebase) return;
   __salvandoFirebase = true;
   try{
-    const dados = __ensureArrays(JSON.parse(__storageCache.pt_data || __defaultStorage.pt_data));
-    const pesos = JSON.parse(__storageCache.pt_pesos || "{}") || {};
+    while(__saveRequested){
+      __saveRequested = false;
+      const snapshotCache = __deepClone(__storageCache);
+      const dados = __ensureArrays(JSON.parse(snapshotCache.pt_data || __defaultStorage.pt_data));
+      const pesos = JSON.parse(snapshotCache.pt_pesos || "{}") || {};
 
     const alunosSemAvaliacoes = [];
     const avaliacoes = [];
@@ -895,23 +908,28 @@ async function __salvarFirebaseAgora(){
       });
     });
 
-    const cargas = Object.keys(pesos).map(function(chave){
-      return { id: __safeDocId(chave), chave: chave, valor: pesos[chave] };
-    });
+      const cargas = Object.keys(pesos).map(function(chave){
+        return { id: __safeDocId(chave), chave: chave, valor: pesos[chave] };
+      });
+      const estado = Object.keys(snapshotCache)
+        .filter(function(chave){ return chave !== 'pt_data' && chave !== 'pt_pesos'; })
+        .map(function(chave){ return { id: __safeDocId(chave), chave: chave, valor: snapshotCache[chave] }; });
 
-    await __gravarColecaoCompleta(COLECOES_I9.alunos, alunosSemAvaliacoes);
+      await __gravarColecaoCompleta(COLECOES_I9.alunos, alunosSemAvaliacoes);
     await __gravarColecaoCompleta(COLECOES_I9.protocolos, dados.protocolos);
     await __gravarColecaoCompleta(COLECOES_I9.semanas, dados.semanas);
     await __gravarColecaoCompleta(COLECOES_I9.dias, dados.dias);
     await __gravarColecaoCompleta(COLECOES_I9.exercicios, dados.exercicios);
     await __gravarColecaoCompleta(COLECOES_I9.avaliacoes, avaliacoes);
-    await __gravarColecaoCompleta(COLECOES_I9.cargas, cargas);
+      await __gravarColecaoCompleta(COLECOES_I9.cargas, cargas);
+      await __gravarColecaoCompleta(COLECOES_I9.estado, estado);
 
-    await setDoc(doc(db, "sistema", "i9fit_meta"), {
+      await setDoc(doc(db, "sistema", "i9fit_meta"), {
       arquitetura: "colecoes_independentes",
       colecoes: COLECOES_I9,
       updatedAt: serverTimestamp()
-    }, { merge: true });
+      }, { merge: true });
+    }
   }catch(err){
     console.error("Erro ao salvar no Firestore em colecoes:", err);
     alert("Nao foi possivel salvar no Firebase. Confira as regras do Firestore e a conexao com a internet.");
@@ -922,8 +940,9 @@ async function __salvarFirebaseAgora(){
 
 function __agendarSaveFirebase(){
   if(!__firebaseReady) return;
+  __saveRequested = true;
   clearTimeout(__saveTimer);
-  __saveTimer = setTimeout(__salvarFirebaseAgora, 450);
+  __saveTimer = setTimeout(__salvarFirebaseAgora, 0);
 }
 
 // Shim de localStorage: o restante do app continua funcionando igual,
@@ -945,6 +964,12 @@ var localStorage = {
     __agendarSaveFirebase();
   }
 };
+
+// Garante que qualquer alteracao pendente seja enviada antes de sair da pagina.
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden') __salvarFirebaseAgora();
+});
+window.addEventListener('pagehide', function(){ __salvarFirebaseAgora(); });
 
 async function __carregarFirebase(){
   try{
