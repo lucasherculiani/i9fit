@@ -743,6 +743,8 @@ let __saveTimer = null;
 let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
+let __lastSyncedStorage = null;
+const I9_BUILD = "2026-07-20-sync-v3";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -886,58 +888,89 @@ async function __salvarFirebaseAgora(){
   __saveRequested = true;
   if(__salvandoFirebase) return;
   __salvandoFirebase = true;
-  try{
-    while(__saveRequested){
-      __saveRequested = false;
-      const snapshotCache = __deepClone(__storageCache);
-      const dados = __ensureArrays(JSON.parse(snapshotCache.pt_data || __defaultStorage.pt_data));
-      const pesos = JSON.parse(snapshotCache.pt_pesos || "{}") || {};
 
-    const alunosSemAvaliacoes = [];
-    const avaliacoes = [];
+  function mapById(items){
+    const m = new Map();
+    (Array.isArray(items)?items:[]).forEach(function(item){
+      if(item && item.id) m.set(String(item.id), item);
+    });
+    return m;
+  }
+  function jsonEqual(a,b){
+    try{return JSON.stringify(a)===JSON.stringify(b);}catch(e){return false;}
+  }
+  async function syncCollectionDiff(nome, antigos, novos){
+    const oldMap=mapById(antigos), newMap=mapById(novos);
+    const ops=[];
+    newMap.forEach(function(item,id){
+      if(!oldMap.has(id) || !jsonEqual(oldMap.get(id),item)){
+        ops.push({tipo:'set',ref:doc(db,nome,__safeDocId(id)),data:item});
+      }
+    });
+    oldMap.forEach(function(item,id){
+      if(!newMap.has(id)) ops.push({tipo:'delete',ref:doc(db,nome,__safeDocId(id))});
+    });
+    for(let i=0;i<ops.length;i+=450){
+      const batch=writeBatch(db);
+      ops.slice(i,i+450).forEach(function(op){
+        if(op.tipo==='delete') batch.delete(op.ref);
+        else batch.set(op.ref,op.data,{merge:false});
+      });
+      await batch.commit();
+    }
+  }
+  function splitStorage(storage){
+    const dados=__ensureArrays(JSON.parse(storage.pt_data||__defaultStorage.pt_data));
+    const pesos=JSON.parse(storage.pt_pesos||'{}')||{};
+    const alunos=[], avaliacoes=[];
     dados.alunos.forEach(function(aluno){
-      const alunoLimpo = __deepClone(aluno);
-      const avs = Array.isArray(alunoLimpo.avaliacoes) ? alunoLimpo.avaliacoes : [];
-      delete alunoLimpo.avaliacoes;
-      alunosSemAvaliacoes.push(alunoLimpo);
-      avs.forEach(function(av, idx){
-        const avLimpa = __deepClone(av);
-        avLimpa.alunoId = aluno.id;
-        avLimpa.id = avLimpa.id || (aluno.id + "_" + (avLimpa.data || "sem-data") + "_" + idx);
-        avaliacoes.push(avLimpa);
+      const limpo=__deepClone(aluno);
+      const avs=Array.isArray(limpo.avaliacoes)?limpo.avaliacoes:[];
+      delete limpo.avaliacoes;
+      alunos.push(limpo);
+      avs.forEach(function(av,idx){
+        const x=__deepClone(av); x.alunoId=aluno.id;
+        x.id=x.id||(aluno.id+'_'+(x.data||'sem-data')+'_'+idx);
+        avaliacoes.push(x);
       });
     });
+    const cargas=Object.keys(pesos).map(function(chave){return {id:__safeDocId(chave),chave:chave,valor:pesos[chave]};});
+    const estado=Object.keys(storage).filter(function(k){return k!=='pt_data'&&k!=='pt_pesos';})
+      .map(function(chave){return {id:__safeDocId(chave),chave:chave,valor:String(storage[chave])};});
+    return {dados,alunos,avaliacoes,cargas,estado};
+  }
 
-      const cargas = Object.keys(pesos).map(function(chave){
-        return { id: __safeDocId(chave), chave: chave, valor: pesos[chave] };
-      });
-      const estado = Object.keys(snapshotCache)
-        .filter(function(chave){ return chave !== 'pt_data' && chave !== 'pt_pesos'; })
-        .map(function(chave){ return { id: __safeDocId(chave), chave: chave, valor: snapshotCache[chave] }; });
+  try{
+    while(__saveRequested){
+      __saveRequested=false;
+      const atual=__deepClone(__storageCache);
+      const anterior=__lastSyncedStorage?__deepClone(__lastSyncedStorage):__deepClone(atual);
+      const A=splitStorage(atual), B=splitStorage(anterior);
 
-      await __gravarColecaoCompleta(COLECOES_I9.alunos, alunosSemAvaliacoes);
-    await __gravarColecaoCompleta(COLECOES_I9.protocolos, dados.protocolos);
-    await __gravarColecaoCompleta(COLECOES_I9.semanas, dados.semanas);
-    await __gravarColecaoCompleta(COLECOES_I9.dias, dados.dias);
-    await __gravarColecaoCompleta(COLECOES_I9.exercicios, dados.exercicios);
-    await __gravarColecaoCompleta(COLECOES_I9.avaliacoes, avaliacoes);
-      await __gravarColecaoCompleta(COLECOES_I9.cargas, cargas);
-      await __gravarColecaoCompleta(COLECOES_I9.estado, estado);
+      // Salva apenas documentos realmente alterados. Assim uma aba antiga não
+      // regrava coleções inteiras nem apaga alterações feitas em outro aparelho.
+      await syncCollectionDiff(COLECOES_I9.alunos,B.alunos,A.alunos);
+      await syncCollectionDiff(COLECOES_I9.protocolos,B.dados.protocolos,A.dados.protocolos);
+      await syncCollectionDiff(COLECOES_I9.semanas,B.dados.semanas,A.dados.semanas);
+      await syncCollectionDiff(COLECOES_I9.dias,B.dados.dias,A.dados.dias);
+      await syncCollectionDiff(COLECOES_I9.exercicios,B.dados.exercicios,A.dados.exercicios);
+      await syncCollectionDiff(COLECOES_I9.avaliacoes,B.avaliacoes,A.avaliacoes);
+      await syncCollectionDiff(COLECOES_I9.cargas,B.cargas,A.cargas);
+      await syncCollectionDiff(COLECOES_I9.estado,B.estado,A.estado);
 
-      await setDoc(doc(db, "sistema", "i9fit_meta"), {
-      arquitetura: "colecoes_independentes",
-      colecoes: COLECOES_I9,
-      updatedAt: serverTimestamp()
-      }, { merge: true });
+      await setDoc(doc(db,'sistema','i9fit_meta'),{
+        arquitetura:'colecoes_incrementais',build:I9_BUILD,updatedAt:serverTimestamp()
+      },{merge:true});
+      __lastSyncedStorage=atual;
     }
   }catch(err){
-    console.error("Erro ao salvar no Firestore em colecoes:", err);
-    alert("Nao foi possivel salvar no Firebase. Confira as regras do Firestore e a conexao com a internet.");
+    console.error('Erro ao salvar no Firestore:',err);
+    __saveRequested=true;
+    alert('Não foi possível confirmar o salvamento no Firebase. Abra o console (F12) para ver o erro e confira as regras do Firestore.');
   }finally{
-    __salvandoFirebase = false;
+    __salvandoFirebase=false;
   }
 }
-
 function __agendarSaveFirebase(){
   if(!__firebaseReady) return;
   __saveRequested = true;
@@ -976,6 +1009,7 @@ async function __carregarFirebase(){
     const novo = await __carregarDasColecoes();
     if(novo.temDados){
       __storageCache = novo.storage;
+      __lastSyncedStorage = __deepClone(__storageCache);
       __firebaseReady = true;
       return;
     }
@@ -984,6 +1018,7 @@ async function __carregarFirebase(){
     // sistema/i9fit e migra automaticamente para as colecoes independentes.
     const snapAntigo = await getDoc(SISTEMA_REF);
     __storageCache = __normalizarStorageAntigo(snapAntigo.exists() ? snapAntigo.data() : null);
+    __lastSyncedStorage = __deepClone(__storageCache);
     __firebaseReady = true;
     await __salvarFirebaseAgora();
   }catch(err){
@@ -994,6 +1029,7 @@ async function __carregarFirebase(){
 }
 
 await __carregarFirebase();
+console.log("i9Fit build", I9_BUILD);
 
 
 // PRE-LOAD: protocolo semente

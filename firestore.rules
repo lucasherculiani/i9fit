@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Aplicativo atual não usa Firebase Authentication.
+    // Regra funcional, porém pública. Use somente enquanto o login seguro não for implantado.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
