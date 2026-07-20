@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-20-sync-v3";
+const I9_BUILD = "2026-07-20-sync-v4-autorefresh";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -1027,6 +1027,59 @@ async function __carregarFirebase(){
     __storageCache = {...__defaultStorage};
   }
 }
+
+// ATUALIZACAO AUTOMATICA AO VOLTAR PARA O APP
+// Ate aqui, os dados so eram buscados no Firestore uma unica vez, no carregamento
+// inicial da pagina. Se o aluno marcasse um treino/exercicio como concluido num
+// aparelho e abrisse o app em outro (ou apenas voltasse para o app que ja estava
+// aberto em segundo plano no celular), a tela continuava mostrando os dados antigos,
+// porque nada buscava as mudancas de novo. As funcoes abaixo resolvem isso:
+// sempre que o app volta a ficar visivel/em foco, primeiro envia qualquer alteracao
+// pendente deste aparelho e so depois busca o estado mais atual do Firestore,
+// atualizando a tela na hora.
+let __refrescandoFirebase = false;
+
+function __rerenderViewAtual(){
+  try{
+    var viewId = __activeViewId();
+    if(viewId === 'view-semanas'){ renderSemanas(); }
+    else if(viewId === 'view-dias'){ if(state.semana) renderDiasGrid(); }
+    else if(viewId === 'view-treino'){ if(state.dia) openDia(state.dia.id); }
+    else if(viewId === 'view-protocolos-aluno'){ renderEscolhaProtocolosAluno(); }
+    else if(viewId === 'view-admin'){ renderAdminHome(); }
+  }catch(e){ console.error('Erro ao atualizar a tela apos sincronizar:', e); }
+}
+
+async function __refrescarDoFirebase(){
+  if(!__firebaseReady || __refrescandoFirebase) return;
+  __refrescandoFirebase = true;
+  try{
+    // Se este aparelho tem alteracoes ainda nao enviadas (ex: acabou de marcar um
+    // exercicio), envia primeiro. Assim nao corremos o risco de buscar os dados do
+    // servidor e "perder" algo que o proprio usuario acabou de marcar aqui.
+    if(__saveRequested || __salvandoFirebase){
+      await __salvarFirebaseAgora();
+    }
+    const novo = await __carregarDasColecoes();
+    if(novo.temDados){
+      __storageCache = novo.storage;
+      __lastSyncedStorage = __deepClone(__storageCache);
+      __rerenderViewAtual();
+    }
+  }catch(err){
+    console.error('Erro ao atualizar dados do Firebase:', err);
+  }finally{
+    __refrescandoFirebase = false;
+  }
+}
+
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible') __refrescarDoFirebase();
+});
+window.addEventListener('focus', function(){ __refrescarDoFirebase(); });
+window.addEventListener('pageshow', function(event){
+  if(event.persisted) __refrescarDoFirebase();
+});
 
 await __carregarFirebase();
 console.log("i9Fit build", I9_BUILD);
