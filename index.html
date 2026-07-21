@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-20-sync-v8-leituras-otimizadas";
+const I9_BUILD = "2026-07-21-sync-v9-sem-undefined";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -752,6 +752,28 @@ function __safeDocId(id){
 
 function __deepClone(obj){
   return JSON.parse(JSON.stringify(obj || {}));
+}
+
+// O Firestore rejeita qualquer campo com valor undefined.
+// Remove undefined de objetos e converte undefined em arrays para null.
+function __sanitizarFirestore(valor){
+  if(valor === undefined) return null;
+  if(valor === null) return null;
+  if(Array.isArray(valor)){
+    return valor.map(function(item){
+      return item === undefined ? null : __sanitizarFirestore(item);
+    });
+  }
+  if(typeof valor === 'object'){
+    const limpo = {};
+    Object.keys(valor).forEach(function(chave){
+      if(valor[chave] !== undefined){
+        limpo[chave] = __sanitizarFirestore(valor[chave]);
+      }
+    });
+    return limpo;
+  }
+  return valor;
 }
 
 function __ensureArrays(d){
@@ -885,7 +907,7 @@ async function __gravarColecaoCompleta(nome, itens, preparar){
     const batch = writeBatch(db);
     ops.slice(i, i+450).forEach(function(op){
       if(op.tipo === "delete") batch.delete(op.ref);
-      else batch.set(op.ref, op.data, {merge:false});
+      else batch.set(op.ref, __sanitizarFirestore(op.data), {merge:false});
     });
     await batch.commit();
   }
@@ -922,7 +944,7 @@ async function __salvarFirebaseAgora(){
       const batch=writeBatch(db);
       ops.slice(i,i+450).forEach(function(op){
         if(op.tipo==='delete') batch.delete(op.ref);
-        else batch.set(op.ref,op.data,{merge:false});
+        else batch.set(op.ref,__sanitizarFirestore(op.data),{merge:false});
       });
       await batch.commit();
     }
@@ -1346,8 +1368,10 @@ function normalizarCheckpoint(aluno){
   if(!cp||typeof cp!=='object')return {ativo:false,colunas:[],linhas:[]};
   return {
     ativo:cp.ativo!==false,
-    colunas:Array.isArray(cp.colunas)?cp.colunas:[],
-    linhas:Array.isArray(cp.linhas)?cp.linhas:[]
+    colunas:Array.isArray(cp.colunas)?cp.colunas.map(function(v){return String(v ?? '');}):[],
+    linhas:Array.isArray(cp.linhas)?cp.linhas.map(function(linha){
+      return Array.isArray(linha)?linha.map(function(v){return String(v ?? '');}):[];
+    }):[]
   };
 }
 function renderCheckpointAluno(containerId,aluno){
@@ -2120,9 +2144,13 @@ async function salvarEdicaoAluno(id){
   // checkpoint desapareça ao atualizar ou abrir em outro aparelho antes do
   // salvamento geral em segundo plano terminar.
   try{
-    var alunoFirebase=__deepClone(d.alunos[idx]);
+    var alunoFirebase=__sanitizarFirestore(__deepClone(d.alunos[idx]));
     delete alunoFirebase.avaliacoes;
-    await setDoc(doc(db,COLECOES_I9.alunos,__safeDocId(alunoFirebase.id)),alunoFirebase,{merge:false});
+    await setDoc(
+      doc(db,COLECOES_I9.alunos,__safeDocId(alunoFirebase.id)),
+      alunoFirebase,
+      {merge:false}
+    );
 
     toggleEditAluno(id);
     renderAdminAlunos();
