@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-21-sync-v9-sem-undefined";
+const I9_BUILD = "2026-07-25-sync-v10-checkpoint-corrigido";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -755,25 +755,61 @@ function __deepClone(obj){
 }
 
 // O Firestore rejeita qualquer campo com valor undefined.
-// Remove undefined de objetos e converte undefined em arrays para null.
+// Em objetos, campos undefined são removidos.
+// Em arrays, valores undefined são convertidos para null.
 function __sanitizarFirestore(valor){
   if(valor === undefined) return null;
   if(valor === null) return null;
+
   if(Array.isArray(valor)){
     return valor.map(function(item){
       return item === undefined ? null : __sanitizarFirestore(item);
     });
   }
+
   if(typeof valor === 'object'){
-    const limpo = {};
+    // Preserva objetos especiais do Firebase, Date e outros objetos não literais.
+    var proto = Object.getPrototypeOf(valor);
+    if(proto !== Object.prototype && proto !== null){
+      return valor;
+    }
+
+    var limpo = {};
     Object.keys(valor).forEach(function(chave){
-      if(valor[chave] !== undefined){
-        limpo[chave] = __sanitizarFirestore(valor[chave]);
+      var item = valor[chave];
+      if(item !== undefined){
+        limpo[chave] = __sanitizarFirestore(item);
       }
     });
     return limpo;
   }
+
   return valor;
+}
+
+// Localiza preventivamente qualquer undefined antes de enviar ao Firebase.
+function __encontrarUndefined(valor,caminho){
+  caminho=caminho||'dados';
+  if(valor===undefined)return caminho;
+  if(valor===null)return '';
+  if(Array.isArray(valor)){
+    for(var i=0;i<valor.length;i++){
+      var achouArray=__encontrarUndefined(valor[i],caminho+'['+i+']');
+      if(achouArray)return achouArray;
+    }
+    return '';
+  }
+  if(typeof valor==='object'){
+    var proto=Object.getPrototypeOf(valor);
+    if(proto!==Object.prototype&&proto!==null)return '';
+    var chaves=Object.keys(valor);
+    for(var j=0;j<chaves.length;j++){
+      var chave=chaves[j];
+      var achouObjeto=__encontrarUndefined(valor[chave],caminho+'.'+chave);
+      if(achouObjeto)return achouObjeto;
+    }
+  }
+  return '';
 }
 
 function __ensureArrays(d){
@@ -1366,12 +1402,25 @@ function escapeCheckpoint(v){
 function normalizarCheckpoint(aluno){
   var cp=aluno&&(aluno.metasCheckpoint||aluno.checkpoint);
   if(!cp||typeof cp!=='object')return {ativo:false,colunas:[],linhas:[]};
+
+  var colunas=Array.isArray(cp.colunas)
+    ? cp.colunas.map(function(v){return String(v===undefined||v===null?'':v);})
+    : [];
+
+  var linhas=Array.isArray(cp.linhas)
+    ? cp.linhas.map(function(linha){
+        var valores=Array.isArray(linha)?linha:[];
+        return colunas.map(function(_,indice){
+          var valor=valores[indice];
+          return String(valor===undefined||valor===null?'':valor);
+        });
+      })
+    : [];
+
   return {
-    ativo:cp.ativo!==false,
-    colunas:Array.isArray(cp.colunas)?cp.colunas.map(function(v){return String(v ?? '');}):[],
-    linhas:Array.isArray(cp.linhas)?cp.linhas.map(function(linha){
-      return Array.isArray(linha)?linha.map(function(v){return String(v ?? '');}):[];
-    }):[]
+    ativo:cp.ativo===true,
+    colunas:colunas,
+    linhas:linhas
   };
 }
 function renderCheckpointAluno(containerId,aluno){
@@ -2144,8 +2193,20 @@ async function salvarEdicaoAluno(id){
   // checkpoint desapareça ao atualizar ou abrir em outro aparelho antes do
   // salvamento geral em segundo plano terminar.
   try{
+    // Garante uma estrutura válida e sem undefined antes do envio.
+    d.alunos[idx].metasCheckpoint=normalizarCheckpoint(d.alunos[idx]);
     var alunoFirebase=__sanitizarFirestore(__deepClone(d.alunos[idx]));
     delete alunoFirebase.avaliacoes;
+
+    if(!alunoFirebase.id){
+      alunoFirebase.id=id;
+    }
+
+    var caminhoUndefined=__encontrarUndefined(alunoFirebase,'aluno');
+    if(caminhoUndefined){
+      throw new Error('Valor undefined encontrado em '+caminhoUndefined);
+    }
+
     await setDoc(
       doc(db,COLECOES_I9.alunos,__safeDocId(alunoFirebase.id)),
       alunoFirebase,
