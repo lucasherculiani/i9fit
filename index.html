@@ -744,7 +744,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-25-sync-v10-checkpoint-corrigido";
+const I9_BUILD = "2026-07-25-sync-v11-checkpoint-firestore";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -993,7 +993,7 @@ async function __salvarFirebaseAgora(){
       const limpo=__deepClone(aluno);
       const avs=Array.isArray(limpo.avaliacoes)?limpo.avaliacoes:[];
       delete limpo.avaliacoes;
-      alunos.push(limpo);
+      alunos.push(prepararAlunoParaFirestore(limpo));
       avs.forEach(function(av,idx){
         const x=__deepClone(av); x.alunoId=aluno.id;
         x.id=x.id||(aluno.id+'_'+(x.data||'sem-data')+'_'+idx);
@@ -1409,7 +1409,11 @@ function normalizarCheckpoint(aluno){
 
   var linhas=Array.isArray(cp.linhas)
     ? cp.linhas.map(function(linha){
-        var valores=Array.isArray(linha)?linha:[];
+        // Formato local antigo: ["valor", ...]
+        // Formato compatível com Firestore: {valores:["valor", ...]}
+        var valores=Array.isArray(linha)
+          ? linha
+          : (linha&&Array.isArray(linha.valores)?linha.valores:[]);
         return colunas.map(function(_,indice){
           var valor=valores[indice];
           return String(valor===undefined||valor===null?'':valor);
@@ -1423,6 +1427,22 @@ function normalizarCheckpoint(aluno){
     linhas:linhas
   };
 }
+// Converte a matriz do checkpoint para um formato aceito pelo Firestore.
+// O Firestore não permite array diretamente dentro de outro array.
+function prepararAlunoParaFirestore(aluno){
+  var limpo=__sanitizarFirestore(__deepClone(aluno||{}));
+  var cp=normalizarCheckpoint(limpo);
+  limpo.metasCheckpoint={
+    ativo:cp.ativo===true,
+    colunas:cp.colunas.slice(),
+    linhas:cp.linhas.map(function(linha){
+      return {valores:linha.slice()};
+    })
+  };
+  delete limpo.checkpoint;
+  return limpo;
+}
+
 function renderCheckpointAluno(containerId,aluno){
   var box=document.getElementById(containerId);if(!box)return;
   var cp=normalizarCheckpoint(aluno);
@@ -2195,7 +2215,7 @@ async function salvarEdicaoAluno(id){
   try{
     // Garante uma estrutura válida e sem undefined antes do envio.
     d.alunos[idx].metasCheckpoint=normalizarCheckpoint(d.alunos[idx]);
-    var alunoFirebase=__sanitizarFirestore(__deepClone(d.alunos[idx]));
+    var alunoFirebase=prepararAlunoParaFirestore(d.alunos[idx]);
     delete alunoFirebase.avaliacoes;
 
     if(!alunoFirebase.id){
