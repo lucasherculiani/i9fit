@@ -574,7 +574,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
   <div class="modal-box">
     <h4>Editar exercicio</h4>
     <div class="modal-edit-ex">
-      <div class="form-row"><label>Nome / Titulo</label><input id="ee-nome" placeholder="Nome do exercicio"></div>
+      <div class="form-row"><label>Nome / Titulo</label><input id="ee-nome" placeholder="Nome do exercicio"></div><div class="form-row"><label>Link do vídeo (opcional)</label><input id="ee-video" type="url" placeholder="https://www.youtube.com/watch?v=..."></div>
       <div class="tipo-toggle">
         <button class="tipo-btn ativo" id="ee-tbm" onclick="setTipoEe('musc')">&#127947; Musculacao</button>
         <button class="tipo-btn" id="ee-tbf" onclick="setTipoEe('func')">&#9889; Funcional / Cross</button>
@@ -1675,6 +1675,7 @@ function openDia(id){
       +(ex.obs&&ex.tipo!=='func'?'<div class="ex-meta">Obs: <span>'+ex.obs+'</span></div>':'')
       +(ex.tecnica&&ex.tipo!=='func'?'<div class="ex-tecnica">&#9889; '+ex.tecnica+'</div>':'')
       +(ex.prescricao?'<div class="ex-prescricao">'+ex.prescricao.replace(/\n/g,'<br>')+'</div>':'')
+      +(i9VideoSeguro(ex.videoUrl)?'<div style="margin:.65rem 0"><a href="'+i9EscAttr(i9VideoSeguro(ex.videoUrl))+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:.45rem;background:var(--accent);color:#111;padding:.55rem .85rem;border-radius:7px;font-weight:700;text-decoration:none;font-size:.85rem">&#9654; Ver execução do exercício</a></div>':'')
       +'<div class="ex-peso-row"><span class="ex-peso-label">Carga</span>'
       +'<div class="peso-ctrl">'
       +'<button class="peso-btn" onclick="ajustarPeso(\'pi'+i+'\',-1,\''+nick+'\',\''+ex.id+'\')">&#8722;</button>'
@@ -1911,6 +1912,7 @@ function renderListaSemanas(){
       var fEx=document.createElement('div');fEx.className='form-card';fEx.id='form-ex-'+di.id;
       fEx.innerHTML='<h4>Adicionar exercicio</h4>'
         +'<div class="form-row"><label>Nome / Titulo</label><input id="fen-'+di.id+'" placeholder="ex: Supino Reto ou WOD do Dia"></div>'
+        +'<div class="form-row"><label>Link do vídeo (opcional)</label><input type="url" id="fev-'+di.id+'" placeholder="https://www.youtube.com/watch?v=..."></div>'
         +'<div class="tipo-toggle">'
         +'<button class="tipo-btn ativo" id="tbm-'+di.id+'">&#127947; Musculacao</button>'
         +'<button class="tipo-btn" id="tbf-'+di.id+'">&#9889; Funcional / Cross</button>'
@@ -2013,12 +2015,15 @@ function setTipoEx(diaId,tipo){
   if(tipo==='func'){tbf.classList.add('ativo');tbm.classList.remove('ativo');cf.style.display='block';cm.style.display='none';}
   else{tbm.classList.add('ativo');tbf.classList.remove('ativo');cm.style.display='block';cf.style.display='none';}
 }
+function i9VideoSeguro(url){try{var u=new URL(String(url||'').trim());return u.protocol==='https:'&&!!u.hostname&&!u.username&&!u.password?u.href:'';}catch(e){return '';}}
+function i9EscAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function salvarExercicio(diaId){
   var nome=document.getElementById('fen-'+diaId).value.trim();if(!nome)return alert('Nome obrigatorio!');
+  var videoInput=document.getElementById('fev-'+diaId);var videoRaw=videoInput?videoInput.value.trim():'';var videoUrl=i9VideoSeguro(videoRaw);if(videoRaw&&!videoUrl)return alert('Use um link HTTPS válido para o vídeo.');
   var d=getData();var ordem=d.exercicios.filter(function(e){return e.diaId===diaId;}).length+1;
   var tbf=document.getElementById('tbf-'+diaId);var tipo=tbf&&tbf.classList.contains('ativo')?'func':'musc';
   var pepEl=document.getElementById('fep-'+diaId);
-  d.exercicios.push({id:uid(),diaId:diaId,nome:nome,ordem:ordem,tipo:tipo,
+  d.exercicios.push({id:uid(),diaId:diaId,nome:nome,ordem:ordem,tipo:tipo,videoUrl:videoUrl,
     prescricao:tipo==='func'?(pepEl?pepEl.value.trim():''):'',
     series:tipo==='musc'?document.getElementById('fes-'+diaId).value.trim():'',
     reps:tipo==='musc'?document.getElementById('fer-'+diaId).value.trim():'',
@@ -2026,7 +2031,7 @@ function salvarExercicio(diaId){
     metodo:tipo==='musc'?document.getElementById('fem-'+diaId).value.trim():'',
     obs:tipo==='musc'?document.getElementById('feo-'+diaId).value.trim():''});
   saveData(d);
-  ['fen-','fes-','fer-','fet-','fem-','feo-'].forEach(function(p){var el=document.getElementById(p+diaId);if(el)el.value='';});
+  ['fen-','fev-','fes-','fer-','fet-','fem-','feo-'].forEach(function(p){var el=document.getElementById(p+diaId);if(el)el.value='';});
   if(pepEl)pepEl.value='';setTipoEx(diaId,'musc');
   document.getElementById('form-ex-'+diaId).classList.remove('open');
   renderListaSemanas();
@@ -2278,6 +2283,7 @@ function abrirEditEx(exId){
   var d=getData();var ex=d.exercicios.find(function(e){return e.id===exId;});if(!ex)return;
   _editExId=exId;
   document.getElementById('ee-nome').value=ex.nome||'';
+  document.getElementById('ee-video').value=ex.videoUrl||'';
   document.getElementById('ee-series').value=ex.series||'';
   document.getElementById('ee-reps').value=ex.reps||'';
   document.getElementById('ee-tecnica').value=ex.tecnica||'';
@@ -2298,7 +2304,9 @@ function confirmarEditEx(){
   if(!_editExId)return;
   var d=getData();var idx=d.exercicios.findIndex(function(e){return e.id===_editExId;});if(idx<0)return;
   var tbf=document.getElementById('ee-tbf');var tipo=tbf&&tbf.classList.contains('ativo')?'func':'musc';
+  var videoRaw=document.getElementById('ee-video').value.trim();var videoUrl=i9VideoSeguro(videoRaw);if(videoRaw&&!videoUrl)return alert('Use um link HTTPS válido para o vídeo.');
   d.exercicios[idx].nome=document.getElementById('ee-nome').value.trim();
+  d.exercicios[idx].videoUrl=videoUrl;
   d.exercicios[idx].tipo=tipo;
   d.exercicios[idx].prescricao=tipo==='func'?document.getElementById('ee-presc').value.trim():'';
   d.exercicios[idx].series=tipo==='musc'?document.getElementById('ee-series').value.trim():'';
