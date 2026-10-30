@@ -276,6 +276,8 @@ table.ref th.col-idade small{display:block;font-size:.62rem;color:var(--accent);
   .rodape-form .acoes{justify-content:stretch}
   .rodape-form .btn{flex:1}
   .erro{text-align:left}
+  .resp .status{display:none}
+  .resp .rodape-form{padding:18px 0 12px}
 }
 
 /* Impressão */
