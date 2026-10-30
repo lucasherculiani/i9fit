@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d0d0d">
+<title>Avaliações InoveAvalia | i9Treino</title>
+<meta name="description" content="Avaliações funcionais do i9Treino: InoveAvalia (multifuncional) e InoveAvalia Plus (60+).">
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="assets/i9-avaliacao.css">
+<style>
+  .hub-hero{position:relative;padding:64px 0 40px;overflow:hidden}
+  .hub-hero::before{content:"";position:absolute;top:-220px;right:-200px;width:560px;height:560px;background:radial-gradient(circle,rgba(200,245,66,.16),transparent 70%);pointer-events:none}
+  .hub-hero h1{font-size:clamp(2.2rem,6vw,3.8rem);letter-spacing:-.03em;margin:12px 0 14px;max-width:780px}
+  .hub-hero p{color:var(--muted);font-size:1.05rem;max-width:620px}
+  .hub-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:22px}
+  .hub-card{position:relative;display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:28px;text-decoration:none;transition:border-color .2s,transform .2s;overflow:hidden}
+  .hub-card:hover{border-color:var(--accent);transform:translateY(-4px)}
+  .hub-card .tag{align-self:flex-start;font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(200,245,66,.12);color:var(--accent)}
+  .hub-card h2{font-size:1.7rem}
+  .hub-card h2 span{color:var(--accent)}
+  .hub-card p{color:var(--muted);font-size:.95rem}
+  .hub-card ul{list-style:none;display:flex;flex-direction:column;gap:7px;margin:4px 0 8px}
+  .hub-card li{font-size:.88rem;color:#d4d4cd;padding-left:22px;position:relative}
+  .hub-card li::before{content:"";position:absolute;left:0;top:.45em;width:12px;height:7px;border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg)}
+  .hub-card .ir{margin-top:auto;font-weight:700;color:var(--accent)}
+  .hub-card.plus{background:linear-gradient(160deg,#1c2410,var(--surface) 55%)}
+  .hub-admin{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px 24px;margin-bottom:60px}
+  .hub-admin h3{font-size:1.1rem}
+  .hub-admin p{color:var(--muted);font-size:.9rem}
+  @media(max-width:760px){.hub-grid{grid-template-columns:1fr}.hub-card{padding:22px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="/">i9<span>Treino</span></a>
+  <nav><a href="/avaliacoes/" class="ativo">Avaliações</a><a href="/admin/">Painel</a></nav>
+</div></header>
+
+<main class="wrap">
+  <section class="hub-hero">
+    <span class="eyebrow">Avaliações i9Treino</span>
+    <h1>Avaliar antes de treinar. <span style="color:var(--accent)">Medir para evoluir.</span></h1>
+    <p>Dois protocolos completos de avaliação funcional, com anamnese, medidas, testes, classificação automática e relatório pronto para imprimir.</p>
+  </section>
+
+  <div class="hub-grid">
+    <a class="hub-card" href="inoveavalia/">
+      <span class="tag">Menos de 60 anos</span>
+      <h2>Inove<span>Avalia</span></h2>
+      <p>Avaliação Multifuncional para quem quer treinar com segurança e direção.</p>
+      <ul>
+        <li>Anamnese completa e medidas corporais (IMC, RCQ, pressão)</li>
+        <li>Habilidade motora: agachamento, afundo, avanço, gato cruzado, cotovelos</li>
+        <li>CORE (Kendall, prancha) e mobilidade (quadril, ombros, tornozelo)</li>
+        <li>Equilíbrio unipodal e força de preensão manual</li>
+      </ul>
+      <span class="ir">Iniciar avaliação →</span>
+    </a>
+    <a class="hub-card plus" href="inoveavaliaplus/">
+      <span class="tag">60 anos ou mais</span>
+      <h2>Inove<span>Avalia</span> Plus</h2>
+      <p>Avaliação de longevidade, com baterias validadas para a população 60+.</p>
+      <ul>
+        <li>Anamnese completa e medidas corporais</li>
+        <li>SPPB com pontuação e interpretação automáticas</li>
+        <li>Senior Fitness Test (6 testes) com tabelas por idade e sexo</li>
+        <li>Preensão manual e equilíbrio estático unipodal</li>
+      </ul>
+      <span class="ir">Iniciar avaliação →</span>
+    </a>
+  </div>
+
+  <div class="hub-admin">
+    <div><h3>Painel de administração</h3><p>Resultados, relatórios, evolução de cada aluno e acesso às outras áreas do i9Treino.</p></div>
+    <a class="btn btn-ghost" href="/admin/">Abrir painel</a>
+  </div>
+</main>
+</body>
+</html>

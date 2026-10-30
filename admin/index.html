@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d0d0d">
+<title>Painel i9Treino</title>
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="../avaliacoes/assets/i9-avaliacao.css">
+<style>
+  .adm-hero{padding:34px 0 18px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .adm-hero h1{font-size:clamp(1.8rem,4.5vw,2.6rem);margin-top:6px}
+  .adm-hero p{color:var(--muted)}
+  .stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:26px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px}
+  .stat small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+  .stat b{font:800 1.9rem Syne,sans-serif;color:var(--accent);line-height:1}
+  .bloco-t{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:30px 0 14px;scroll-margin-top:80px}
+  .bloco-t h2{font-size:1.35rem}
+  .atalhos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .atalho{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;text-decoration:none;transition:border-color .2s,transform .2s}
+  .atalho:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .atalho .ic{width:38px;height:38px;border-radius:10px;background:rgba(200,245,66,.1);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+  .atalho b{font-size:.98rem}
+  .atalho span{font-size:.82rem;color:var(--muted)}
+  .filtros{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:14px}
+  .pessoas{display:flex;flex-direction:column;gap:10px;margin-bottom:60px}
+  .pessoa-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .pessoa-top{display:grid;grid-template-columns:minmax(0,1.6fr) 90px 110px 90px minmax(260px,auto);gap:12px;align-items:center;padding:14px 16px}
+  .pessoa-top .nm b{display:block;font-size:1rem}
+  .pessoa-top .nm span{font-size:.8rem;color:var(--muted)}
+  .tipo{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-right:6px}
+  .tipo-multifuncional{background:rgba(200,245,66,.12);color:var(--accent)}
+  .tipo-longev{background:rgba(79,179,255,.14);color:var(--d)}
+  .kv small{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .kv b{font-size:.92rem}
+  .pessoa-acoes{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .historico{border-top:1px solid var(--border);background:#131313}
+  .historico>summary{cursor:pointer;padding:10px 16px;font-size:.82rem;color:var(--muted);list-style:none}
+  .historico>summary::before{content:"▸ "}
+  .historico[open]>summary::before{content:"▾ "}
+  .hist-linha{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-top:1px dashed var(--border);font-size:.86rem}
+  .hist-linha .info span{color:var(--muted)}
+  .vazio-grande{text-align:center;padding:48px 20px;border:1px dashed var(--border2);border-radius:16px;color:var(--muted)}
+  .modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);display:flex;justify-content:center;overflow-y:auto;padding:24px 12px}
+  .modal-caixa{width:min(980px,100%);margin:auto 0}
+  .modal-acoes{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;gap:8px;padding:8px 0;background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,0))}
+  .evo-pontos{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+  .evo-pontos span{font-size:.8rem;background:var(--surface2);border-radius:999px;padding:5px 12px}
+  .evo-resumo{background:rgba(200,245,66,.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 16px;font-size:.92rem;color:#dcdcd5;margin-bottom:18px}
+  .metrica{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:14px;align-items:center;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;break-inside:avoid}
+  .metrica h4{font-size:.95rem;margin-bottom:6px}
+  .metrica table{font-size:.82rem}
+  .metrica td,.metrica th{padding:6px 8px}
+  .st{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .st-improved{background:rgba(92,196,106,.18);color:#7ee08c}.st-worsened{background:rgba(229,83,61,.18);color:#ff8b78}
+  .st-stable,.st-neutral,.st-single{background:var(--surface3);color:var(--muted)}
+  .tom-poor{color:#ff8b78}.tom-low{color:#ffb070}.tom-mid{color:#f1d26a}.tom-good{color:#c8f542}.tom-best{color:#7ee08c}
+  .spark{width:100%;height:auto}
+  @media(max-width:980px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.atalhos{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .pessoa-top{grid-template-columns:1fr 1fr 1fr}.pessoa-top .nm{grid-column:1/-1}.pessoa-acoes{grid-column:1/-1;justify-content:flex-start}}
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.atalhos{grid-template-columns:1fr}.filtros{grid-template-columns:1fr 1fr}.filtros .busca{grid-column:1/-1}
+    .metrica{grid-template-columns:1fr}.topbar nav a.opc{display:none}}
+  @media print{body.imprimindo main,body.imprimindo .topbar{display:none!important}body.imprimindo .modal{position:static;background:#fff;padding:0;display:block}
+    .metrica{border-color:#ccc!important}.st{border:1px solid #999}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="/">i9<span>Treino</span></a>
+  <nav>
+    <a href="#visao" class="opc">Visão geral</a><a href="#areas" class="opc">Áreas</a><a href="#avaliacoes">Avaliações</a>
+    <a href="#" id="sair">Sair</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <section class="adm-hero" id="visao">
+    <div><span class="eyebrow">Painel de administração</span><h1>Painel i9Treino</h1><p>Resultados das avaliações e acesso a todas as áreas do i9Treino.</p></div>
+    <div class="acoes-linha" style="margin:0">
+      <a class="btn btn-primary btn-sm" href="/avaliacoes/inoveavalia/">+ InoveAvalia</a>
+      <a class="btn btn-ghost btn-sm" href="/avaliacoes/inoveavaliaplus/">+ InoveAvalia Plus</a>
+    </div>
+  </section>
+
+  <div class="stats" id="stats">
+    <div class="stat"><small>Avaliações</small><b data-s="total">–</b></div>
+    <div class="stat"><small>InoveAvalia</small><b data-s="multi">–</b></div>
+    <div class="stat"><small>InoveAvalia Plus</small><b data-s="plus">–</b></div>
+    <div class="stat"><small>Últimos 30 dias</small><b data-s="mes">–</b></div>
+    <div class="stat"><small>Alunos i9Treino</small><b data-s="alunos">–</b></div>
+    <div class="stat"><small>Protocolos</small><b data-s="protocolos">–</b></div>
+  </div>
+
+  <div class="bloco-t" id="areas"><h2>Áreas do i9Treino</h2></div>
+  <div class="atalhos">
+    <a class="atalho" href="/" target="_blank" rel="noopener"><span class="ic">◎</span><b>Plataforma de treinos</b><span>Alunos, protocolos, semanas, exercícios e cargas (entre como administrador)</span></a>
+    <a class="atalho" href="/avaliacoes/"><span class="ic">✚</span><b>Avaliações</b><span>Página das avaliações InoveAvalia e InoveAvalia Plus</span></a>
+    <a class="atalho" href="/comeceaqui/" target="_blank" rel="noopener"><span class="ic">☀</span><b>Comece aqui</b><span>Landing page do Projeto Verão e planos</span></a>
+    <a class="atalho" href="/produtos/" target="_blank" rel="noopener"><span class="ic">◆</span><b>Produtos</b><span>Produtos e calculadora de suplementação</span></a>
+    <a class="atalho" href="https://console.firebase.google.com/project/i9fit-4b643/firestore" target="_blank" rel="noopener"><span class="ic">▤</span><b>Banco de dados</b><span>Firebase do i9Treino (Firestore)</span></a>
+    <a class="atalho" href="https://github.com/lucasherculiani/i9fit" target="_blank" rel="noopener"><span class="ic">⌘</span><b>Código do site</b><span>Repositório no GitHub</span></a>
+    <a class="atalho" href="https://wa.me/5514991042051" target="_blank" rel="noopener"><span class="ic">✆</span><b>WhatsApp</b><span>Número usado nas páginas de venda</span></a>
+    <a class="atalho" href="https://instagram.com/lucasherculiani" target="_blank" rel="noopener"><span class="ic">◉</span><b>Instagram</b><span>@lucasherculiani</span></a>
+  </div>
+
+  <div class="bloco-t" id="avaliacoes">
+    <h2>Avaliações</h2>
+    <div class="acoes-linha" style="margin:0">
+      <button class="btn btn-ghost btn-sm" id="exp-csv">Exportar planilha (CSV)</button>
+      <button class="btn btn-ghost btn-sm" id="exp-json">Backup (JSON)</button>
+    </div>
+  </div>
+  <div class="filtros">
+    <input class="inp busca" id="f-busca" placeholder="Buscar por nome, aluno ou avaliador">
+    <select class="inp" id="f-tipo"><option value="">Todos os protocolos</option><option value="multifuncional">InoveAvalia</option><option value="longev">InoveAvalia Plus</option></select>
+    <select class="inp" id="f-periodo"><option value="">Todo o período</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="365">Último ano</option></select>
+    <button class="btn btn-ghost btn-sm" id="recarregar">Atualizar</button>
+  </div>
+  <div class="pessoas" id="pessoas"><div class="vazio-grande">Carregando avaliações...</div></div>
+</main>
+
+<div class="modal" id="modal" hidden><div class="modal-caixa">
+  <div class="modal-acoes"><button class="btn btn-primary btn-sm" id="m-print">Imprimir / PDF</button><button class="btn btn-ghost btn-sm" id="m-fechar">Fechar</button></div>
+  <div id="m-conteudo"></div>
+</div></div>
+
+<script type="module">
+import { exigirAcesso, sair } from "../avaliacoes/assets/acesso.js";
+import { listarAvaliacoes, excluirAvaliacao, contar } from "../avaliacoes/assets/db.js";
+import { relatorioHTML, TIPOS, esc, dataBR } from "../avaliacoes/assets/avaliacao.js";
+import * as C from "../avaliacoes/assets/catalogo.js";
+
+await exigirAcesso("Painel i9Treino");
+document.getElementById("sair").onclick = e => { e.preventDefault(); sair(); };
+
+let TODAS = [];
+const $ = id => document.getElementById(id);
+const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+const chavePessoa = a => `${a.type}|${norm(a.patientName)}|${(a.formData || {}).dataNascimento || ""}`;
+const porData = (a, b) => String(a.assessmentDate).localeCompare(String(b.assessmentDate)) || String(a.criadoEm).localeCompare(String(b.criadoEm));
+const diasAtras = d => { const x = new Date(); x.setDate(x.getDate() - d); return x.toISOString().slice(0, 10); };
+
+async function carregar() {
+  $("pessoas").innerHTML = '<div class="vazio-grande">Carregando avaliações...</div>';
+  try { TODAS = await listarAvaliacoes(); }
+  catch (e) { console.error(e); $("pessoas").innerHTML = '<div class="vazio-grande">Não foi possível carregar as avaliações. Verifique a internet e clique em Atualizar.</div>'; return; }
+  const s = k => document.querySelector(`[data-s="${k}"]`);
+  s("total").textContent = TODAS.length;
+  s("multi").textContent = TODAS.filter(a => a.type === "multifuncional").length;
+  s("plus").textContent = TODAS.filter(a => a.type === "longev").length;
+  s("mes").textContent = TODAS.filter(a => String(a.assessmentDate) >= diasAtras(30)).length;
+  render();
+}
+contar("alunos").then(n => document.querySelector('[data-s="alunos"]').textContent = n ?? "–");
+contar("protocolos").then(n => document.querySelector('[data-s="protocolos"]').textContent = n ?? "–");
+
+function filtradas() {
+  const q = norm($("f-busca").value), t = $("f-tipo").value, p = $("f-periodo").value;
+  return TODAS.filter(a => (!t || a.type === t) && (!p || String(a.assessmentDate) >= diasAtras(Number(p))) &&
+    (!q || norm(`${a.patientName} ${a.alunoI9 || ""} ${a.avaliador || ""}`).includes(q)));
+}
+
+function render() {
+  const grupos = new Map();
+  for (const a of filtradas()) { const k = chavePessoa(a); if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(a); }
+  const lista = [...grupos.values()].map(g => g.sort(porData)).sort((a, b) => porData(b[b.length - 1], a[a.length - 1]));
+  if (!lista.length) {
+    $("pessoas").innerHTML = TODAS.length ? '<div class="vazio-grande">Nenhuma avaliação encontrada com esses filtros.</div>'
+      : '<div class="vazio-grande">Nenhuma avaliação registrada ainda.<br><br><a class="btn btn-primary btn-sm" href="/avaliacoes/">Fazer a primeira avaliação</a></div>';
+    return;
+  }
+  $("pessoas").innerHTML = lista.map(g => {
+    const u = g[g.length - 1], fd = u.formData || {};
+    const idade = fd.dataNascimento ? C.ageFromBirthDate(fd.dataNascimento) : u.patientAge;
+    return `<article class="pessoa-card">
+      <div class="pessoa-top">
+        <div class="nm"><span class="tipo tipo-${u.type}">${esc(TIPOS[u.type]?.nome || u.type)}</span><b>${esc(u.patientName)}</b>
+          <span>${idade ?? "—"} anos${u.alunoI9 ? " · aluno i9: " + esc(u.alunoI9) : ""}</span></div>
+        <div class="kv"><small>Avaliações</small><b>${g.length}</b></div>
+        <div class="kv"><small>Última</small><b>${dataBR(u.assessmentDate)}</b></div>
+        <div class="kv"><small>Nota geral</small><b>${fd.notaGeral ? esc(fd.notaGeral) + "/10" : "—"}</b></div>
+        <div class="pessoa-acoes">
+          <button class="btn btn-primary btn-sm" data-rel="${esc(u.id)}">Relatório</button>
+          ${g.length > 1 ? `<button class="btn btn-ghost btn-sm" data-evo="${esc(chavePessoa(u))}">Evolução</button>` : ""}
+          <a class="btn btn-ghost btn-sm" href="${TIPOS[u.type].rota}?reavaliar=${encodeURIComponent(u.id)}">Reavaliar</a>
+        </div>
+      </div>
+      <details class="historico"><summary>Histórico (${g.length})</summary>
+        ${g.slice().reverse().map(a => `<div class="hist-linha"><div class="info"><b>${dataBR(a.assessmentDate)}</b> <span>· ${esc(a.avaliador || "sem avaliador")}</span></div>
+          <div class="pessoa-acoes"><button class="btn btn-ghost btn-sm" data-rel="${esc(a.id)}">Ver</button>
+          <a class="btn btn-ghost btn-sm" href="${TIPOS[a.type].rota}?editar=${encodeURIComponent(a.id)}">Editar</a>
+          <button class="btn btn-perigo btn-sm" data-del="${esc(a.id)}">Excluir</button></div></div>`).join("")}
+      </details></article>`;
+  }).join("");
+}
+
+/* Modal */
+function abrir(html) { $("m-conteudo").innerHTML = html; $("modal").hidden = false; document.body.style.overflow = "hidden"; }
+function fechar() { $("modal").hidden = true; document.body.style.overflow = ""; }
+$("m-fechar").onclick = fechar;
+$("modal").addEventListener("click", e => { if (e.target.id === "modal") fechar(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("modal").hidden) fechar(); });
+$("m-print").onclick = () => { document.body.classList.add("imprimindo"); window.print(); };
+window.addEventListener("afterprint", () => document.body.classList.remove("imprimindo"));
+
+/* Evolução */
+function sparkline(metric, pontos) {
+  const vals = metric.series.flatMap(s => s.values).filter(v => v !== null);
+  if (vals.length < 2) return "";
+  const min = Math.min(...vals), max = Math.max(...vals), pad = (max - min) * 0.15 || 1;
+  const W = 220, H = 90, x = i => 14 + (i * (W - 28)) / Math.max(1, pontos - 1), y = v => H - 14 - ((v - (min - pad)) / (max - min + 2 * pad)) * (H - 28);
+  const cores = ["#c8f542", "#4fb3ff", "#ff9f43"];
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}">${metric.series.map((s, si) => {
+    const pts = s.values.map((v, i) => (v === null ? null : [x(i), y(v)])).filter(Boolean);
+    return `<polyline fill="none" stroke="${cores[si % 3]}" stroke-width="2.5" points="${pts.map(p => p.join(",")).join(" ")}"/>` +
+      pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${cores[si % 3]}"/>`).join("");
+  }).join("")}</svg>`;
+}
+
+function evolucaoHTML(docs) {
+  const lista = docs.slice().sort(porData).map((d, i) => ({ id: i + 1, type: d.type, patientName: d.patientName, patientAge: d.patientAge, assessmentDate: d.assessmentDate, formData: d.formData || {} }));
+  const ev = C.buildEvolution(lista);
+  if (!ev) return "<p>Sem dados suficientes.</p>";
+  const T = TIPOS[ev.type];
+  const bloco = grupo => ev.metrics.filter(m => m.group === grupo).map(m => `<div class="metrica"><div>
+      <h4>${esc(m.title)}</h4>
+      <div class="scroll-x"><table><thead><tr><th></th>${ev.points.map(p => `<th>${esc(p.label)}<br><small>${dataBR(p.date)}</small></th>`).join("")}<th>Resultado</th></tr></thead><tbody>
+      ${m.series.map((s, si) => `<tr><th>${esc(s.side || "Valor")}</th>${s.values.map((v, i) => `<td class="${s.classes[i] ? "tom-" + s.classes[i].tone : ""}">${v === null ? "—" : esc(C.formatValue(m, v))}${s.classes[i] ? `<br><small>${esc(s.classes[i].label)}</small>` : ""}</td>`).join("")}
+        <td><span class="st st-${m.statuses[si].status}">${esc(C.STATUS_LABELS[m.statuses[si].status])}</span>${m.statuses[si].delta !== undefined ? `<br><small>${esc(C.formatDelta(m, m.statuses[si].delta))}</small>` : ""}</td></tr>`).join("")}
+      </tbody></table></div></div>${sparkline(m, ev.points.length)}</div>`).join("");
+  const medidas = bloco("measures"), testes = bloco("tests");
+  return `<article class="relatorio">
+    <header class="rel-head"><div><span class="logo">i9<span>Treino</span></span><strong>Evolução · ${esc(T.nome)}</strong><small>${esc(ev.patientName)}</small></div>
+    <div class="rel-data">${ev.points.length} avaliações<br><b>${dataBR(ev.points[0].date)} → ${dataBR(ev.points[ev.points.length - 1].date)}</b></div></header>
+    <div class="evo-pontos">${ev.points.map(p => `<span>${esc(p.label)} · ${dataBR(p.date)}</span>`).join("")}</div>
+    ${ev.summary ? `<p class="evo-resumo">${esc(ev.summary)}</p>` : ""}
+    ${medidas ? `<section class="rel-sec"><h3>Medidas corporais</h3>${medidas}</section>` : ""}
+    ${testes ? `<section class="rel-sec"><h3>Testes</h3>${testes}</section>` : ""}
+    ${!medidas && !testes ? '<p class="vazio">As avaliações ainda não têm resultados comparáveis.</p>' : ""}
+    <footer class="rel-foot">i9Treino · relatório de evolução gerado em ${new Date().toLocaleDateString("pt-BR")}</footer></article>`;
+}
+
+$("pessoas").addEventListener("click", async e => {
+  const rel = e.target.closest("[data-rel]"), evo = e.target.closest("[data-evo]"), del = e.target.closest("[data-del]");
+  if (rel) { const a = TODAS.find(x => x.id === rel.dataset.rel); if (a) abrir(relatorioHTML(a)); }
+  if (evo) abrir(evolucaoHTML(TODAS.filter(a => chavePessoa(a) === evo.dataset.evo)));
+  if (del) {
+    const a = TODAS.find(x => x.id === del.dataset.del);
+    if (!a || !confirm(`Excluir a avaliação de ${a.patientName} de ${dataBR(a.assessmentDate)}? Essa ação não pode ser desfeita.`)) return;
+    try { await excluirAvaliacao(a.id); TODAS = TODAS.filter(x => x.id !== a.id); render(); }
+    catch (er) { alert("Não foi possível excluir. Tente de novo."); }
+  }
+});
+["f-busca", "f-tipo", "f-periodo"].forEach(id => $(id).addEventListener("input", render));
+$("recarregar").onclick = carregar;
+
+/* Exportação */
+function baixar(nome, conteudo, tipo) {
+  const url = URL.createObjectURL(new Blob([conteudo], { type: tipo }));
+  const a = document.createElement("a"); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+$("exp-json").onclick = () => baixar(`inoveavalia-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(filtradas(), null, 2), "application/json");
+$("exp-csv").onclick = () => {
+  const linhas = filtradas().sort(porData);
+  const rotulos = new Map([...C.fieldLabelsForType("multifuncional"), ...C.fieldLabelsForType("longev")]);
+  const chaves = [...new Set(linhas.flatMap(a => Object.keys(a.formData || {})))].filter(k => !k.endsWith("__linha") && k !== "avaliacoesDatas");
+  const cel = v => `"${String(Array.isArray(v) ? v.join(", ") : v ?? "").replace(/"/g, '""')}"`;
+  const cab = ["Protocolo", "Nome", "Data", "Idade", "Avaliador", "Aluno i9", ...chaves.map(k => rotulos.get(k) || k)];
+  const corpo = linhas.map(a => [TIPOS[a.type]?.nome, a.patientName, a.assessmentDate, a.patientAge, a.avaliador, a.alunoI9, ...chaves.map(k => (a.formData || {})[k])].map(cel).join(";"));
+  baixar(`inoveavalia-${new Date().toISOString().slice(0, 10)}.csv`, "﻿" + [cab.map(cel).join(";"), ...corpo].join("\r\n"), "text/csv;charset=utf-8");
+};
+
+carregar();
+</script>
+</body>
+</html>

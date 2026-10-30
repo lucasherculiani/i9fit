@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d0d0d">
+<title>InoveAvalia Plus — Avaliação 60+ | i9Treino</title>
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="../assets/i9-avaliacao.css">
+</head>
+<body>
+<header class="topbar no-print"><div class="wrap">
+  <a class="logo" href="/">i9<span>Treino</span></a>
+  <nav><a href="/avaliacoes/">Avaliações</a><a href="/admin/">Painel</a></nav>
+</div></header>
+<main class="wrap" id="app"><p style="padding:40px 0;color:#9a9a93">Carregando avaliação...</p></main>
+<script type="module">
+import { exigirAcesso } from "../assets/acesso.js";
+import { montarFormulario } from "../assets/avaliacao.js";
+await exigirAcesso("InoveAvalia Plus — Avaliação 60+");
+montarFormulario(document.getElementById("app"), "longev").catch(e => {
+  console.error(e);
+  document.getElementById("app").innerHTML = '<p style="padding:40px 0;color:#ff6b5b">Não foi possível carregar a avaliação. Recarregue a página.</p>';
+});
+</script>
+</body>
+</html>
