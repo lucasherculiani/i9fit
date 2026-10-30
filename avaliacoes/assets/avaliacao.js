@@ -92,6 +92,27 @@ function ageInLabel(label, age) {
   return p ? age >= Number(p[1]) : false;
 }
 
+/* ───────────────────────────── cronômetros ───────────────────────────── */
+
+/** Testes de duração fixa: timer regressivo (segundos). */
+const CONTAGEM = { cotoveloRepeticoes: 60, sft1Repeticoes: 30, sft2Direito: 30, sft2Esquerdo: 30, sft6Metros: 360 };
+const ehTempo = (id, label, type) => (type || "number") === "number" && /segund|tempo|\(s\)/i.test(label || "") && !CONTAGEM[id];
+const fmtCrono = ms => {
+  const t = Math.max(0, ms), m = Math.floor(t / 60000), sgs = Math.floor((t % 60000) / 1000), d = Math.floor((t % 1000) / 100);
+  return `${String(m).padStart(2, "0")}:${String(sgs).padStart(2, "0")},${d}`;
+};
+function cronoHTML(key, id, label, type, compacto) {
+  const dur = CONTAGEM[id];
+  if (!dur && !ehTempo(id, label, type)) return "";
+  const modo = dur ? "timer" : "crono";
+  return `<div class="crono${compacto ? " crono-sm" : ""}" data-crono="${esc(key)}" data-modo="${modo}" data-dur="${dur || 0}">
+    <button type="button" class="crono-play" data-c="play" aria-label="Iniciar">▶</button>
+    <output class="crono-tempo">${fmtCrono(dur ? dur * 1000 : 0)}</output>
+    <span class="crono-tipo">${dur ? (dur >= 60 ? dur / 60 + " min" : dur + " s") : "cronômetro"}</span>
+    <button type="button" class="crono-zerar" data-c="zerar" aria-label="Zerar">↺</button>
+  </div>`;
+}
+
 /* Registro de tabelas e seções renderizadas (para atualizar partes dinâmicas). */
 let REG = { tabelas: new Map(), secoes: new Map(), gauges: new Map(), n: 0 };
 const registrar = (mapa, obj) => { const id = "r" + (++REG.n); REG[mapa].set(id, obj); return id; };
@@ -126,7 +147,7 @@ function grade(fields, ctx) {
     const cls = ["fbox", f.full || yn || f.type === "textarea" || f.type === "check" ? "full" : "", yn ? "yn" : "", f.showWhen ? "reveal" : ""].filter(Boolean).join(" ");
     const sw = f.showWhen ? ` data-sw="${esc(f.showWhen.field)}" data-sweq="${esc(f.showWhen.equals)}"` : "";
     const oculto = f.showWhen && !isFieldVisible(f, ctx.values) ? " hidden" : "";
-    return `<div class="${cls}"${sw}${oculto}><label>${esc(f.label)}</label>${campo(f, f.id, ctx.values[f.id])}</div>`;
+    return `<div class="${cls}"${sw}${oculto}><label>${esc(f.label)}</label>${campo(f, f.id, ctx.values[f.id])}${ctx.semCrono ? "" : cronoHTML(f.id, f.id, f.label, f.type)}</div>`;
   }).join("");
   const dica = vis.some(f => f.computed) ? `<p class="dica full">Pontuação e interpretação calculadas automaticamente a partir das marcações nas tabelas.</p>` : "";
   return `<div class="grid-campos">${html}${dica}</div>`;
@@ -248,7 +269,7 @@ function tabelaLateral(sec, ctx, ro) {
       return `<td class="comp" data-lcomp="${sid}|${esc(col.id)}|${side}">${esc(r || "—")}</td>`;
     }
     if (ro) return `<td>${esc(txt(ctx.values[key]) || "—")}</td>`;
-    return `<td>${campo({ type: col.type || "number", options: col.options, placeholder: col.placeholder }, key, ctx.values[key], true)}</td>`;
+    return `<td>${campo({ type: col.type || "number", options: col.options, placeholder: col.placeholder }, key, ctx.values[key], true)}${cronoHTML(key, col.id, col.label, col.type, true)}</td>`;
   }).join("")}</tr>`).join("");
   return `<div class="scroll-x"><table class="tab lateral"><thead><tr><th class="lado">${esc(sideLabel)}</th>${columns.map(c => `<th>${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${corpo}</tbody></table></div>`;
 }
@@ -260,7 +281,7 @@ function tabelaCampos(sec, ctx, ro, legenda) {
   const sid = registrar("secoes", sec);
   const linha = f => {
     if (ro && !temValor(ctx.values[f.id])) return "";
-    return `<tr><th>${esc(f.label)}</th><td>${ro ? esc(txt(ctx.values[f.id])) : campo(f, f.id, ctx.values[f.id], true)}</td></tr>`;
+    return `<tr><th>${esc(f.label)}</th><td>${ro ? esc(txt(ctx.values[f.id])) : campo(f, f.id, ctx.values[f.id], true) + cronoHTML(f.id, f.id, f.label, f.type, true)}</td></tr>`;
   };
   const linhasCalc = calc.map((c, i) => {
     const v = c.value(ctx.values, 0);
@@ -584,7 +605,64 @@ export async function montarFormulario(root, tipo) {
     atualizar(); sincronizarCampos(); salvarRascunho();
   }
 
+  /* Cronômetros (crescente) e timers (regressivo com alarme) */
+  const cronos = new Map();
+  let audio;
+  function bip() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.35, 0.7].forEach(t => {
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.frequency.value = 880; o.connect(g); g.connect(audio.destination);
+        g.gain.setValueAtTime(0.25, audio.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + t + 0.25);
+        o.start(audio.currentTime + t); o.stop(audio.currentTime + t + 0.26);
+      });
+    } catch (e) { /* sem áudio */ }
+    try { navigator.vibrate?.([200, 100, 200, 100, 300]); } catch (e) { /* sem vibração */ }
+  }
+  function cronoEstado(box) {
+    const k = box.dataset.crono;
+    if (!cronos.has(k)) cronos.set(k, { acum: 0, inicio: 0, rodando: false, t: null });
+    return cronos.get(k);
+  }
+  const decorrido = c => c.acum + (c.rodando ? performance.now() - c.inicio : 0);
+  function desenharCrono(box) {
+    const c = cronoEstado(box), dur = Number(box.dataset.dur) * 1000, ms = decorrido(c);
+    box.querySelector(".crono-tempo").textContent = fmtCrono(box.dataset.modo === "timer" ? dur - ms : ms);
+    box.querySelector(".crono-play").textContent = c.rodando ? "⏸" : "▶";
+    box.classList.toggle("rodando", c.rodando);
+    if (box.dataset.modo === "timer" && c.rodando && ms >= dur) {
+      c.acum = dur; c.rodando = false; clearInterval(c.t);
+      box.classList.remove("rodando"); box.classList.add("fim");
+      box.querySelector(".crono-play").textContent = "▶";
+      box.querySelector(".crono-tempo").textContent = "Tempo!";
+      bip();
+      const inp = box.parentElement.querySelector("[data-k]"); inp?.focus();
+    }
+  }
+  function acionarCrono(box, acao) {
+    const c = cronoEstado(box), dur = Number(box.dataset.dur) * 1000;
+    if (acao === "zerar") { clearInterval(c.t); c.acum = 0; c.rodando = false; box.classList.remove("fim"); desenharCrono(box); return; }
+    if (c.rodando) {
+      c.acum = decorrido(c); c.rodando = false; clearInterval(c.t);
+      if (box.dataset.modo === "crono") {
+        const seg = (Math.floor(c.acum / 100) / 10).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const inp = box.parentElement.querySelector("[data-k]");
+        if (inp) { inp.value = seg; setValue(box.dataset.crono, seg); }
+      }
+    } else {
+      if (box.dataset.modo === "timer" && c.acum >= dur) c.acum = 0;
+      box.classList.remove("fim");
+      try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume?.(); } catch (e) { /* sem áudio */ }
+      c.inicio = performance.now(); c.rodando = true;
+      c.t = setInterval(() => desenharCrono(box), 100);
+    }
+    desenharCrono(box);
+  }
+
   root.addEventListener("click", e => {
+    const cb = e.target.closest("[data-crono] [data-c]");
+    if (cb) { acionarCrono(cb.closest("[data-crono]"), cb.dataset.c); return; }
     const limpar = e.target.closest("[data-limpar]");
     const tr = e.target.closest("tr[data-row]");
     const box = e.target.closest("[data-ptable]");
@@ -814,7 +892,7 @@ export async function montarResposta(root, id) {
   const paraAluno = fields => fields
     .filter(f => f.id !== "multiIdentificacaoObs")
     .map(f => (/Obs$/.test(f.id) ? { ...f, label: "Quer contar mais alguma coisa sobre isso? (opcional)", placeholder: "Escreva aqui, se quiser" } : f));
-  const ctx = { values: st.values };
+  const ctx = { values: st.values, semCrono: true };
   const primeiro = st.meta.nome.trim().split(/\s+/)[0];
   const jaRespondeu = av.status === "respondida" || av.status === "concluida";
 
