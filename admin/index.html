@@ -56,6 +56,11 @@
   .envio-form .resultado{background:rgba(200,245,66,.06);border:1px dashed rgba(200,245,66,.35);border-radius:12px;padding:14px;font-size:.88rem;word-break:break-all}
   .envio-form .resultado a{color:var(--accent)}
   @media(max-width:760px){.pend{grid-template-columns:1fr}}
+  .lote-linha{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:8px;margin-bottom:8px}
+  .lote-res{display:flex;flex-direction:column;gap:8px}
+  .lote-item{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface2);border-radius:12px;padding:10px 14px}
+  .lote-item b{display:block}
+  @media(max-width:640px){.lote-linha{grid-template-columns:1fr auto;padding-bottom:8px;border-bottom:1px dashed var(--border)}.lote-linha [name=nome]{grid-column:1;grid-row:1}.lote-linha [name=tel]{grid-column:1;grid-row:2}.lote-linha [data-rm]{grid-column:2;grid-row:1/3}}
   .vazio-grande{text-align:center;padding:48px 20px;border:1px dashed var(--border2);border-radius:16px;color:var(--muted)}
   .modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);display:flex;justify-content:center;overflow-y:auto;padding:24px 12px}
   .modal-caixa{width:min(980px,100%);margin:auto 0}
@@ -121,7 +126,7 @@
 
   <div class="bloco-t" id="anamneses">
     <div><h2>Parte 1 enviada aos alunos</h2><p class="sub">Anamneses enviadas por link. Quando o aluno responder, continue a avaliação daqui.</p></div>
-    <button class="btn btn-primary btn-sm" id="novo-envio">Enviar Parte 1 para um aluno</button>
+    <button class="btn btn-primary btn-sm" id="novo-envio">Enviar Parte 1 para alunos</button>
   </div>
   <div class="pendentes" id="pendentes"><div class="vazio-grande">Carregando...</div></div>
 
@@ -221,7 +226,7 @@ function render() {
 }
 
 /* Modal */
-function abrir(html) { $("m-conteudo").innerHTML = html; $("modal").hidden = false; document.body.style.overflow = "hidden"; }
+function abrir(html, imprimir = true) { $("m-print").hidden = !imprimir; $("m-conteudo").innerHTML = html; $("modal").hidden = false; document.body.style.overflow = "hidden"; }
 function fechar() { $("modal").hidden = true; document.body.style.overflow = ""; }
 $("m-fechar").onclick = fechar;
 $("modal").addEventListener("click", e => { if (e.target.id === "modal") fechar(); });
@@ -300,7 +305,7 @@ $("exp-csv").onclick = () => {
 /* ===== Parte 1 enviada aos alunos ===== */
 function renderPendentes() {
   const pend = TODAS.filter(a => !concluida(a)).sort((a, b) => String(b.respondidaEm || b.enviadoEm || b.criadoEm).localeCompare(String(a.respondidaEm || a.enviadoEm || a.criadoEm)));
-  if (!pend.length) { $("pendentes").innerHTML = '<div class="vazio-grande" style="padding:22px">Nenhuma Parte 1 pendente. Use "Enviar Parte 1 para um aluno" para mandar o link pelo WhatsApp.</div>'; return; }
+  if (!pend.length) { $("pendentes").innerHTML = '<div class="vazio-grande" style="padding:22px">Nenhuma Parte 1 pendente. Use "Enviar Parte 1 para alunos" para mandar o link pelo WhatsApp.</div>'; return; }
   $("pendentes").innerHTML = pend.map(a => `<div class="pend">
     <div><span class="tipo tipo-${a.type}">${esc(TIPOS[a.type]?.nome || "")}</span><b>${esc(a.patientName)}</b>
       <span class="meta">${a.telefone ? esc(formatTel(a.telefone)) + " · " : ""}enviado em ${a.enviadoEm ? new Date(a.enviadoEm).toLocaleDateString("pt-BR") : "—"}</span></div>
@@ -328,40 +333,72 @@ $("pendentes").addEventListener("click", async e => {
 });
 
 $("novo-envio").onclick = () => {
+  const linha = (n = "", t = "") => `<div class="lote-linha"><input class="inp" name="nome" placeholder="Nome do aluno" value="${esc(n)}"><input class="inp" name="tel" type="tel" inputmode="tel" placeholder="(14) 99999-9999" value="${esc(t)}"><button type="button" class="btn btn-ghost btn-sm" data-rm title="Remover">✕</button></div>`;
   abrir(`<form class="envio-form" id="f-envio" autocomplete="off">
     <span class="eyebrow">Parte 1 · Anamnese pelo celular</span>
-    <h3>Enviar a anamnese para o aluno</h3>
-    <div class="grid-campos">
-      <div class="fbox full"><label>Protocolo</label><select class="inp" name="tipo"><option value="multifuncional">InoveAvalia (menos de 60 anos)</option><option value="longev">InoveAvalia Plus (60 anos ou mais)</option></select></div>
-      <div class="fbox"><label>Nome do aluno</label><input class="inp" name="nome" required></div>
-      <div class="fbox"><label>Telefone (WhatsApp)</label><input class="inp" name="tel" type="tel" inputmode="tel" placeholder="(14) 99999-9999"></div>
-    </div>
-    <div class="acoes-linha" style="margin:0">
-      <button class="btn btn-primary" type="submit" name="acao" value="whats">Enviar pelo WhatsApp</button>
-      <button class="btn btn-ghost" type="submit" name="acao" value="copiar">Só gerar e copiar o link</button>
-    </div>
+    <h3>Enviar a anamnese para um ou vários alunos</h3>
+    <div class="fbox"><label>Protocolo</label><select class="inp" name="tipo"><option value="multifuncional">InoveAvalia (menos de 60 anos)</option><option value="longev">InoveAvalia Plus (60 anos ou mais)</option></select></div>
+    <div class="fbox"><label>Alunos (nome e telefone com DDD)</label><div id="lote">${linha()}${linha()}${linha()}</div>
+      <div class="acoes-linha" style="margin-top:6px"><button type="button" class="btn btn-ghost btn-sm" id="lote-add">+ Adicionar aluno</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="lote-colar-abrir">Colar uma lista</button></div></div>
+    <div class="fbox" id="lote-colar" hidden><label>Cole um aluno por linha: <small>Nome, telefone</small></label>
+      <textarea class="inp" rows="5" placeholder="Maria Souza, 14 99123-4567&#10;João Lima, (14) 98888-7777"></textarea>
+      <button type="button" class="btn btn-ghost btn-sm" id="lote-colar-ok" style="align-self:flex-start">Adicionar à lista</button></div>
+    <button class="btn btn-primary" type="submit">Gerar links</button>
     <p class="erro" style="text-align:left" data-envio-erro></p>
-    <div class="resultado" data-envio-res hidden></div>
-  </form>`);
-  const f = $("f-envio");
+  </form><div class="envio-form" id="lote-res" hidden style="margin-top:12px"></div>`, false);
+  const f = $("f-envio"), lote = $("lote");
+  $("lote-add").onclick = () => { lote.insertAdjacentHTML("beforeend", linha()); lote.lastElementChild.querySelector("input").focus(); };
+  lote.addEventListener("click", e => { if (e.target.closest("[data-rm]")) { e.target.closest(".lote-linha").remove(); if (!lote.children.length) lote.innerHTML = linha(); } });
+  $("lote-colar-abrir").onclick = () => { $("lote-colar").hidden = false; $("lote-colar").querySelector("textarea").focus(); };
+  $("lote-colar-ok").onclick = () => {
+    const ta = $("lote-colar").querySelector("textarea");
+    const itens = ta.value.split(/\n+/).map(l => l.trim()).filter(Boolean).map(l => {
+      const m = l.match(/^(.*?)[,;\t-]*\s*((?:\+?55\s*)?\(?\d{2}\)?[\s.-]*9?\d{4}[\s.-]*\d{4})\s*$/);
+      return m ? [m[1].replace(/[,;\t-]+\s*$/, "").trim(), m[2]] : [l, ""];
+    });
+    [...lote.querySelectorAll(".lote-linha")].forEach(r => { if (!r.querySelector('[name=nome]').value.trim() && !r.querySelector('[name=tel]').value.trim()) r.remove(); });
+    itens.forEach(([n, t]) => lote.insertAdjacentHTML("beforeend", linha(n, t)));
+    if (!lote.children.length) lote.innerHTML = linha();
+    ta.value = ""; $("lote-colar").hidden = true;
+  };
   f.addEventListener("submit", async ev => {
     ev.preventDefault();
-    const acao = ev.submitter?.value || "copiar";
-    const nome = f.nome.value.trim(), tel = f.tel.value.trim(), erro = f.querySelector("[data-envio-erro]"), res = f.querySelector("[data-envio-res]");
-    if (!nome) { erro.textContent = "Informe o nome do aluno."; return; }
-    if (acao === "whats" && tel.replace(/\D/g, "").length < 10) { erro.textContent = "Informe o telefone com DDD para enviar pelo WhatsApp."; return; }
-    erro.textContent = "";
-    const aba = acao === "whats" ? abrirAba() : null;
-    try {
-      const reg = await salvarAvaliacao({ type: f.tipo.value, patientName: nome, telefone: tel, status: "aguardando",
-        assessmentDate: new Date().toISOString().slice(0, 10), enviadoEm: new Date().toISOString(), formData: {} });
-      TODAS.push(reg); renderPendentes();
-      const link = linkResposta(reg.id);
-      if (acao === "whats") irPara(aba, linkWhats(tel, mensagemEnvio(nome, link)));
-      const ok = acao === "copiar" ? await copiar(link) : false;
-      res.hidden = false;
-      res.innerHTML = `${acao === "whats" ? "WhatsApp aberto com a mensagem pronta." : ok ? "Link copiado!" : "Copie o link abaixo:"}<br><a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>`;
-    } catch (er) { console.error(er); if (aba) aba.close(); erro.textContent = "Não foi possível gerar o link. Tente de novo."; }
+    const erro = f.querySelector("[data-envio-erro]"), btn = f.querySelector("button[type=submit]");
+    const alunos = [...lote.querySelectorAll(".lote-linha")].map(r => ({ nome: r.querySelector('[name=nome]').value.trim(), tel: r.querySelector('[name=tel]').value.trim() })).filter(a => a.nome || a.tel);
+    if (!alunos.length) { erro.textContent = "Adicione pelo menos um aluno."; return; }
+    const semNome = alunos.find(a => !a.nome);
+    if (semNome) { erro.textContent = `Falta o nome para o telefone ${semNome.tel}.`; return; }
+    erro.textContent = ""; btn.disabled = true; btn.textContent = "Gerando links...";
+    const criados = [];
+    for (const a of alunos) {
+      try {
+        const reg = await salvarAvaliacao({ type: f.tipo.value, patientName: a.nome, telefone: a.tel, status: "aguardando",
+          assessmentDate: new Date().toISOString().slice(0, 10), enviadoEm: new Date().toISOString(), formData: {} });
+        TODAS.push(reg); criados.push(reg);
+      } catch (er) { console.error(er); criados.push({ falhou: true, patientName: a.nome }); }
+    }
+    renderPendentes();
+    f.hidden = true;
+    const res = $("lote-res"); res.hidden = false;
+    const ok = criados.filter(c => !c.falhou);
+    res.innerHTML = `<span class="eyebrow">${ok.length} link(s) gerado(s)</span>
+      <h3>Agora é só enviar</h3>
+      <p class="sub">O WhatsApp abre uma conversa por vez, com a mensagem pronta. Toque em cada aluno e depois em enviar no WhatsApp.</p>
+      <div class="lote-res">${criados.map(c => c.falhou ? `<div class="lote-item"><b>${esc(c.patientName)}</b><span class="erro">Não foi possível gerar — tente de novo.</span></div>` :
+        `<div class="lote-item" data-id="${esc(c.id)}"><div><b>${esc(c.patientName)}</b><span class="sub">${esc(formatTel(c.telefone) || "sem telefone")}</span></div>
+          <div class="pessoa-acoes">${telWhats(c.telefone).length >= 12 ? `<button class="btn btn-primary btn-sm" data-l-whats>Enviar WhatsApp</button>` : ""}<button class="btn btn-ghost btn-sm" data-l-copiar>Copiar link</button></div></div>`).join("")}</div>
+      <div class="acoes-linha"><button class="btn btn-ghost btn-sm" id="lote-todos">Copiar todos os links</button><button class="btn btn-ghost btn-sm" id="lote-novo">Enviar para outros alunos</button></div>`;
+    res.addEventListener("click", async e => {
+      const item = e.target.closest(".lote-item"), reg = item && TODAS.find(x => x.id === item.dataset.id);
+      if (e.target.closest("[data-l-whats]") && reg) {
+        window.open(linkWhats(reg.telefone, mensagemEnvio(reg.patientName, linkResposta(reg.id))), "_blank");
+        const b = e.target.closest("[data-l-whats]"); b.textContent = "Enviado ✓"; b.classList.replace("btn-primary", "btn-ghost");
+      }
+      if (e.target.closest("[data-l-copiar]") && reg) { const b = e.target.closest("[data-l-copiar]"); b.textContent = (await copiar(linkResposta(reg.id))) ? "Copiado!" : "Não copiou"; }
+      if (e.target.id === "lote-todos") { const txt = ok.map(c => `${c.patientName}: ${linkResposta(c.id)}`).join("\n"); e.target.textContent = (await copiar(txt)) ? "Todos copiados!" : "Não copiou"; }
+      if (e.target.id === "lote-novo") $("novo-envio").click();
+    });
   });
 };
 
