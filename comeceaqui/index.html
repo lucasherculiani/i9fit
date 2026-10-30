@@ -289,6 +289,17 @@
   .price-card.featured .price-cta{background:var(--accent);color:var(--bg);border-color:var(--accent);}
   .price-cta:hover{border-color:var(--accent);color:var(--accent);}
   .price-card.featured .price-cta:hover{background:var(--accent2);color:var(--bg);}
+  .tier-switch{display:flex;justify-content:center;margin:0 auto 18px;}
+  .tier-seg{display:inline-flex;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:5px;gap:4px;}
+  .tier-btn{background:transparent;border:none;color:var(--text-dim);font-weight:700;font-size:.95rem;padding:11px 22px;border-radius:999px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;}
+  .tier-btn .tb-tag{font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(200,245,66,.14);color:var(--accent);padding:3px 8px;border-radius:999px;}
+  .tier-btn.active{background:var(--accent);color:var(--bg);}
+  .tier-btn.active .tb-tag{background:rgba(13,13,13,.15);color:var(--bg);}
+  .tier-desc{text-align:center;max-width:620px;margin:0 auto 44px;color:var(--text-dim);font-size:.96rem;min-height:3em;}
+  .tier-desc b{color:var(--text);}
+  .price-features li.hl{color:var(--text);font-weight:600;}
+  .pricing-grid.swap .price-card{animation:fadeUp .35s ease;}
+  @media(max-width:640px){.tier-btn{padding:10px 16px;font-size:.88rem;}}
   .pricing-disclaimer{text-align:center;color:var(--text-dimmer);font-size:.85rem;margin-top:30px;}
 
   /* FAQ */
@@ -668,52 +679,14 @@
       <h2>Escolha como entrar no Projeto Verão</h2>
       <p>Sem fidelidade, sem letra miúda.</p>
     </div>
-    <div class="pricing-grid">
-
-      <div class="price-card rv">
-        <h3>Mensal</h3>
-        <div class="price-tagline">Para começar agora</div>
-        <div class="price-value"><span class="currency">R$</span><span class="amount">79</span><span class="period">,90/mês</span></div>
-        <div class="price-note">Cobrança mensal recorrente</div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Protocolo do Projeto Verão</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Vídeos de execução</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Memória de carga automática</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Registro de evolução física</li>
-        </ul>
-        <a href="#" class="price-cta" data-plan="Mensal" data-valor="R$ 79,90/mês">Quero esse plano</a>
+    <div class="tier-switch rv">
+      <div class="tier-seg" role="tablist" aria-label="Escolha o nível do plano">
+        <button class="tier-btn active" data-tier="premium" role="tab" aria-selected="true">Premium</button>
+        <button class="tier-btn" data-tier="plus" role="tab" aria-selected="false">Premium Plus <span class="tb-tag">Individual</span></button>
       </div>
-
-      <div class="price-card featured rv">
-        <div class="price-badge">Cobre as 8 semanas</div>
-        <h3>Trimestral</h3>
-        <div class="price-tagline">Atravessa o projeto inteiro e entra no verão com você</div>
-        <div class="price-value"><span class="currency">R$</span><span class="amount">64</span><span class="period">,90/mês</span></div>
-        <div class="price-note">R$ 194,70 a cada 3 meses · economia de ~19%</div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Tudo do plano Mensal</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Reavaliação física a cada 30 dias</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Ajuste de protocolo ao final de cada fase</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Prioridade no suporte via WhatsApp</li>
-        </ul>
-        <a href="#" class="price-cta" data-plan="Trimestral" data-valor="R$ 194,70 (3x R$ 64,90)">Quero esse plano</a>
-      </div>
-
-      <div class="price-card rv">
-        <h3>Semestral</h3>
-        <div class="price-tagline">Verão e o que vem depois</div>
-        <div class="price-value"><span class="currency">R$</span><span class="amount">54</span><span class="period">,90/mês</span></div>
-        <div class="price-note">R$ 329,40 a cada 6 meses · economia de ~31%</div>
-        <ul class="price-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Tudo do plano Trimestral</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Periodização completa em ciclos</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Fase de manutenção pós-verão</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Melhor custo por mês</li>
-        </ul>
-        <a href="#" class="price-cta" data-plan="Semestral" data-valor="R$ 329,40 (6x R$ 54,90)">Quero esse plano</a>
-      </div>
-
     </div>
+    <p class="tier-desc" id="tierDesc"></p>
+    <div class="pricing-grid" id="pricingGrid"></div>
     <p class="pricing-disclaimer">Ao escolher um plano, você é direcionado ao WhatsApp para confirmar os dados e receber o link de pagamento (Pix ou cartão).</p>
   </div>
 </section>
@@ -732,6 +705,7 @@
       <h2>Perguntas frequentes</h2>
     </div>
     <div class="faq-list rv">
+      <div class="faq-item"><button class="faq-q">Qual a diferença entre Premium e Premium Plus?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button><div class="faq-a"><p>No Premium, você recebe o protocolo do Projeto Verão ajustado ao seu nível e à sua rotina, a partir de uma anamnese inicial. No Premium Plus, o protocolo é montado do zero só para você, depois de uma anamnese completa e aprofundada sobre histórico, saúde, rotina, limitações e objetivos.</p></div></div>
       <div class="faq-item"><button class="faq-q">Vou precisar fazer dieta restritiva?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button><div class="faq-a"><p>Não. O emagrecimento depende de déficit calórico, não de proibição. O foco é comer de um jeito que gere déficit sem privação, porque privação vira compulsão depois. Se quiser um plano alimentar individual, a nutricionista da equipe pode atender.</p></div></div>
       <div class="faq-item"><button class="faq-q">Só fazer cardio não resolve?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button><div class="faq-a"><p>O cardio ajuda, mas sozinho tende a ser compensado: o corpo gasta menos no resto do dia. A combinação que funciona é musculação como base, movimento diário (passos) e cardio como apoio.</p></div></div>
       <div class="faq-item"><button class="faq-q">Ainda dá tempo até o verão?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button><div class="faq-a"><p>Dá para fazer muita diferença em 8 semanas quando treino, movimento, sono e ambiente andam juntos. E o objetivo não é só chegar bem no verão: é continuar bem depois dele.</p></div></div>
@@ -783,14 +757,69 @@
   // WhatsApp flutuante
   document.getElementById('waFloat').href = wa("Oi! Quero saber mais sobre o Projeto Verão do i9Treino 💪");
 
-  // Botões de plano
-  document.querySelectorAll('.price-cta').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  // ====== PLANOS (Premium / Premium Plus) ======
+  const CHK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>';
+  const TIERS = {
+    premium: {
+      nome: 'Premium',
+      desc: '<b>Protocolo do Projeto Verão ajustado ao seu nível e à sua rotina</b>, a partir de uma anamnese inicial.',
+      base: ['Anamnese inicial', 'Protocolo do Projeto Verão', 'Vídeos de execução', 'Memória de carga automática', 'Registro de evolução física'],
+      precos: [
+        { mes:'79,90', total:'R$ 79,90/mês',  nota:'Cobrança mensal recorrente' },
+        { mes:'64,90', total:'R$ 194,70 (3x R$ 64,90)', nota:'R$ 194,70 a cada 3 meses · economia de ~19%' },
+        { mes:'54,90', total:'R$ 329,40 (6x R$ 54,90)', nota:'R$ 329,40 a cada 6 meses · economia de ~31%' }
+      ]
+    },
+    plus: {
+      nome: 'Premium Plus',
+      desc: '<b>Protocolo montado do zero, só para você.</b> Começa com uma anamnese completa e aprofundada: histórico, saúde, rotina, limitações e objetivos.',
+      base: ['Anamnese completa e aprofundada', 'Protocolo 100% individualizado', 'Vídeos de execução', 'Memória de carga automática', 'Registro de evolução física'],
+      hl: 2,
+      precos: [
+        { mes:'90,00', total:'R$ 90,00/mês',  nota:'Cobrança mensal recorrente' },
+        { mes:'72,90', total:'R$ 218,70 (3x R$ 72,90)', nota:'R$ 218,70 a cada 3 meses · economia de ~19%' },
+        { mes:'61,90', total:'R$ 371,40 (6x R$ 61,90)', nota:'R$ 371,40 a cada 6 meses · economia de ~31%' }
+      ]
+    }
+  };
+  const PERIODOS = [
+    { nome:'Mensal', tag:'Para começar agora', extra:null },
+    { nome:'Trimestral', tag:'Atravessa o projeto inteiro e entra no verão com você', badge:'Cobre as 8 semanas', featured:true,
+      extra:['Tudo do plano Mensal', 'Reavaliação física a cada 30 dias', 'Ajuste de protocolo ao final de cada fase', 'Prioridade no suporte via WhatsApp'] },
+    { nome:'Semestral', tag:'Verão e o que vem depois',
+      extra:['Tudo do plano Trimestral', 'Periodização completa em ciclos', 'Fase de manutenção pós-verão', 'Melhor custo por mês'] }
+  ];
+  const grid = document.getElementById('pricingGrid');
+  function renderPlanos(tierKey, animar){
+    const t = TIERS[tierKey];
+    document.getElementById('tierDesc').innerHTML = t.desc;
+    grid.innerHTML = PERIODOS.map((p, i) => {
+      const pr = t.precos[i];
+      const [inteiro, cent] = pr.mes.split(',');
+      const itens = p.extra || t.base;
+      const lis = itens.map((txt, k) => `<li${(!p.extra && t.hl && k < t.hl) ? ' class="hl"' : ''}>${CHK}${txt}</li>`).join('');
+      return `<div class="price-card${p.featured ? ' featured' : ''}">
+        ${p.badge ? `<div class="price-badge">${p.badge}</div>` : ''}
+        <h3>${t.nome} · ${p.nome}</h3>
+        <div class="price-tagline">${p.tag}</div>
+        <div class="price-value"><span class="currency">R$</span><span class="amount">${inteiro}</span><span class="period">,${cent}/mês</span></div>
+        <div class="price-note">${pr.nota}</div>
+        <ul class="price-features">${lis}</ul>
+        <a href="#" class="price-cta" data-plan="${t.nome} ${p.nome}" data-valor="${pr.total}">Quero esse plano</a>
+      </div>`;
+    }).join('');
+    grid.classList.remove('swap'); if (animar){ void grid.offsetWidth; grid.classList.add('swap'); }
+    grid.querySelectorAll('.price-cta').forEach(btn => btn.addEventListener('click', (e) => {
       e.preventDefault();
       const msg = `Oi! Quero entrar no Projeto Verão do i9Treino com o plano ${btn.dataset.plan} (${btn.dataset.valor}). Pode me enviar o link de pagamento?`;
       window.open(wa(msg), '_blank');
-    });
-  });
+    }));
+  }
+  document.querySelectorAll('.tier-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tier-btn').forEach(x => { x.classList.toggle('active', x === b); x.setAttribute('aria-selected', x === b); });
+    renderPlanos(b.dataset.tier, true);
+  }));
+  renderPlanos('premium', false);
 
   // ====== CONTAGEM REGRESSIVA ======
   const pad = n => String(n).padStart(2, '0');
