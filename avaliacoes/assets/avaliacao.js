@@ -68,7 +68,7 @@ export function formatTel(tel) {
 export const linkResposta = id => `${location.origin}/avaliacoes/responder/?id=${encodeURIComponent(id)}`;
 export function mensagemEnvio(nome, link) {
   const p = String(nome || "").trim().split(/\s+/)[0];
-  return `Olá${p ? ", " + p : ""}! Aqui é do i9Treino. Antes da sua avaliação, preencha a Parte 1 (anamnese) pelo link abaixo. Leva uns 10 minutos e dá para fazer pelo celular:\n\n${link}\n\nQualquer dúvida, é só responder esta mensagem.`;
+  return `Olá${p ? ", " + p : ""}! Aqui é o Lucas. Antes da sua avaliação, preencha a Parte 1 (anamnese) pelo link abaixo. Leva uns 10 minutos e dá para fazer pelo celular:\n\n${link}\n\nQualquer dúvida, é só responder esta mensagem.`;
 }
 export const linkWhats = (tel, msg) => `https://wa.me/${telWhats(tel)}?text=${encodeURIComponent(msg)}`;
 export async function copiar(texto) {
