@@ -100,7 +100,26 @@ input[type=date].inp{color-scheme:dark}
 .dica{font-size:.8rem;color:var(--muted)}
 
 /* Pessoa */
-.pessoa{display:grid;grid-template-columns:2fr 1fr auto;gap:14px;align-items:end;margin-bottom:16px}
+.pessoa{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) auto;gap:14px;align-items:end;margin-bottom:16px}
+.envio{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:rgba(200,245,66,.06);border:1px dashed rgba(200,245,66,.35);border-radius:14px;padding:14px 16px;margin-top:6px}
+.envio b{display:block;font-size:.95rem}
+.envio span{font-size:.84rem;color:var(--muted)}
+.envio-botoes{display:flex;gap:8px;flex-wrap:wrap}
+.envio-status{flex-basis:100%;font-size:.84rem;color:#dcdcd5;word-break:break-all}
+.envio-status:empty{display:none}
+.envio-status a{color:var(--accent)}
+.topo-tag{font-size:.78rem;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.resp-wrap{max-width:760px}
+.resp-hero h1{font-size:clamp(2rem,7vw,2.8rem)}
+.resp-progresso{display:flex;align-items:center;gap:12px;margin-top:18px}
+.resp-progresso>div{flex:1;height:8px;background:var(--surface3);border-radius:999px;overflow:hidden}
+.resp-progresso i{display:block;height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .3s}
+.resp-progresso span{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.resp-fim{text-align:center;padding:90px 0}
+.resp-fim h1{font-size:clamp(2rem,7vw,2.8rem);margin:12px 0}
+.resp-fim p{color:var(--muted);max-width:480px;margin:0 auto}
+.resp .fbox.yn{flex-direction:column;align-items:flex-start}
+.resp .pill span{padding:10px 18px;font-size:.92rem}
 .idade{background:var(--surface2);border-radius:12px;padding:10px 16px;min-width:120px}
 .idade span{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 .idade strong{font:800 1.5rem Syne,sans-serif;color:var(--accent)}
@@ -242,6 +261,8 @@ table.ref th.col-idade small{display:block;font-size:.62rem;color:var(--accent);
   .grid-campos,.dl{grid-template-columns:1fr}
   .pessoa{grid-template-columns:1fr 1fr}
   .pessoa .nome{grid-column:1/-1}
+  .envio-botoes{width:100%}
+  .envio-botoes .btn{flex:1}
   .com-gauge{grid-template-columns:1fr}
   .card{padding:16px}
   .fbox.yn{flex-wrap:wrap}

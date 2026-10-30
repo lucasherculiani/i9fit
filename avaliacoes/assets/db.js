@@ -19,7 +19,12 @@ const app = getApps()[0] || initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const COLECAO = "inoveavalia";
 
-const novoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+// Id difícil de adivinhar: também é o "código" do link enviado ao aluno.
+const novoId = () => {
+  const b = new Uint8Array(12);
+  crypto.getRandomValues(b);
+  return Date.now().toString(36) + Array.from(b, x => x.toString(36).padStart(2, "0")).join("").slice(0, 18);
+};
 
 /** Remove valores vazios para manter o documento enxuto. */
 function limpar(formData) {

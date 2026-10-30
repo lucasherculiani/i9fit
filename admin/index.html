@@ -42,6 +42,20 @@
   .historico[open]>summary::before{content:"▾ "}
   .hist-linha{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-top:1px dashed var(--border);font-size:.86rem}
   .hist-linha .info span{color:var(--muted)}
+  .sub{font-size:.86rem;color:var(--muted);margin-top:2px}
+  .pendentes{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  .pend{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px}
+  .pend b{display:block}
+  .pend .meta{font-size:.8rem;color:var(--muted)}
+  .badge{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+  .badge-aguardando{background:rgba(255,159,67,.14);color:var(--e)}
+  .badge-respondida{background:rgba(200,245,66,.14);color:var(--accent)}
+  .tel{color:var(--accent);text-decoration:none}
+  .envio-form{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
+  .envio-form h3{font-size:1.3rem}
+  .envio-form .resultado{background:rgba(200,245,66,.06);border:1px dashed rgba(200,245,66,.35);border-radius:12px;padding:14px;font-size:.88rem;word-break:break-all}
+  .envio-form .resultado a{color:var(--accent)}
+  @media(max-width:760px){.pend{grid-template-columns:1fr}}
   .vazio-grande{text-align:center;padding:48px 20px;border:1px dashed var(--border2);border-radius:16px;color:var(--muted)}
   .modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);display:flex;justify-content:center;overflow-y:auto;padding:24px 12px}
   .modal-caixa{width:min(980px,100%);margin:auto 0}
@@ -70,7 +84,7 @@
 <header class="topbar"><div class="wrap">
   <a class="logo" href="/">i9<span>Treino</span></a>
   <nav>
-    <a href="#visao" class="opc">Visão geral</a><a href="#areas" class="opc">Áreas</a><a href="#avaliacoes">Avaliações</a>
+    <a href="#visao" class="opc">Visão geral</a><a href="#areas" class="opc">Áreas</a><a href="#anamneses" class="opc">Parte 1</a><a href="#avaliacoes">Avaliações</a>
     <a href="#" id="sair">Sair</a>
   </nav>
 </div></header>
@@ -105,6 +119,12 @@
     <a class="atalho" href="https://instagram.com/lucasherculiani" target="_blank" rel="noopener"><span class="ic">◉</span><b>Instagram</b><span>@lucasherculiani</span></a>
   </div>
 
+  <div class="bloco-t" id="anamneses">
+    <div><h2>Parte 1 enviada aos alunos</h2><p class="sub">Anamneses enviadas por link. Quando o aluno responder, continue a avaliação daqui.</p></div>
+    <button class="btn btn-primary btn-sm" id="novo-envio">Enviar Parte 1 para um aluno</button>
+  </div>
+  <div class="pendentes" id="pendentes"><div class="vazio-grande">Carregando...</div></div>
+
   <div class="bloco-t" id="avaliacoes">
     <h2>Avaliações</h2>
     <div class="acoes-linha" style="margin:0">
@@ -113,7 +133,7 @@
     </div>
   </div>
   <div class="filtros">
-    <input class="inp busca" id="f-busca" placeholder="Buscar por nome, aluno ou avaliador">
+    <input class="inp busca" id="f-busca" placeholder="Buscar por nome ou telefone">
     <select class="inp" id="f-tipo"><option value="">Todos os protocolos</option><option value="multifuncional">InoveAvalia</option><option value="longev">InoveAvalia Plus</option></select>
     <select class="inp" id="f-periodo"><option value="">Todo o período</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="365">Último ano</option></select>
     <button class="btn btn-ghost btn-sm" id="recarregar">Atualizar</button>
@@ -129,13 +149,16 @@
 <script type="module">
 import { exigirAcesso, sair } from "../avaliacoes/assets/acesso.js";
 import { listarAvaliacoes, excluirAvaliacao, contar } from "../avaliacoes/assets/db.js";
-import { relatorioHTML, TIPOS, esc, dataBR } from "../avaliacoes/assets/avaliacao.js";
+import { relatorioHTML, TIPOS, esc, dataBR, STATUS, formatTel, telWhats, linkResposta, linkWhats, mensagemEnvio, copiar, abrirAba, irPara } from "../avaliacoes/assets/avaliacao.js";
+import { salvarAvaliacao } from "../avaliacoes/assets/db.js";
 import * as C from "../avaliacoes/assets/catalogo.js";
 
 await exigirAcesso("Painel i9Treino");
 document.getElementById("sair").onclick = e => { e.preventDefault(); sair(); };
 
 let TODAS = [];
+const concluida = a => !a.status || a.status === "concluida";
+const CONC = () => TODAS.filter(concluida);
 const $ = id => document.getElementById(id);
 const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 const chavePessoa = a => `${a.type}|${norm(a.patientName)}|${(a.formData || {}).dataNascimento || ""}`;
@@ -147,10 +170,11 @@ async function carregar() {
   try { TODAS = await listarAvaliacoes(); }
   catch (e) { console.error(e); $("pessoas").innerHTML = '<div class="vazio-grande">Não foi possível carregar as avaliações. Verifique a internet e clique em Atualizar.</div>'; return; }
   const s = k => document.querySelector(`[data-s="${k}"]`);
-  s("total").textContent = TODAS.length;
-  s("multi").textContent = TODAS.filter(a => a.type === "multifuncional").length;
-  s("plus").textContent = TODAS.filter(a => a.type === "longev").length;
-  s("mes").textContent = TODAS.filter(a => String(a.assessmentDate) >= diasAtras(30)).length;
+  s("total").textContent = CONC().length;
+  s("multi").textContent = CONC().filter(a => a.type === "multifuncional").length;
+  s("plus").textContent = CONC().filter(a => a.type === "longev").length;
+  s("mes").textContent = CONC().filter(a => String(a.assessmentDate) >= diasAtras(30)).length;
+  renderPendentes();
   render();
 }
 contar("alunos").then(n => document.querySelector('[data-s="alunos"]').textContent = n ?? "–");
@@ -158,8 +182,8 @@ contar("protocolos").then(n => document.querySelector('[data-s="protocolos"]').t
 
 function filtradas() {
   const q = norm($("f-busca").value), t = $("f-tipo").value, p = $("f-periodo").value;
-  return TODAS.filter(a => (!t || a.type === t) && (!p || String(a.assessmentDate) >= diasAtras(Number(p))) &&
-    (!q || norm(`${a.patientName} ${a.alunoI9 || ""} ${a.avaliador || ""}`).includes(q)));
+  return CONC().filter(a => (!t || a.type === t) && (!p || String(a.assessmentDate) >= diasAtras(Number(p))) &&
+    (!q || norm(`${a.patientName} ${a.telefone || ""}`).includes(q) || (q.replace(/\D/g, "") && String(a.telefone || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")))));
 }
 
 function render() {
@@ -167,7 +191,7 @@ function render() {
   for (const a of filtradas()) { const k = chavePessoa(a); if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(a); }
   const lista = [...grupos.values()].map(g => g.sort(porData)).sort((a, b) => porData(b[b.length - 1], a[a.length - 1]));
   if (!lista.length) {
-    $("pessoas").innerHTML = TODAS.length ? '<div class="vazio-grande">Nenhuma avaliação encontrada com esses filtros.</div>'
+    $("pessoas").innerHTML = CONC().length ? '<div class="vazio-grande">Nenhuma avaliação encontrada com esses filtros.</div>'
       : '<div class="vazio-grande">Nenhuma avaliação registrada ainda.<br><br><a class="btn btn-primary btn-sm" href="/avaliacoes/">Fazer a primeira avaliação</a></div>';
     return;
   }
@@ -177,7 +201,7 @@ function render() {
     return `<article class="pessoa-card">
       <div class="pessoa-top">
         <div class="nm"><span class="tipo tipo-${u.type}">${esc(TIPOS[u.type]?.nome || u.type)}</span><b>${esc(u.patientName)}</b>
-          <span>${idade ?? "—"} anos${u.alunoI9 ? " · aluno i9: " + esc(u.alunoI9) : ""}</span></div>
+          <span>${idade ?? "—"} anos${u.telefone ? ` · <a class="tel" href="https://wa.me/${telWhats(u.telefone)}" target="_blank" rel="noopener">${esc(formatTel(u.telefone))}</a>` : ""}</span></div>
         <div class="kv"><small>Avaliações</small><b>${g.length}</b></div>
         <div class="kv"><small>Última</small><b>${dataBR(u.assessmentDate)}</b></div>
         <div class="kv"><small>Nota geral</small><b>${fd.notaGeral ? esc(fd.notaGeral) + "/10" : "—"}</b></div>
@@ -188,7 +212,7 @@ function render() {
         </div>
       </div>
       <details class="historico"><summary>Histórico (${g.length})</summary>
-        ${g.slice().reverse().map(a => `<div class="hist-linha"><div class="info"><b>${dataBR(a.assessmentDate)}</b> <span>· ${esc(a.avaliador || "sem avaliador")}</span></div>
+        ${g.slice().reverse().map(a => `<div class="hist-linha"><div class="info"><b>${dataBR(a.assessmentDate)}</b> <span>· ${esc(TIPOS[a.type]?.nome || "")}</span></div>
           <div class="pessoa-acoes"><button class="btn btn-ghost btn-sm" data-rel="${esc(a.id)}">Ver</button>
           <a class="btn btn-ghost btn-sm" href="${TIPOS[a.type].rota}?editar=${encodeURIComponent(a.id)}">Editar</a>
           <button class="btn btn-perigo btn-sm" data-del="${esc(a.id)}">Excluir</button></div></div>`).join("")}
@@ -249,7 +273,7 @@ $("pessoas").addEventListener("click", async e => {
   if (del) {
     const a = TODAS.find(x => x.id === del.dataset.del);
     if (!a || !confirm(`Excluir a avaliação de ${a.patientName} de ${dataBR(a.assessmentDate)}? Essa ação não pode ser desfeita.`)) return;
-    try { await excluirAvaliacao(a.id); TODAS = TODAS.filter(x => x.id !== a.id); render(); }
+    try { await excluirAvaliacao(a.id); TODAS = TODAS.filter(x => x.id !== a.id); render(); renderPendentes(); }
     catch (er) { alert("Não foi possível excluir. Tente de novo."); }
   }
 });
@@ -268,9 +292,77 @@ $("exp-csv").onclick = () => {
   const rotulos = new Map([...C.fieldLabelsForType("multifuncional"), ...C.fieldLabelsForType("longev")]);
   const chaves = [...new Set(linhas.flatMap(a => Object.keys(a.formData || {})))].filter(k => !k.endsWith("__linha") && k !== "avaliacoesDatas");
   const cel = v => `"${String(Array.isArray(v) ? v.join(", ") : v ?? "").replace(/"/g, '""')}"`;
-  const cab = ["Protocolo", "Nome", "Data", "Idade", "Avaliador", "Aluno i9", ...chaves.map(k => rotulos.get(k) || k)];
-  const corpo = linhas.map(a => [TIPOS[a.type]?.nome, a.patientName, a.assessmentDate, a.patientAge, a.avaliador, a.alunoI9, ...chaves.map(k => (a.formData || {})[k])].map(cel).join(";"));
+  const cab = ["Protocolo", "Nome", "Data", "Idade", "Telefone", ...chaves.map(k => rotulos.get(k) || k)];
+  const corpo = linhas.map(a => [TIPOS[a.type]?.nome, a.patientName, a.assessmentDate, a.patientAge, formatTel(a.telefone), ...chaves.map(k => (a.formData || {})[k])].map(cel).join(";"));
   baixar(`inoveavalia-${new Date().toISOString().slice(0, 10)}.csv`, "﻿" + [cab.map(cel).join(";"), ...corpo].join("\r\n"), "text/csv;charset=utf-8");
+};
+
+/* ===== Parte 1 enviada aos alunos ===== */
+function renderPendentes() {
+  const pend = TODAS.filter(a => !concluida(a)).sort((a, b) => String(b.respondidaEm || b.enviadoEm || b.criadoEm).localeCompare(String(a.respondidaEm || a.enviadoEm || a.criadoEm)));
+  if (!pend.length) { $("pendentes").innerHTML = '<div class="vazio-grande" style="padding:22px">Nenhuma Parte 1 pendente. Use "Enviar Parte 1 para um aluno" para mandar o link pelo WhatsApp.</div>'; return; }
+  $("pendentes").innerHTML = pend.map(a => `<div class="pend">
+    <div><span class="tipo tipo-${a.type}">${esc(TIPOS[a.type]?.nome || "")}</span><b>${esc(a.patientName)}</b>
+      <span class="meta">${a.telefone ? esc(formatTel(a.telefone)) + " · " : ""}enviado em ${a.enviadoEm ? new Date(a.enviadoEm).toLocaleDateString("pt-BR") : "—"}</span></div>
+    <div><span class="badge badge-${a.status}">${esc(STATUS[a.status] || a.status)}</span>
+      ${a.respondidaEm ? `<span class="meta"><br>respondida em ${new Date(a.respondidaEm).toLocaleString("pt-BR")}</span>` : ""}</div>
+    <div class="pessoa-acoes">
+      ${a.status === "respondida" ? `<button class="btn btn-ghost btn-sm" data-ver="${esc(a.id)}">Ver respostas</button>` : ""}
+      <a class="btn ${a.status === "respondida" ? "btn-primary" : "btn-ghost"} btn-sm" href="${TIPOS[a.type].rota}?editar=${encodeURIComponent(a.id)}">Continuar avaliação</a>
+      ${a.status === "aguardando" ? `<button class="btn btn-ghost btn-sm" data-whats="${esc(a.id)}">Reenviar WhatsApp</button>` : ""}
+      <button class="btn btn-ghost btn-sm" data-copiar="${esc(a.id)}">Copiar link</button>
+      <button class="btn btn-perigo btn-sm" data-del="${esc(a.id)}">Excluir</button>
+    </div></div>`).join("");
+}
+$("pendentes").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const id = b.dataset.ver || b.dataset.whats || b.dataset.copiar || b.dataset.del;
+  const a = TODAS.find(x => x.id === id); if (!a) return;
+  if (b.dataset.ver) abrir(relatorioHTML(a));
+  if (b.dataset.whats) window.open(linkWhats(a.telefone, mensagemEnvio(a.patientName, linkResposta(a.id))), "_blank");
+  if (b.dataset.copiar) { const ok = await copiar(linkResposta(a.id)); b.textContent = ok ? "Link copiado!" : "Não copiou"; setTimeout(() => (b.textContent = "Copiar link"), 2000); }
+  if (b.dataset.del) {
+    if (!confirm(`Excluir o envio para ${a.patientName}? O link deixará de funcionar.`)) return;
+    try { await excluirAvaliacao(a.id); TODAS = TODAS.filter(x => x.id !== a.id); renderPendentes(); } catch (er) { alert("Não foi possível excluir."); }
+  }
+});
+
+$("novo-envio").onclick = () => {
+  abrir(`<form class="envio-form" id="f-envio" autocomplete="off">
+    <span class="eyebrow">Parte 1 · Anamnese pelo celular</span>
+    <h3>Enviar a anamnese para o aluno</h3>
+    <div class="grid-campos">
+      <div class="fbox full"><label>Protocolo</label><select class="inp" name="tipo"><option value="multifuncional">InoveAvalia (menos de 60 anos)</option><option value="longev">InoveAvalia Plus (60 anos ou mais)</option></select></div>
+      <div class="fbox"><label>Nome do aluno</label><input class="inp" name="nome" required></div>
+      <div class="fbox"><label>Telefone (WhatsApp)</label><input class="inp" name="tel" type="tel" inputmode="tel" placeholder="(14) 99999-9999"></div>
+    </div>
+    <div class="acoes-linha" style="margin:0">
+      <button class="btn btn-primary" type="submit" name="acao" value="whats">Enviar pelo WhatsApp</button>
+      <button class="btn btn-ghost" type="submit" name="acao" value="copiar">Só gerar e copiar o link</button>
+    </div>
+    <p class="erro" style="text-align:left" data-envio-erro></p>
+    <div class="resultado" data-envio-res hidden></div>
+  </form>`);
+  const f = $("f-envio");
+  f.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const acao = ev.submitter?.value || "copiar";
+    const nome = f.nome.value.trim(), tel = f.tel.value.trim(), erro = f.querySelector("[data-envio-erro]"), res = f.querySelector("[data-envio-res]");
+    if (!nome) { erro.textContent = "Informe o nome do aluno."; return; }
+    if (acao === "whats" && tel.replace(/\D/g, "").length < 10) { erro.textContent = "Informe o telefone com DDD para enviar pelo WhatsApp."; return; }
+    erro.textContent = "";
+    const aba = acao === "whats" ? abrirAba() : null;
+    try {
+      const reg = await salvarAvaliacao({ type: f.tipo.value, patientName: nome, telefone: tel, status: "aguardando",
+        assessmentDate: new Date().toISOString().slice(0, 10), enviadoEm: new Date().toISOString(), formData: {} });
+      TODAS.push(reg); renderPendentes();
+      const link = linkResposta(reg.id);
+      if (acao === "whats") irPara(aba, linkWhats(tel, mensagemEnvio(nome, link)));
+      const ok = acao === "copiar" ? await copiar(link) : false;
+      res.hidden = false;
+      res.innerHTML = `${acao === "whats" ? "WhatsApp aberto com a mensagem pronta." : ok ? "Link copiado!" : "Copie o link abaixo:"}<br><a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>`;
+    } catch (er) { console.error(er); if (aba) aba.close(); erro.textContent = "Não foi possível gerar o link. Tente de novo."; }
+  });
 };
 
 carregar();

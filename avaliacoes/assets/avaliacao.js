@@ -1,7 +1,7 @@
 // InoveAvalia — formulário e relatório das avaliações (identidade i9Treino).
 // O catálogo (perguntas, testes, tabelas de referência e cálculos) vem de catalogo.js.
 import * as C from "./catalogo.js";
-import { salvarAvaliacao, obterAvaliacao, listarAlunosI9 } from "./db.js";
+import { salvarAvaliacao, obterAvaliacao } from "./db.js";
 
 const {
   sectionsForType, protocolReferences, testResultGroupsFor, checklistSpans,
@@ -42,8 +42,47 @@ const isYesNo = f => f.type === "radio" && f.options?.length === 2 && f.options[
 const sexoDe = v => (typeof v.multiSexo === "string" ? v.multiSexo : typeof v.sexo === "string" ? v.sexo : undefined);
 const normSexo = s => (/fem/i.test(s || "") ? "Feminino" : /masc/i.test(s || "") ? "Masculino" : undefined);
 export const dataBR = d => formatDateBR(d) || "—";
-const PARTES = { anamnese: "Parte 1 — Anamnese", testes: "Parte 2 — Testes" };
+const PARTES = { anamnese: "Parte 1 — Anamnese", testes: "Parte 3 — Avaliação" };
 const TONS = { poor: "#e5533d", low: "#f0913a", mid: "#e8c13c", good: "#a8d932", best: "#5cc46a" };
+
+/* ───────────────────── envio da Parte 1 ao aluno (WhatsApp / link) ───────────────────── */
+
+export const STATUS = {
+  aguardando: "Aguardando o aluno",
+  respondida: "Parte 1 respondida",
+  concluida: "Avaliação concluída"
+};
+export const soDigitos = s => String(s || "").replace(/\D/g, "");
+export function telWhats(tel) {
+  let d = soDigitos(tel);
+  if (!d) return "";
+  if (d.length <= 11) d = "55" + d.replace(/^0+/, "");
+  return d;
+}
+export function formatTel(tel) {
+  const d = soDigitos(tel).replace(/^55(?=\d{10,11}$)/, "");
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return tel || "";
+}
+export const linkResposta = id => `${location.origin}/avaliacoes/responder/?id=${encodeURIComponent(id)}`;
+export function mensagemEnvio(nome, link) {
+  const p = String(nome || "").trim().split(/\s+/)[0];
+  return `Olá${p ? ", " + p : ""}! Aqui é do i9Treino. Antes da sua avaliação, preencha a Parte 1 (anamnese) pelo link abaixo. Leva uns 10 minutos e dá para fazer pelo celular:\n\n${link}\n\nQualquer dúvida, é só responder esta mensagem.`;
+}
+export const linkWhats = (tel, msg) => `https://wa.me/${telWhats(tel)}?text=${encodeURIComponent(msg)}`;
+export async function copiar(texto) {
+  try { await navigator.clipboard.writeText(texto); return true; } catch (e) {
+    const t = document.createElement("textarea");
+    t.value = texto; t.style.position = "fixed"; t.style.opacity = "0";
+    document.body.appendChild(t); t.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch (_) { /* sem cópia */ }
+    t.remove(); return ok;
+  }
+}
+/** Abre o WhatsApp numa aba já reservada (evita bloqueio de pop-up após await). */
+export function abrirAba() { try { return window.open("", "_blank"); } catch (e) { return null; } }
+export function irPara(aba, url) { if (aba && !aba.closed) aba.location.href = url; else location.href = url; }
 
 function ageInLabel(label, age) {
   if (age === undefined || age === null || Number.isNaN(age)) return false;
@@ -333,8 +372,8 @@ export async function montarFormulario(root, tipo) {
   const CHAVE_RASC = `inoveavalia-rascunho-${tipo}`;
 
   const st = {
-    id: null, criadoEm: null,
-    meta: { nome: "", nasc: "", data: hoje(), avaliador: "", aluno: "" },
+    id: null, criadoEm: null, status: null, extra: {},
+    meta: { nome: "", nasc: "", data: hoje(), telefone: "" },
     values: {}
   };
   let aviso = "";
@@ -344,17 +383,22 @@ export async function montarFormulario(root, tipo) {
       const av = await obterAvaliacao(params.get("editar"));
       if (av) {
         const fd = { ...(av.formData || {}) };
-        st.id = av.id; st.criadoEm = av.criadoEm;
-        st.meta = { nome: av.patientName || "", nasc: fd.dataNascimento || "", data: av.assessmentDate || hoje(), avaliador: av.avaliador || "", aluno: av.alunoI9 || "" };
+        st.id = av.id; st.criadoEm = av.criadoEm; st.status = av.status || null;
+        st.extra = { enviadoEm: av.enviadoEm, respondidaEm: av.respondidaEm };
+        st.meta = { nome: av.patientName || "", nasc: fd.dataNascimento || "", data: av.assessmentDate || hoje(), telefone: av.telefone || "" };
         delete fd.dataNascimento; delete fd.avaliacoesDatas;
         st.values = fd;
-        aviso = `Editando a avaliação de <b>${esc(av.patientName)}</b> de ${dataBR(av.assessmentDate)}.`;
+        aviso = av.status === "respondida"
+          ? `<b>${esc(av.patientName)}</b> respondeu a Parte 1 em ${new Date(av.respondidaEm).toLocaleString("pt-BR")}. Confira a anamnese e complete a Parte 2 (medidas) e a Parte 3 (avaliação).`
+          : av.status === "aguardando"
+            ? `Parte 1 enviada para <b>${esc(av.patientName)}</b> — ainda aguardando as respostas. Você pode preencher as outras partes enquanto isso.`
+            : `Editando a avaliação de <b>${esc(av.patientName)}</b> de ${dataBR(av.assessmentDate)}.`;
       }
     } else if (params.get("reavaliar")) {
       const av = await obterAvaliacao(params.get("reavaliar"));
       if (av) {
         const fd = anamnesisValues(tipo, av.formData || {});
-        st.meta = { nome: av.patientName || "", nasc: (av.formData || {}).dataNascimento || "", data: hoje(), avaliador: av.avaliador || "", aluno: av.alunoI9 || "" };
+        st.meta = { nome: av.patientName || "", nasc: (av.formData || {}).dataNascimento || "", data: hoje(), telefone: av.telefone || "" };
         delete fd.dataNascimento;
         st.values = fd;
         aviso = `Nova avaliação de <b>${esc(av.patientName)}</b>: identificação e anamnese foram trazidas da avaliação de ${dataBR(av.assessmentDate)}. Medidas e testes começam em branco.`;
@@ -382,32 +426,36 @@ export async function montarFormulario(root, tipo) {
   </section>
   ${aviso ? `<div class="banner" data-banner>${aviso}</div>` : ""}
   <nav class="secnav" aria-label="Seções">
-    <a href="#s-aplicacao">Aplicação</a><a href="#s-pessoa">Pessoa</a><a href="#s-medidas">Medidas</a>
-    ${secoes.map((s, i) => `<a href="#s-${esc(s.id)}">${esc(numeros[i] ? numeros[i] + ". " : "")}${esc(limparTitulo(s.title).split(" — ")[0].split(" (")[0])}</a>`).join("")}
+    <a href="#s-aluno">Aluno</a><a href="#p-1">Parte 1 · Anamnese</a><a href="#p-2">Parte 2 · Medidas</a><a href="#p-3">Parte 3 · Avaliação</a>
+    ${secoes.filter(s => s.part === "testes").map(s => `<a href="#s-${esc(s.id)}">${esc(limparTitulo(s.title).split(" — ")[0].split(" (")[0])}</a>`).join("")}
   </nav>
 
-  <section class="card" id="s-aplicacao">
-    <div class="card-head"><span class="eyebrow">Aplicação</span><h2>Avaliador e data</h2></div>
-    <div class="grid-campos">
-      <div class="fbox"><label>Avaliador(a)</label><input class="inp" data-meta="avaliador" list="lista-avaliadores" value="${esc(st.meta.avaliador)}" placeholder="Nome do profissional"></div>
-      <div class="fbox"><label>Data da avaliação</label><input class="inp" type="date" data-meta="data" value="${esc(st.meta.data)}"></div>
-      <div class="fbox full"><label>Aluno(a) do i9Treino <small>(opcional — vincula a avaliação ao cadastro da plataforma)</small></label>
-        <input class="inp" data-meta="aluno" list="lista-alunos" value="${esc(st.meta.aluno)}" placeholder="Digite o nome ou o nick do aluno"></div>
-    </div>
-    <datalist id="lista-avaliadores"></datalist><datalist id="lista-alunos"></datalist>
-  </section>
-
-  <section class="card" id="s-pessoa">
-    <div class="card-head"><span class="eyebrow">Pessoa avaliada</span><h2>Identificação</h2></div>
+  <section class="card" id="s-aluno">
+    <div class="card-head"><span class="eyebrow">Aluno</span><h2>Quem será avaliado</h2></div>
     <div class="pessoa">
-      <div class="fbox nome"><label>Nome completo</label><input class="inp" data-meta="nome" value="${esc(st.meta.nome)}" autocomplete="off"></div>
+      <div class="fbox nome"><label>Nome do aluno</label><input class="inp" data-meta="nome" value="${esc(st.meta.nome)}" autocomplete="off"></div>
+      <div class="fbox"><label>Telefone (WhatsApp)</label><input class="inp" type="tel" inputmode="tel" data-meta="telefone" value="${esc(st.meta.telefone)}" placeholder="(14) 99999-9999"></div>
       <div class="fbox"><label>Data de nascimento</label><input class="inp" type="date" data-meta="nasc" max="${hoje()}" value="${esc(st.meta.nasc)}"></div>
+      <div class="fbox"><label>Data da avaliação</label><input class="inp" type="date" data-meta="data" value="${esc(st.meta.data)}"></div>
       <div class="idade" data-idade></div>
     </div>
     <p class="alerta-idade" data-alerta-idade hidden></p>
-    ${ident ? grade(ident.fields, c) : ""}
+    <div class="envio">
+      <div><b>Enviar a Parte 1 para o aluno preencher no celular</b><span>Ele responde a anamnese pelo link e as respostas aparecem aqui e no painel.</span></div>
+      <div class="envio-botoes">
+        <button type="button" class="btn btn-primary btn-sm" data-acao="enviar-whats">Enviar pelo WhatsApp</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-acao="copiar-link">Copiar link</button>
+      </div>
+      <p class="envio-status" data-envio-status role="status"></p>
+    </div>
   </section>
 
+  <h2 class="parte" id="p-1">Parte 1 — Anamnese</h2>
+  ${ident ? `<section class="card" id="s-identificacao"><div class="secao-head"><span class="num">•</span><div><h3>Identificação</h3></div></div>${grade(ident.fields, c)}</section>` : ""}`;
+
+  let parte2Feita = false;
+  const parte2 = `
+  <h2 class="parte" id="p-2">Parte 2 — Medidas corporais</h2>
   <section class="card" id="s-medidas">
     <div class="card-head"><span class="eyebrow">Medidas corporais</span><h2>Peso, altura, circunferências, pressão e frequência cardíaca</h2></div>
     ${medidas ? tabelasDaSecao(medidas, c, false) : ""}
@@ -417,9 +465,11 @@ export async function montarFormulario(root, tipo) {
   </section>`;
 
   secoes.forEach((s, i) => {
-    if (s.part && s.part !== secoes[i - 1]?.part) html += `<h2 class="parte">${PARTES[s.part]}</h2>`;
+    if (s.part !== "anamnese" && !parte2Feita) { html += parte2; parte2Feita = true; }
+    if (s.part === "testes" && s.part !== secoes[i - 1]?.part) html += `<h2 class="parte" id="p-3">${PARTES.testes}</h2>`;
     html += secaoForm(s, numeros[i], c);
   });
+  if (!parte2Feita) html += parte2;
 
   html += `
   <div class="rodape-form">
@@ -430,16 +480,6 @@ export async function montarFormulario(root, tipo) {
     </div>
   </div>`;
   root.innerHTML = html;
-
-  // Listas auxiliares
-  listarAlunosI9().then(alunos => {
-    const dl = root.querySelector("#lista-alunos");
-    if (dl) dl.innerHTML = alunos.map(a => `<option value="${esc(a.nome || a.nick)}${a.nick && a.nome ? " (@" + esc(a.nick) + ")" : ""}">`).join("");
-  });
-  try {
-    const avs = JSON.parse(localStorage.getItem("inoveavalia-avaliadores") || "[]");
-    root.querySelector("#lista-avaliadores").innerHTML = avs.map(a => `<option value="${esc(a)}">`).join("");
-  } catch (e) { /* sem storage */ }
 
   /* ── atualização das partes dinâmicas ── */
   function atualizar() {
@@ -552,6 +592,7 @@ export async function montarFormulario(root, tipo) {
     const acao = e.target.closest("[data-acao]")?.dataset.acao;
     if (acao === "parecer") gerarParecer();
     if (acao === "salvar") salvar();
+    if (acao === "enviar-whats" || acao === "copiar-link") enviarParte1(acao === "enviar-whats");
     if (acao === "descartar") {
       try { localStorage.removeItem(CHAVE_RASC); } catch (er) { /* sem storage */ }
       location.href = location.pathname;
@@ -573,29 +614,74 @@ export async function montarFormulario(root, tipo) {
     sincronizarCampos(); salvarRascunho();
   }
 
+  /** Se o aluno respondeu a Parte 1 com esta tela aberta, traz as respostas antes de gravar. */
+  async function mesclarRespostas() {
+    if (!st.id) return;
+    try {
+      const atual = await obterAvaliacao(st.id);
+      if (!atual || !atual.respondidaEm || atual.respondidaEm === st.extra.respondidaEm) return;
+      const fd = atual.formData || {};
+      for (const [k, v] of Object.entries(anamnesisValues(tipo, fd))) if (!temValor(st.values[k])) st.values[k] = v;
+      if (!st.meta.nasc && fd.dataNascimento) st.meta.nasc = fd.dataNascimento;
+      if (!st.meta.telefone && atual.telefone) st.meta.telefone = atual.telefone;
+      st.extra.respondidaEm = atual.respondidaEm;
+      if (st.status === "aguardando") st.status = "respondida";
+    } catch (e) { console.warn(e); }
+  }
+
+  /** Grava o que já foi preenchido e gera o link da Parte 1 para o aluno. */
+  async function enviarParte1(viaWhats) {
+    const msgEl = root.querySelector("[data-envio-status]");
+    if (!st.meta.nome.trim()) { msgEl.textContent = "Preencha o nome do aluno antes de enviar."; root.querySelector('[data-meta="nome"]').focus(); return; }
+    if (viaWhats && soDigitos(st.meta.telefone).length < 10) { msgEl.textContent = "Informe o telefone com DDD para enviar pelo WhatsApp (ou use Copiar link)."; root.querySelector('[data-meta="telefone"]').focus(); return; }
+    const aba = viaWhats ? abrirAba() : null;
+    msgEl.textContent = "Gerando o link...";
+    try {
+      await mesclarRespostas();
+      const formData = { ...st.values };
+      if (isIsoDate(st.meta.nasc)) formData.dataNascimento = st.meta.nasc;
+      const registro = await salvarAvaliacao({
+        ...st.extra, id: st.id || undefined, criadoEm: st.criadoEm || undefined, type: tipo,
+        patientName: st.meta.nome.trim(), patientAge: idade(), assessmentDate: st.meta.data,
+        telefone: st.meta.telefone.trim(), status: st.status && st.status !== "aguardando" ? st.status : "aguardando",
+        enviadoEm: new Date().toISOString(), formData
+      });
+      st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
+      st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm };
+      history.replaceState(null, "", `?editar=${encodeURIComponent(st.id)}`);
+      try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
+      const link = linkResposta(st.id);
+      if (viaWhats) {
+        irPara(aba, linkWhats(st.meta.telefone, mensagemEnvio(st.meta.nome, link)));
+        msgEl.innerHTML = `WhatsApp aberto com a mensagem pronta. Link: <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>`;
+      } else {
+        const ok = await copiar(link);
+        msgEl.innerHTML = `${ok ? "Link copiado! Cole no WhatsApp, e-mail ou SMS do aluno." : "Copie o link:"} <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>`;
+      }
+    } catch (e) {
+      console.error(e);
+      if (aba) aba.close();
+      msgEl.textContent = "Não foi possível gerar o link. Verifique a internet e tente de novo.";
+    }
+  }
+
   async function salvar() {
     const erro = root.querySelector("[data-erro]");
     const btn = root.querySelector('[data-acao="salvar"]');
     const id = idade();
-    if (!st.meta.nome.trim()) { erro.textContent = "Preencha o nome da pessoa avaliada."; root.querySelector('[data-meta="nome"]').focus(); return; }
+    if (!st.meta.nome.trim()) { erro.textContent = "Preencha o nome do aluno."; root.querySelector('[data-meta="nome"]').focus(); return; }
     if (!isIsoDate(st.meta.nasc) || id === null) { erro.textContent = "Informe uma data de nascimento válida."; root.querySelector('[data-meta="nasc"]').focus(); return; }
     erro.textContent = "";
     btn.disabled = true; btn.textContent = "Salvando...";
     try {
+      await mesclarRespostas();
       const formData = { ...st.values, dataNascimento: st.meta.nasc, avaliacoesDatas: [st.meta.data] };
       const registro = await salvarAvaliacao({
-        id: st.id || undefined, criadoEm: st.criadoEm || undefined, type: tipo,
+        ...st.extra, id: st.id || undefined, criadoEm: st.criadoEm || undefined, type: tipo,
         patientName: st.meta.nome.trim(), patientAge: id, assessmentDate: st.meta.data,
-        avaliador: st.meta.avaliador.trim(), alunoI9: st.meta.aluno.trim(), formData
+        telefone: st.meta.telefone.trim(), status: "concluida", formData
       });
-      try {
-        localStorage.removeItem(CHAVE_RASC);
-        if (st.meta.avaliador.trim()) {
-          const avs = new Set(JSON.parse(localStorage.getItem("inoveavalia-avaliadores") || "[]"));
-          avs.add(st.meta.avaliador.trim());
-          localStorage.setItem("inoveavalia-avaliadores", JSON.stringify([...avs].slice(-20)));
-        }
-      } catch (e) { /* sem storage */ }
+      try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
       mostrarConcluido(root, registro);
     } catch (e) {
       console.error(e);
@@ -679,8 +765,7 @@ export function relatorioHTML(av) {
       <div><small>Idade</small><b>${idade ?? "—"} anos</b></div>
       <div><small>Sexo</small><b>${esc(sexoDe(fd) || "—")}</b></div>
       <div><small>Nascimento</small><b>${dataBR(fd.dataNascimento)}</b></div>
-      <div><small>Avaliador(a)</small><b>${esc(av.avaliador || "—")}</b></div>
-      ${av.alunoI9 ? `<div><small>Aluno i9Treino</small><b>${esc(av.alunoI9)}</b></div>` : ""}
+      ${av.telefone ? `<div><small>Telefone</small><b>${esc(formatTel(av.telefone))}</b></div>` : ""}
     </section>
     ${parecer ? `<section class="rel-sec rel-parecer"><h3>Parecer profissional</h3>
       <div class="parecer-grid">
@@ -691,10 +776,118 @@ export function relatorioHTML(av) {
           ${temValor(fd.avaliacaoFinalProfissional) ? `<h5>Avaliação final e recomendações</h5><p>${multiline(fd.avaliacaoFinalProfissional)}</p>` : ""}
         </div>
       </div></section>` : ""}
-    ${medidas ? `<section class="rel-sec"><h3>Medidas corporais</h3>${tabelaCampos(medidas, ctx, true, "Medida") || '<p class="vazio">Sem medidas registradas.</p>'}</section>` : ""}
-    ${testes ? `<section class="rel-sec"><h3>Testes</h3>${testes}</section>` : ""}
-    ${(ident && dl(ident.fields)) || anamnese ? `<section class="rel-sec"><h3>Identificação e anamnese</h3>
+    ${(ident && dl(ident.fields)) || anamnese ? `<section class="rel-sec"><h3>Parte 1 — Anamnese</h3>
       ${ident && dl(ident.fields) ? `<div class="rel-bloco"><h4>Identificação</h4><dl class="dl">${dl(ident.fields)}</dl></div>` : ""}${anamnese}</section>` : ""}
+    ${medidas ? `<section class="rel-sec"><h3>Parte 2 — Medidas corporais</h3>${tabelaCampos(medidas, ctx, true, "Medida") || '<p class="vazio">Sem medidas registradas.</p>'}</section>` : ""}
+    ${testes ? `<section class="rel-sec"><h3>Parte 3 — Avaliação</h3>${testes}</section>` : ""}
     <footer class="rel-foot">i9Treino · ${esc(T.nome)} · gerado em ${new Date().toLocaleDateString("pt-BR")}</footer>
   </article>`;
+}
+
+/* ───────────────────── página do aluno: Parte 1 pelo celular ───────────────────── */
+
+export async function montarResposta(root, id) {
+  const aviso = (titulo, texto) => {
+    root.innerHTML = `<section class="resp-fim"><span class="eyebrow">i9Treino</span><h1>${titulo}</h1><p>${texto}</p></section>`;
+  };
+  if (!id) return aviso("Link incompleto", "Abra o link exatamente como você recebeu no WhatsApp.");
+  let av;
+  try { av = await obterAvaliacao(id); } catch (e) { console.error(e); return aviso("Sem conexão", "Não foi possível abrir o formulário. Verifique a internet e tente de novo."); }
+  if (!av) return aviso("Link não encontrado", "Este link não existe mais. Fale com o seu treinador para receber um novo.");
+
+  const tipo = av.type === "longev" ? "longev" : "multifuncional";
+  const todas = sectionsForType(tipo);
+  const ident = todas.find(s => s.placement === "identification");
+  const anamnese = todas.filter(s => s.part === "anamnese" && !s.perRound);
+  const fd = av.formData || {};
+  const CHAVE = `inoveavalia-resposta-${id}`;
+  const st = {
+    meta: { nome: av.patientName || "", nasc: fd.dataNascimento || "", telefone: av.telefone || "" },
+    values: Object.fromEntries(Object.entries(anamnesisValues(tipo, fd)).filter(([k]) => k !== "dataNascimento"))
+  };
+  try {
+    const r = JSON.parse(localStorage.getItem(CHAVE) || "null");
+    if (r && r.ts > Date.parse(av.atualizadoEm || 0)) { st.meta = { ...st.meta, ...r.meta }; st.values = { ...st.values, ...r.values }; }
+  } catch (e) { /* sem storage */ }
+
+  // Para o aluno: sem campos de anotação do profissional; "Anotações gerais" vira pergunta aberta.
+  const paraAluno = fields => fields
+    .filter(f => f.id !== "multiIdentificacaoObs")
+    .map(f => (/Obs$/.test(f.id) ? { ...f, label: "Quer contar mais alguma coisa sobre isso? (opcional)", placeholder: "Escreva aqui, se quiser" } : f));
+  const ctx = { values: st.values };
+  const primeiro = st.meta.nome.trim().split(/\s+/)[0];
+  const jaRespondeu = av.status === "respondida" || av.status === "concluida";
+
+  root.innerHTML = `
+  <section class="hero-av resp-hero">
+    <span class="eyebrow">Parte 1 · Anamnese</span>
+    <h1>Olá${primeiro ? ", " + esc(primeiro) : ""}!</h1>
+    <p class="lead">Estas perguntas ajudam a montar um treino seguro e do seu jeito. Responda com calma, leva uns 10 minutos. As respostas vão direto para o seu treinador no i9Treino.</p>
+    <div class="resp-progresso"><div><i data-barra></i></div><span data-progresso></span></div>
+  </section>
+  ${jaRespondeu ? `<div class="banner">Você já enviou suas respostas${av.respondidaEm ? " em " + new Date(av.respondidaEm).toLocaleDateString("pt-BR") : ""}. Se quiser corrigir algo, altere abaixo e envie de novo.</div>` : ""}
+  <section class="card" id="r-voce">
+    <div class="secao-head"><span class="num">1</span><div><h3>Seus dados</h3></div></div>
+    <div class="grid-campos">
+      <div class="fbox full"><label>Nome completo</label><input class="inp" data-meta="nome" value="${esc(st.meta.nome)}" autocomplete="name"></div>
+      <div class="fbox"><label>Data de nascimento</label><input class="inp" type="date" data-meta="nasc" max="${hoje()}" value="${esc(st.meta.nasc)}"></div>
+      <div class="fbox"><label>Telefone (WhatsApp)</label><input class="inp" type="tel" inputmode="tel" data-meta="telefone" value="${esc(st.meta.telefone)}" autocomplete="tel"></div>
+    </div>
+    ${ident ? `<div style="margin-top:14px">${grade(paraAluno(ident.fields), ctx)}</div>` : ""}
+  </section>
+  ${anamnese.map((s, i) => `<section class="card secao" data-secao>
+    <div class="secao-head"><span class="num">${i + 2}</span><div><h3>${esc(limparTitulo(s.title))}</h3></div></div>
+    ${grade(paraAluno(s.fields), ctx)}</section>`).join("")}
+  <div class="rodape-form">
+    <p class="erro" data-erro role="alert"></p>
+    <div class="acoes"><span class="status">Suas respostas ficam salvas neste celular até você enviar.</span>
+      <button type="button" class="btn btn-primary" data-enviar>Enviar respostas</button></div>
+  </div>`;
+
+  const perguntas = () => [...root.querySelectorAll(".fbox:not([hidden]) [data-k]")].reduce((m, el) => m.add(el.dataset.k), new Set());
+  function progresso() {
+    const ks = [...perguntas()].filter(k => !/Obs$/.test(k));
+    const feitas = ks.filter(k => temValor(st.values[k])).length;
+    const pct = ks.length ? Math.round((feitas / ks.length) * 100) : 0;
+    root.querySelector("[data-barra]").style.width = pct + "%";
+    root.querySelector("[data-progresso]").textContent = `${feitas} de ${ks.length} respostas`;
+  }
+  function visiveis() { root.querySelectorAll("[data-sw]").forEach(el => { el.hidden = st.values[el.dataset.sw] !== el.dataset.sweq; }); }
+  let t;
+  const guardar = () => { clearTimeout(t); t = setTimeout(() => { try { localStorage.setItem(CHAVE, JSON.stringify({ meta: st.meta, values: st.values, ts: Date.now() })); } catch (e) { /* sem storage */ } }, 400); };
+  const mudar = e => {
+    const el = e.target;
+    if (el.dataset.meta) { st.meta[el.dataset.meta] = el.value; guardar(); return; }
+    const k = el.dataset.k; if (!k) return;
+    const grupo = [...root.querySelectorAll(`[data-k="${CSS.escape(k)}"]`)];
+    st.values[k] = el.dataset.t === "radio" ? el.value : el.dataset.t === "multi" ? grupo.filter(x => x.checked).map(x => x.value) : el.value;
+    visiveis(); progresso(); guardar();
+  };
+  root.addEventListener("input", mudar);
+  root.addEventListener("change", mudar);
+  visiveis(); progresso();
+
+  root.querySelector("[data-enviar]").addEventListener("click", async ev => {
+    const btn = ev.currentTarget, erro = root.querySelector("[data-erro]");
+    if (!st.meta.nome.trim()) { erro.textContent = "Preencha o seu nome."; root.querySelector('[data-meta="nome"]').focus(); return; }
+    if (!isIsoDate(st.meta.nasc)) { erro.textContent = "Preencha a sua data de nascimento."; root.querySelector('[data-meta="nasc"]').focus(); return; }
+    erro.textContent = ""; btn.disabled = true; btn.textContent = "Enviando...";
+    try {
+      const atual = (await obterAvaliacao(id)) || av;
+      const formData = { ...(atual.formData || {}), ...st.values, dataNascimento: st.meta.nasc };
+      await salvarAvaliacao({
+        ...atual, patientName: st.meta.nome.trim(), telefone: st.meta.telefone.trim(),
+        patientAge: ageFromBirthDate(st.meta.nasc, atual.assessmentDate || hoje()),
+        status: atual.status === "concluida" ? "concluida" : "respondida",
+        respondidaEm: new Date().toISOString(), formData
+      });
+      try { localStorage.removeItem(CHAVE); } catch (e) { /* sem storage */ }
+      aviso(`Pronto${primeiro ? ", " + esc(primeiro) : ""}!`, "Recebemos suas respostas. Agora é só aguardar o contato do seu treinador para a próxima etapa da avaliação. Obrigado!");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {
+      console.error(e);
+      erro.textContent = "Não foi possível enviar. Verifique a internet e toque em Enviar de novo — suas respostas não foram perdidas.";
+      btn.disabled = false; btn.textContent = "Enviar respostas";
+    }
+  });
 }

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d0d0d">
+<title>Sua anamnese | i9Treino</title>
+<meta property="og:title" content="i9Treino · Parte 1 da sua avaliação">
+<meta property="og:description" content="Responda a anamnese pelo celular antes da sua avaliação.">
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="../assets/i9-avaliacao.css">
+</head>
+<body class="resp">
+<header class="topbar"><div class="wrap"><span class="logo">i9<span>Treino</span></span><span class="topo-tag">Avaliação</span></div></header>
+<main class="wrap resp-wrap" id="app"><p style="padding:40px 0;color:#9a9a93">Carregando...</p></main>
+<script type="module">
+import { montarResposta } from "../assets/avaliacao.js";
+montarResposta(document.getElementById("app"), new URLSearchParams(location.search).get("id"));
+</script>
+</body>
+</html>
