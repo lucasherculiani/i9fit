@@ -405,6 +405,7 @@ export async function montarFormulario(root, tipo) {
       if (av) {
         const fd = { ...(av.formData || {}) };
         st.id = av.id; st.criadoEm = av.criadoEm; st.status = av.status || null;
+        st.nomeRegistro = av.patientName || "";
         st.extra = { enviadoEm: av.enviadoEm, respondidaEm: av.respondidaEm };
         st.meta = { nome: av.patientName || "", nasc: fd.dataNascimento || "", data: av.assessmentDate || hoje(), telefone: av.telefone || "" };
         delete fd.dataNascimento; delete fd.avaliacoesDatas;
@@ -466,6 +467,7 @@ export async function montarFormulario(root, tipo) {
       <div class="envio-botoes">
         <button type="button" class="btn btn-primary btn-sm" data-acao="enviar-whats">Enviar pelo WhatsApp</button>
         <button type="button" class="btn btn-ghost btn-sm" data-acao="copiar-link">Copiar link</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-acao="novo-aluno">+ Outro aluno</button>
       </div>
       <p class="envio-status" data-envio-status role="status"></p>
     </div>
@@ -671,6 +673,11 @@ export async function montarFormulario(root, tipo) {
     if (acao === "parecer") gerarParecer();
     if (acao === "salvar") salvar();
     if (acao === "enviar-whats" || acao === "copiar-link") enviarParte1(acao === "enviar-whats");
+    if (acao === "novo-aluno") {
+      if (st.meta.nome.trim() && !confirm("Começar uma avaliação em branco para outro aluno?\n\nO que você digitou nesta tela e ainda não foi enviado ou salvo será perdido.")) return;
+      try { localStorage.removeItem(CHAVE_RASC); } catch (er) { /* sem storage */ }
+      location.href = location.pathname;
+    }
     if (acao === "descartar") {
       try { localStorage.removeItem(CHAVE_RASC); } catch (er) { /* sem storage */ }
       location.href = location.pathname;
@@ -707,11 +714,28 @@ export async function montarFormulario(root, tipo) {
     } catch (e) { console.warn(e); }
   }
 
+  /**
+   * Cada aluno tem o próprio registro (e o próprio link). Se esta tela já pertence a um aluno e o nome
+   * foi trocado, pergunta se é outro aluno; se for, desvincula do registro anterior para gerar um novo,
+   * em vez de sobrescrever a avaliação de quem já recebeu o link.
+   */
+  const normNome = t => (t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+  function separarSeForOutroAluno() {
+    if (!st.id || !st.nomeRegistro || normNome(st.meta.nome) === normNome(st.nomeRegistro)) return;
+    const outro = confirm(
+      `Esta tela é da avaliação de ${st.nomeRegistro}, e o nome agora está "${st.meta.nome.trim()}".\n\n` +
+      `OK: é OUTRO aluno. Cria um link novo só para ${st.meta.nome.trim()} (a avaliação de ${st.nomeRegistro} continua salva).\n` +
+      `Cancelar: é o MESMO aluno, só estou corrigindo o nome.`
+    );
+    if (outro) { st.id = null; st.criadoEm = null; st.status = null; st.extra = {}; st.nomeRegistro = ""; }
+  }
+
   /** Grava o que já foi preenchido e gera o link da Parte 1 para o aluno. */
   async function enviarParte1(viaWhats) {
     const msgEl = root.querySelector("[data-envio-status]");
     if (!st.meta.nome.trim()) { msgEl.textContent = "Preencha o nome do aluno antes de enviar."; root.querySelector('[data-meta="nome"]').focus(); return; }
     if (viaWhats && soDigitos(st.meta.telefone).length < 10) { msgEl.textContent = "Informe o telefone com DDD para enviar pelo WhatsApp (ou use Copiar link)."; root.querySelector('[data-meta="telefone"]').focus(); return; }
+    separarSeForOutroAluno();
     const aba = viaWhats ? abrirAba() : null;
     msgEl.textContent = "Gerando o link...";
     try {
@@ -725,16 +749,18 @@ export async function montarFormulario(root, tipo) {
         enviadoEm: new Date().toISOString(), formData
       });
       st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
+      st.nomeRegistro = registro.patientName;
       st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm };
       history.replaceState(null, "", `?editar=${encodeURIComponent(st.id)}`);
       try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
       const link = linkResposta(st.id);
+      const proximo = ` <br>Link de <b>${esc(registro.patientName)}</b>. Para o próximo aluno, toque em <b>+ Outro aluno</b>.`;
       if (viaWhats) {
         irPara(aba, linkWhats(st.meta.telefone, mensagemEnvio(st.meta.nome, link)));
-        msgEl.innerHTML = `WhatsApp aberto com a mensagem pronta. Link: <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>`;
+        msgEl.innerHTML = `WhatsApp aberto com a mensagem pronta. Link: <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>${proximo}`;
       } else {
         const ok = await copiar(link);
-        msgEl.innerHTML = `${ok ? "Link copiado! Cole no WhatsApp, e-mail ou SMS do aluno." : "Copie o link:"} <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>`;
+        msgEl.innerHTML = `${ok ? "Link copiado! Cole no WhatsApp, e-mail ou SMS do aluno." : "Copie o link:"} <a href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>${proximo}`;
       }
     } catch (e) {
       console.error(e);
@@ -750,6 +776,7 @@ export async function montarFormulario(root, tipo) {
     if (!st.meta.nome.trim()) { erro.textContent = "Preencha o nome do aluno."; root.querySelector('[data-meta="nome"]').focus(); return; }
     if (!isIsoDate(st.meta.nasc) || id === null) { erro.textContent = "Informe uma data de nascimento válida."; root.querySelector('[data-meta="nasc"]').focus(); return; }
     erro.textContent = "";
+    separarSeForOutroAluno();
     btn.disabled = true; btn.textContent = "Salvando...";
     try {
       await mesclarRespostas();
