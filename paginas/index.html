@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="paginas-versao" content="2026-11-03-2">
+<meta name="paginas-versao" content="2026-11-03-3">
 <title>Páginas i9Treino</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
@@ -43,6 +43,22 @@ h1 { font: 900 clamp(28px, 5vw, 42px)/1.05 var(--font-display); margin: 10px 0 6
 .card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; background: var(--c); }
 .card:hover { border-color: var(--c); transform: translateY(-2px); }
 .card:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+button.card { font: inherit; text-align: left; cursor: pointer; }
+.card.group[aria-expanded="true"] { border-color: var(--c); }
+.card .count { font: 800 13px var(--font-display); color: var(--fg); }
+.card .chev { margin-left: auto; font: 800 13px var(--font-display); color: var(--c); }
+@media (prefers-color-scheme: light) { .card .chev { color: var(--fg); } }
+.submenu { grid-column: 1 / -1; background: var(--surface); background: color-mix(in srgb, var(--c) 8%, var(--surface)); border: 1px solid var(--c); border-radius: 14px; padding: 14px; }
+.subgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+@media (min-width: 560px) { .subgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 980px) { .subgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.subcard { display: flex; flex-direction: column; gap: 4px; padding: 14px 14px 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 10px; color: var(--fg); text-decoration: none; min-width: 0; }
+.subcard:hover { border-color: var(--c); }
+.subcard:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.subcard .title { font: 800 15.5px/1.25 var(--font-display); }
+.subcard .desc { color: var(--muted); font-size: 13.5px; }
+.subcard .foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding-top: 6px; }
+.subcard .path { font: 600 12px ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--muted); word-break: break-all; }
 .card .sec { align-self: flex-start; font: 800 10.5px var(--font-display); letter-spacing: .1em; text-transform: uppercase; background: var(--c); color: #0b0b0b; padding: 3px 8px; border-radius: 5px; }
 @media (prefers-reduced-motion: no-preference) { .card { transition: transform .15s ease, border-color .15s ease; } }
 .card .title { font: 800 18px/1.2 var(--font-display); text-wrap: balance; }
@@ -119,29 +135,90 @@ footer { color: var(--muted); font-size: 13px; padding-block: 34px 40px; }
   // Uma cor por quadro, sempre na mesma ordem, para cada página ficar fácil de reconhecer.
   var CORES = ["#C8F542", "#1E8BFF", "#FF2D95", "#FF7A1A", "#9B5CFF", "#19C7B4", "#FFC531", "#FF4D4D", "#3FC8FF", "#2ECC71", "#E040FB", "#FF8A65"];
 
+  // Textos dos quadros que agrupam várias páginas (seção com mais de uma página vira um quadro com submenu).
+  var GRUPOS = {
+    avaliacoes: "InoveAvalia multifuncional, InoveAvalia Plus 60+ e anamnese.",
+    calendario: "Calendários de conteúdo de cada cliente."
+  };
+  var aberto = null;   // id da seção com o submenu aberto
+  var ultimas = [];
+
+  function tagsDe(pg) {
+    var t = [];
+    if (DESTAQUE[pg.p]) t.push('<span class="tag main">Público</span>');
+    if (pg.ni) t.push('<span class="tag">Interna</span>');
+    return t.join("");
+  }
+  function linkPagina(pg, cls) {
+    var a = document.createElement("a");
+    a.className = cls; a.href = "/" + pg.p;
+    var desc = pg.d || DESCRICOES[pg.p] || "";
+    a.innerHTML =
+      '<span class="title">' + esc(limpaTitulo(pg.t) || nomePelaPasta(pg.p)) + "</span>" +
+      (desc ? '<span class="desc">' + esc(desc) + "</span>" : "") +
+      '<span class="foot"><span class="path">i9treino.com.br/' + esc(pg.p) + "</span>" + tagsDe(pg) + "</span>";
+    return a;
+  }
+
+  // O submenu entra logo depois do último quadro da linha do quadro tocado, ocupando a largura toda.
+  function posicionaSubmenu(grid) {
+    var painel = grid.querySelector(".submenu");
+    var dono = grid.querySelector('.card[data-grupo="' + aberto + '"]');
+    if (!painel || !dono) return;
+    grid.appendChild(painel);
+    var cards = Array.prototype.slice.call(grid.querySelectorAll(".card"));
+    var ultimoDaLinha = dono;
+    cards.forEach(function (c) { if (c.offsetTop === dono.offsetTop) ultimoDaLinha = c; });
+    ultimoDaLinha.after(painel);
+  }
+
   function render(paginas) {
+    ultimas = paginas;
     main.innerHTML = "";
     var grid = document.createElement("div"); grid.className = "grid";
-    var n = 0;
+    var n = 0, painelAberto = null;
     SECOES.forEach(function (s) {
-      paginas.filter(function (pg) { return pg.secao === s.id; }).forEach(function (pg) {
-        var a = document.createElement("a");
-        a.className = "card"; a.href = "/" + pg.p;
-        a.style.setProperty("--c", CORES[n++ % CORES.length]);
-        var desc = pg.d || DESCRICOES[pg.p] || "";
-        var tags = [];
-        if (DESTAQUE[pg.p]) tags.push('<span class="tag main">Público</span>');
-        if (pg.ni) tags.push('<span class="tag">Interna</span>');
-        a.innerHTML =
-          '<span class="sec">' + esc(s.nome) + "</span>" +
-          '<span class="title">' + esc(limpaTitulo(pg.t) || nomePelaPasta(pg.p)) + "</span>" +
-          (desc ? '<span class="desc">' + esc(desc) + "</span>" : "") +
-          '<span class="foot"><span class="path">i9treino.com.br/' + esc(pg.p) + "</span>" + tags.join("") + "</span>";
+      var lista = paginas.filter(function (pg) { return pg.secao === s.id; });
+      if (!lista.length) return;
+      var cor = CORES[n++ % CORES.length];
+      if (lista.length === 1) {
+        var a = linkPagina(lista[0], "card");
+        a.style.setProperty("--c", cor);
+        a.insertAdjacentHTML("afterbegin", '<span class="sec">' + esc(s.nome) + "</span>");
         grid.appendChild(a);
-      });
+        return;
+      }
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "card group"; b.dataset.grupo = s.id;
+      b.style.setProperty("--c", cor);
+      b.setAttribute("aria-expanded", aberto === s.id ? "true" : "false");
+      b.setAttribute("aria-controls", "sub-" + s.id);
+      b.innerHTML =
+        '<span class="sec">' + esc(s.nome) + "</span>" +
+        '<span class="title">' + esc(s.nome) + "</span>" +
+        '<span class="desc">' + esc(GRUPOS[s.id] || lista.map(function (pg) { return limpaTitulo(pg.t); }).join(", ")) + "</span>" +
+        '<span class="foot"><span class="count">' + lista.length + " páginas</span>" +
+        '<span class="chev" aria-hidden="true">' + (aberto === s.id ? "Fechar ▴" : "Abrir ▾") + "</span></span>";
+      b.addEventListener("click", function () { aberto = aberto === s.id ? null : s.id; render(ultimas); });
+      grid.appendChild(b);
+      if (aberto === s.id) {
+        var painel = document.createElement("div");
+        painel.className = "submenu"; painel.id = "sub-" + s.id;
+        painel.style.setProperty("--c", cor);
+        painel.setAttribute("role", "region");
+        painel.setAttribute("aria-label", s.nome);
+        var sub = document.createElement("div"); sub.className = "subgrid";
+        lista.forEach(function (pg) { sub.appendChild(linkPagina(pg, "subcard")); });
+        painel.appendChild(sub);
+        painelAberto = painel;
+      }
     });
+    // O submenu entra no fim primeiro (assim não empurra os quadros) e depois vai para baixo da linha certa.
+    if (painelAberto) grid.appendChild(painelAberto);
     main.appendChild(grid);
+    if (painelAberto) posicionaSubmenu(grid);
   }
+  window.addEventListener("resize", function () { var g = main.querySelector(".grid"); if (g && aberto) posicionaSubmenu(g); });
 
   function classifica(lista) {
     return lista
