@@ -391,7 +391,17 @@ export async function montarFormulario(root, tipo) {
   const secoes = todas.filter(s => !s.placement);
   const numeros = numberSections(secoes);
   const params = new URLSearchParams(location.search);
-  const CHAVE_RASC = `inoveavalia-rascunho-${tipo}`;
+  // Na tela "lado a lado" cada coluna abre esta página com ?embed=1&slot=N: sem barra do topo e com
+  // rascunho próprio, para duas avaliações do mesmo protocolo não apagarem o rascunho uma da outra.
+  const slot = (params.get("slot") || "").replace(/\D/g, "");
+  const embed = params.get("embed") === "1";
+  const extraUrl = (embed ? "&embed=1" : "") + (slot ? `&slot=${slot}` : "");
+  const urlNova = () => location.pathname + (extraUrl ? "?" + extraUrl.slice(1) : "");
+  const urlEditar = id => `?editar=${encodeURIComponent(id)}${extraUrl}`;
+  if (embed && !document.getElementById("estilo-embed")) {
+    document.head.insertAdjacentHTML("beforeend", '<style id="estilo-embed">.topbar,.hero-av .voltar{display:none!important}.secnav{top:0!important}.hero-av{padding-top:14px!important}</style>');
+  }
+  const CHAVE_RASC = `inoveavalia-rascunho-${tipo}` + (slot ? `-slot${slot}` : "") + (params.get("editar") ? `-${params.get("editar")}` : "");
 
   const st = {
     id: null, criadoEm: null, status: null, extra: {},
@@ -679,11 +689,11 @@ export async function montarFormulario(root, tipo) {
     if (acao === "novo-aluno") {
       if (st.meta.nome.trim() && !confirm("Começar uma avaliação em branco para outro aluno?\n\nO que você digitou nesta tela e ainda não foi enviado ou salvo será perdido.")) return;
       try { localStorage.removeItem(CHAVE_RASC); } catch (er) { /* sem storage */ }
-      location.href = location.pathname;
+      location.href = urlNova();
     }
     if (acao === "descartar") {
       try { localStorage.removeItem(CHAVE_RASC); } catch (er) { /* sem storage */ }
-      location.href = location.pathname;
+      location.href = urlNova();
     }
   });
   root.addEventListener("keydown", e => {
@@ -754,7 +764,7 @@ export async function montarFormulario(root, tipo) {
       st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
       st.nomeRegistro = registro.patientName;
       st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm, whatsEnviadoEm: registro.whatsEnviadoEm };
-      history.replaceState(null, "", `?editar=${encodeURIComponent(st.id)}`);
+      history.replaceState(null, "", urlEditar(st.id));
       try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
       const link = linkResposta(st.id);
       const proximo = ` <br>Link de <b>${esc(registro.patientName)}</b>. Para o próximo aluno, toque em <b>+ Outro aluno</b>.`;
@@ -797,7 +807,7 @@ export async function montarFormulario(root, tipo) {
       st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
       st.nomeRegistro = registro.patientName;
       st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm, whatsEnviadoEm: registro.whatsEnviadoEm };
-      history.replaceState(null, "", `?editar=${encodeURIComponent(st.id)}`);
+      history.replaceState(null, "", urlEditar(st.id));
       try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
       const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
       aviso.innerHTML = `Salvo às ${hora}. Para continuar depois, abra o <a href="/admin/#anamneses">painel</a> em "Em andamento". Para o próximo aluno, toque em <b>+ Outro aluno</b>.`;
@@ -837,6 +847,13 @@ export async function montarFormulario(root, tipo) {
   atualizar();
 }
 
+/** Mantém ?embed e ?slot ao trocar de avaliação dentro da tela lado a lado. */
+function manterTela() {
+  const p = new URLSearchParams(location.search);
+  const q = ["embed", "slot"].filter(k => p.get(k)).map(k => `${k}=${encodeURIComponent(p.get(k))}`).join("&");
+  return q ? "?" + q : "";
+}
+
 function mostrarConcluido(root, av) {
   const T = TIPOS[av.type];
   root.innerHTML = `
@@ -846,7 +863,7 @@ function mostrarConcluido(root, av) {
       <p class="lead">${esc(T.nome)} · ${dataBR(av.assessmentDate)}. O resultado já aparece no painel de administração.</p>
       <div class="acoes-linha">
         <button class="btn btn-primary" onclick="window.print()">Imprimir / salvar PDF</button>
-        <a class="btn btn-ghost" href="${T.rota}">Nova avaliação</a>
+        <a class="btn btn-ghost" href="${T.rota}${manterTela()}">Nova avaliação</a>
         <a class="btn btn-ghost" href="/admin/#avaliacoes">Ir para o painel</a>
       </div>
     </section>
