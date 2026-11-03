@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d0d0d">
+<title>Avaliações lado a lado | i9Treino</title>
+<link rel="icon" href="/icon-192.png">
+<link rel="stylesheet" href="../assets/i9-avaliacao.css">
+<style>
+  /* Tela dividida: uma avaliação por coluna, cada uma independente (iframe da página da avaliação). */
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  .barra { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .barra h1 { font-size: 1rem; margin-right: auto; }
+  .barra h1 span { color: var(--muted); font-weight: 600; font-size: .85rem; margin-left: 8px; }
+  .seg { display: inline-flex; border: 1px solid var(--border2); border-radius: 999px; overflow: hidden; }
+  .seg button { background: transparent; color: var(--muted); border: 0; padding: 7px 14px; font: inherit; font-weight: 700; font-size: .85rem; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #0d0d0d; }
+  .colunas { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); }
+  .coluna { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--border); }
+  .coluna:last-child { border-right: 0; }
+  .col-topo { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .col-n { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .8rem; background: var(--accent); color: #0d0d0d; }
+  .col-topo select { flex: 1; min-width: 0; padding: 8px 10px; font-size: .88rem; }
+  .col-topo .btn { padding: 7px 12px; font-size: .8rem; flex: 0 0 auto; }
+  .coluna iframe { flex: 1; width: 100%; min-height: 0; border: 0; background: var(--bg); }
+  .vazio { flex: 1; display: grid; place-items: center; text-align: center; color: var(--muted); padding: 24px; font-size: .92rem; }
+  .vazio b { display: block; color: var(--text); font-size: 1rem; margin-bottom: 4px; }
+  @media (max-width: 900px) {
+    body { overflow: auto; display: block; }
+    .colunas { display: block; }
+    .coluna { border-right: 0; border-bottom: 1px solid var(--border); }
+    .coluna iframe, .vazio { height: 85vh; flex: none; }
+    .aviso-pequeno { display: block !important; }
+  }
+  .aviso-pequeno { display: none; flex-basis: 100%; font-size: .8rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap" style="width:100%">
+  <a class="logo" href="/">i9<span>Treino</span></a>
+  <nav><a href="/avaliacoes/">Avaliações</a><a href="/avaliacoes/lado-a-lado/" class="ativo">Lado a lado</a><a href="/admin/">Painel</a></nav>
+</div></header>
+
+<div class="barra">
+  <h1>Avaliações lado a lado<span>cada coluna é uma avaliação separada e salva sozinha</span></h1>
+  <span style="font-size:.85rem;color:var(--muted)">Colunas</span>
+  <div class="seg" role="group" aria-label="Número de colunas">
+    <button type="button" data-n="2" aria-pressed="true">2</button>
+    <button type="button" data-n="3" aria-pressed="false">3</button>
+  </div>
+  <button type="button" class="btn btn-ghost btn-sm" id="atualizar-lista">Atualizar lista de alunos</button>
+  <p class="aviso-pequeno">Tela pequena: as colunas ficam uma embaixo da outra. No computador elas ficam lado a lado.</p>
+</div>
+
+<main class="colunas" id="colunas"><div class="vazio"><div>Carregando...</div></div></main>
+
+<script type="module">
+import { exigirAcesso } from "../assets/acesso.js";
+import { TIPOS } from "../assets/avaliacao.js";
+import { listarAvaliacoes } from "../assets/db.js";
+
+await exigirAcesso("Avaliações lado a lado");
+
+const CHAVE = "inoveavalia-lado-a-lado";
+const $ = s => document.querySelector(s);
+const esc = t => String(t ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+let estado = { n: 2, cols: ["", "", ""] };
+try { estado = { ...estado, ...JSON.parse(localStorage.getItem(CHAVE) || "{}") }; } catch (e) { /* sem storage */ }
+const guardar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) { /* sem storage */ } };
+let lista = [];
+
+async function carregarLista() {
+  try { lista = await listarAvaliacoes(); } catch (e) { console.error(e); lista = []; }
+}
+
+// Endereço da página da avaliação dentro da coluna (sempre com embed e slot próprio).
+function urlDe(valor, slot) {
+  if (!valor) return "";
+  const [tipo, id] = valor.split(":");
+  const T = TIPOS[tipo]; if (!T) return "";
+  return `${T.rota}?${id ? `editar=${encodeURIComponent(id)}&` : ""}embed=1&slot=${slot}`;
+}
+// Transforma o endereço atual da coluna de volta no valor do seletor.
+function valorDe(url) {
+  if (!url) return "";
+  const u = new URL(url, location.origin);
+  const tipo = Object.keys(TIPOS).find(k => u.pathname === TIPOS[k].rota);
+  if (!tipo) return "";
+  const id = u.searchParams.get("editar");
+  return id ? `${tipo}:${id}` : tipo;
+}
+
+function opcoes(selecionado) {
+  const abertas = lista.filter(a => a.status && a.status !== "concluida")
+    .sort((a, b) => String(a.patientName).localeCompare(String(b.patientName), "pt-BR"));
+  const concluidas = lista.filter(a => !a.status || a.status === "concluida")
+    .sort((a, b) => String(b.atualizadoEm || b.criadoEm || "").localeCompare(String(a.atualizadoEm || a.criadoEm || ""))).slice(0, 30);
+  const op = (v, t) => `<option value="${esc(v)}"${v === selecionado ? " selected" : ""}>${esc(t)}</option>`;
+  const item = a => op(`${a.type}:${a.id}`, `${a.patientName} · ${TIPOS[a.type]?.nome || ""}`);
+  let html = op("", "Escolha a avaliação desta coluna…");
+  html += `<optgroup label="Nova avaliação">${Object.keys(TIPOS).map(k => op(k, `Nova ${TIPOS[k].nome}`)).join("")}</optgroup>`;
+  if (abertas.length) html += `<optgroup label="Em aberto (continuar)">${abertas.map(item).join("")}</optgroup>`;
+  if (concluidas.length) html += `<optgroup label="Concluídas (editar)">${concluidas.map(item).join("")}</optgroup>`;
+  // Avaliação aberta na coluna que ainda não está na lista (acabou de ser salva): mantém a opção.
+  if (selecionado && selecionado.includes(":") && !lista.some(a => `${a.type}:${a.id}` === selecionado)) html += `<optgroup label="Nesta coluna">${op(selecionado, "Avaliação aberta nesta coluna")}</optgroup>`;
+  return html;
+}
+
+function montar() {
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(Number(b.dataset.n) === estado.n)));
+  const cont = $("#colunas");
+  cont.style.setProperty("--n", estado.n);
+  cont.innerHTML = "";
+  for (let i = 0; i < estado.n; i++) {
+    const slot = i + 1;
+    const url = estado.cols[i] || "";
+    const col = document.createElement("section");
+    col.className = "coluna"; col.setAttribute("aria-label", `Coluna ${slot}`);
+    col.innerHTML = `<div class="col-topo"><span class="col-n">${slot}</span>
+        <select class="inp" aria-label="Avaliação da coluna ${slot}">${opcoes(valorDe(url))}</select>
+        <button type="button" class="btn btn-ghost" data-aba title="Abrir esta avaliação sozinha em outra aba">↗</button></div>
+      ${url ? `<iframe title="Avaliação da coluna ${slot}" src="${esc(url)}"></iframe>` : `<div class="vazio"><div><b>Coluna ${slot} livre</b>Escolha acima uma avaliação nova ou um aluno em aberto.</div></div>`}`;
+    col.querySelector("select").addEventListener("change", e => {
+      const v = e.target.value;
+      if (estado.cols[i] && !confirm(`Trocar a avaliação da coluna ${slot}?\n\nO que foi digitado e ainda não salvo nela continua no rascunho desta coluna, mas a tela será recarregada.`)) { e.target.value = valorDe(estado.cols[i]); return; }
+      estado.cols[i] = urlDe(v, slot); guardar(); montar();
+    });
+    col.querySelector("[data-aba]").addEventListener("click", () => {
+      const fr = col.querySelector("iframe");
+      if (!fr) return;
+      let u = estado.cols[i];
+      try { u = fr.contentWindow.location.pathname + fr.contentWindow.location.search; } catch (e) { /* mesma origem */ }
+      window.open(u.replace(/[?&]embed=1/, "").replace(/[?&]slot=\d+/, "").replace(/\?&/, "?").replace(/\?$/, ""), "_blank");
+    });
+    cont.appendChild(col);
+  }
+}
+
+// Quando uma coluna salva ou troca de aluno, o endereço dela muda: guarda para reabrir igual depois.
+setInterval(() => {
+  let mudou = false;
+  document.querySelectorAll(".coluna iframe").forEach((fr, i) => {
+    try {
+      const u = fr.contentWindow.location.pathname + fr.contentWindow.location.search;
+      if (u && u !== "blank" && u !== estado.cols[i]) { estado.cols[i] = u; mudou = true; }
+    } catch (e) { /* ainda carregando */ }
+  });
+  if (mudou) guardar();
+}, 1500);
+
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  const n = Number(b.dataset.n);
+  if (n === estado.n) return;
+  if (n < estado.n && estado.cols[n] && !confirm("Fechar a coluna 3? O rascunho dela continua salvo e volta se você abrir 3 colunas de novo.")) return;
+  estado.n = n; guardar(); montar();
+}));
+$("#atualizar-lista").addEventListener("click", async () => {
+  const b = $("#atualizar-lista"); b.disabled = true; b.textContent = "Atualizando...";
+  await carregarLista();
+  document.querySelectorAll(".coluna select").forEach((sel, i) => { sel.innerHTML = opcoes(valorDe(estado.cols[i])); });
+  b.disabled = false; b.textContent = "Atualizar lista de alunos";
+});
+
+await carregarLista();
+montar();
+</script>
+</body>
+</html>
