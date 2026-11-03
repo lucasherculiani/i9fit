@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="paginas-versao" content="2026-11-03-1">
+<meta name="paginas-versao" content="2026-11-03-2">
 <title>Páginas i9Treino</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
@@ -36,12 +36,14 @@ header { padding-block: 30px 10px; }
 h1 { font: 900 clamp(28px, 5vw, 42px)/1.05 var(--font-display); margin: 10px 0 6px; text-wrap: balance; }
 .sub { color: var(--muted); margin: 0; max-width: 60ch; }
 .status { color: var(--muted); font-size: 13px; margin: 10px 0 0; min-height: 1.4em; }
-section { padding-block: 22px 4px; }
-section h2 { font: 800 12px var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
-.card { display: flex; flex-direction: column; gap: 6px; min-height: 150px; padding: 18px 18px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; color: var(--fg); text-decoration: none; min-width: 0; }
-.card:hover { border-color: var(--accent); transform: translateY(-2px); }
-.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding-block: 22px 0; }
+@media (min-width: 560px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 980px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.card { position: relative; display: flex; flex-direction: column; gap: 6px; min-height: 190px; padding: 22px 18px 16px; background: var(--surface); background: color-mix(in srgb, var(--c) 13%, var(--surface)); border: 1px solid var(--line); border-color: color-mix(in srgb, var(--c) 35%, var(--line)); border-radius: 14px; color: var(--fg); text-decoration: none; min-width: 0; overflow: hidden; }
+.card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 6px; background: var(--c); }
+.card:hover { border-color: var(--c); transform: translateY(-2px); }
+.card:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+.card .sec { align-self: flex-start; font: 800 10.5px var(--font-display); letter-spacing: .1em; text-transform: uppercase; background: var(--c); color: #0b0b0b; padding: 3px 8px; border-radius: 5px; }
 @media (prefers-reduced-motion: no-preference) { .card { transition: transform .15s ease, border-color .15s ease; } }
 .card .title { font: 800 18px/1.2 var(--font-display); text-wrap: balance; }
 .card .desc { color: var(--muted); font-size: 14.5px; }
@@ -114,30 +116,31 @@ footer { color: var(--muted); font-size: 13px; padding-block: 34px 40px; }
     return ult ? ult.replace(/[-_]+/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); }) : "Principal";
   }
 
+  // Uma cor por quadro, sempre na mesma ordem, para cada página ficar fácil de reconhecer.
+  var CORES = ["#C8F542", "#1E8BFF", "#FF2D95", "#FF7A1A", "#9B5CFF", "#19C7B4", "#FFC531", "#FF4D4D", "#3FC8FF", "#2ECC71", "#E040FB", "#FF8A65"];
+
   function render(paginas) {
     main.innerHTML = "";
+    var grid = document.createElement("div"); grid.className = "grid";
+    var n = 0;
     SECOES.forEach(function (s) {
-      var lista = paginas.filter(function (pg) { return pg.secao === s.id; });
-      if (!lista.length) return;
-      var sec = document.createElement("section");
-      sec.innerHTML = "<h2>" + esc(s.nome) + "</h2>";
-      var grid = document.createElement("div"); grid.className = "grid";
-      lista.forEach(function (pg) {
+      paginas.filter(function (pg) { return pg.secao === s.id; }).forEach(function (pg) {
         var a = document.createElement("a");
         a.className = "card"; a.href = "/" + pg.p;
+        a.style.setProperty("--c", CORES[n++ % CORES.length]);
         var desc = pg.d || DESCRICOES[pg.p] || "";
         var tags = [];
         if (DESTAQUE[pg.p]) tags.push('<span class="tag main">Público</span>');
         if (pg.ni) tags.push('<span class="tag">Interna</span>');
         a.innerHTML =
+          '<span class="sec">' + esc(s.nome) + "</span>" +
           '<span class="title">' + esc(limpaTitulo(pg.t) || nomePelaPasta(pg.p)) + "</span>" +
           (desc ? '<span class="desc">' + esc(desc) + "</span>" : "") +
           '<span class="foot"><span class="path">i9treino.com.br/' + esc(pg.p) + "</span>" + tags.join("") + "</span>";
         grid.appendChild(a);
       });
-      sec.appendChild(grid);
-      main.appendChild(sec);
     });
+    main.appendChild(grid);
   }
 
   function classifica(lista) {
