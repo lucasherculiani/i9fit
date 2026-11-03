@@ -50,6 +50,9 @@
   .badge{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
   .badge-aguardando{background:rgba(255,159,67,.14);color:var(--e)}
   .badge-respondida{background:rgba(200,245,66,.14);color:var(--accent)}
+  .badge-em_andamento{background:rgba(90,170,255,.14);color:#7cbcff}
+  .falta-whats{display:inline-block;margin-top:4px;font-size:.72rem;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--e)}
+  .whats-ok{display:inline-block;margin-top:4px;font-size:.78rem;color:var(--muted)}
   .tel{color:var(--accent);text-decoration:none}
   .envio-form{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
   .envio-form h3{font-size:1.3rem}
@@ -125,7 +128,7 @@
   </div>
 
   <div class="bloco-t" id="anamneses">
-    <div><h2>Parte 1 enviada aos alunos</h2><p class="sub">Anamneses enviadas por link. Quando o aluno responder, continue a avaliação daqui.</p></div>
+    <div><h2>Em andamento e Parte 1 enviada</h2><p class="sub" id="pend-resumo">Avaliações salvas para continuar depois e anamneses enviadas por link. Continue qualquer uma daqui.</p></div>
     <button class="btn btn-primary btn-sm" id="novo-envio">Enviar Parte 1 para alunos</button>
   </div>
   <div class="pendentes" id="pendentes"><div class="vazio-grande">Carregando...</div></div>
@@ -155,7 +158,7 @@
 import { exigirAcesso, sair } from "../avaliacoes/assets/acesso.js";
 import { listarAvaliacoes, excluirAvaliacao, contar } from "../avaliacoes/assets/db.js";
 import { relatorioHTML, TIPOS, esc, dataBR, STATUS, formatTel, telWhats, linkResposta, linkWhats, mensagemEnvio, copiar, abrirAba, irPara } from "../avaliacoes/assets/avaliacao.js";
-import { salvarAvaliacao } from "../avaliacoes/assets/db.js";
+import { salvarAvaliacao, obterAvaliacao } from "../avaliacoes/assets/db.js";
 import * as C from "../avaliacoes/assets/catalogo.js";
 
 await exigirAcesso("Painel i9Treino");
@@ -302,19 +305,43 @@ $("exp-csv").onclick = () => {
   baixar(`inoveavalia-${new Date().toISOString().slice(0, 10)}.csv`, "﻿" + [cab.map(cel).join(";"), ...corpo].join("\r\n"), "text/csv;charset=utf-8");
 };
 
-/* ===== Parte 1 enviada aos alunos ===== */
+/* ===== Em andamento e Parte 1 enviada ===== */
+const faltaWhats = a => (a.status === "aguardando" || a.status === "em_andamento") && !a.whatsEnviadoEm && telWhats(a.telefone).length >= 12;
+
+/** Registra que o WhatsApp foi enviado, lendo a versão atual do banco para não apagar respostas que acabaram de chegar. */
+async function marcarWhatsEnviado(id) {
+  try {
+    const atual = await obterAvaliacao(id);
+    if (!atual) return;
+    const agora = new Date().toISOString();
+    const reg = await salvarAvaliacao({ ...atual, whatsEnviadoEm: agora, enviadoEm: atual.enviadoEm || agora,
+      status: atual.status === "em_andamento" ? "aguardando" : atual.status });
+    const i = TODAS.findIndex(x => x.id === id);
+    if (i >= 0) TODAS[i] = reg;
+    renderPendentes();
+  } catch (e) { console.error(e); }
+}
+
 function renderPendentes() {
-  const pend = TODAS.filter(a => !concluida(a)).sort((a, b) => String(b.respondidaEm || b.enviadoEm || b.criadoEm).localeCompare(String(a.respondidaEm || a.enviadoEm || a.criadoEm)));
-  if (!pend.length) { $("pendentes").innerHTML = '<div class="vazio-grande" style="padding:22px">Nenhuma Parte 1 pendente. Use "Enviar Parte 1 para alunos" para mandar o link pelo WhatsApp.</div>'; return; }
+  const pend = TODAS.filter(a => !concluida(a)).sort((a, b) =>
+    (faltaWhats(b) - faltaWhats(a)) ||
+    String(b.respondidaEm || b.atualizadoEm || b.enviadoEm || b.criadoEm).localeCompare(String(a.respondidaEm || a.atualizadoEm || a.enviadoEm || a.criadoEm)));
+  const nFalta = pend.filter(faltaWhats).length;
+  $("pend-resumo").textContent = pend.length
+    ? `${pend.length} em aberto${nFalta ? ` · ${nFalta} ainda sem WhatsApp enviado (aparecem primeiro)` : ""}. Continue qualquer uma daqui.`
+    : "Avaliações salvas para continuar depois e anamneses enviadas por link. Continue qualquer uma daqui.";
+  if (!pend.length) { $("pendentes").innerHTML = '<div class="vazio-grande" style="padding:22px">Nada em aberto. Use "Enviar Parte 1 para alunos" para mandar o link para vários alunos, ou "Salvar e continuar depois" dentro de uma avaliação.</div>'; return; }
   $("pendentes").innerHTML = pend.map(a => `<div class="pend">
     <div><span class="tipo tipo-${a.type}">${esc(TIPOS[a.type]?.nome || "")}</span><b>${esc(a.patientName)}</b>
-      <span class="meta">${a.telefone ? esc(formatTel(a.telefone)) + " · " : ""}enviado em ${a.enviadoEm ? new Date(a.enviadoEm).toLocaleDateString("pt-BR") : "—"}</span></div>
+      <span class="meta">${a.telefone ? esc(formatTel(a.telefone)) + " · " : ""}${a.status === "em_andamento" ? "salva em " + new Date(a.atualizadoEm || a.criadoEm).toLocaleDateString("pt-BR") : "link gerado em " + (a.enviadoEm ? new Date(a.enviadoEm).toLocaleDateString("pt-BR") : "—")}</span>
+      ${faltaWhats(a) ? '<span class="falta-whats">Falta enviar o WhatsApp</span>' : a.whatsEnviadoEm ? `<span class="whats-ok">WhatsApp enviado em ${new Date(a.whatsEnviadoEm).toLocaleDateString("pt-BR")}</span>` : ""}</div>
     <div><span class="badge badge-${a.status}">${esc(STATUS[a.status] || a.status)}</span>
       ${a.respondidaEm ? `<span class="meta"><br>respondida em ${new Date(a.respondidaEm).toLocaleString("pt-BR")}</span>` : ""}</div>
     <div class="pessoa-acoes">
       ${a.status === "respondida" ? `<button class="btn btn-ghost btn-sm" data-ver="${esc(a.id)}">Ver respostas</button>` : ""}
+      ${faltaWhats(a) ? `<button class="btn btn-primary btn-sm" data-whats="${esc(a.id)}">Enviar WhatsApp</button>` : ""}
       <a class="btn ${a.status === "respondida" ? "btn-primary" : "btn-ghost"} btn-sm" href="${TIPOS[a.type].rota}?editar=${encodeURIComponent(a.id)}">Continuar avaliação</a>
-      ${a.status === "aguardando" ? `<button class="btn btn-ghost btn-sm" data-whats="${esc(a.id)}">Reenviar WhatsApp</button>` : ""}
+      ${a.status === "aguardando" && a.whatsEnviadoEm && a.telefone ? `<button class="btn btn-ghost btn-sm" data-whats="${esc(a.id)}">Reenviar WhatsApp</button>` : ""}
       <button class="btn btn-ghost btn-sm" data-copiar="${esc(a.id)}">Copiar link</button>
       <button class="btn btn-perigo btn-sm" data-del="${esc(a.id)}">Excluir</button>
     </div></div>`).join("");
@@ -324,7 +351,7 @@ $("pendentes").addEventListener("click", async e => {
   const id = b.dataset.ver || b.dataset.whats || b.dataset.copiar || b.dataset.del;
   const a = TODAS.find(x => x.id === id); if (!a) return;
   if (b.dataset.ver) abrir(relatorioHTML(a));
-  if (b.dataset.whats) window.open(linkWhats(a.telefone, mensagemEnvio(a.patientName, linkResposta(a.id))), "_blank");
+  if (b.dataset.whats) { window.open(linkWhats(a.telefone, mensagemEnvio(a.patientName, linkResposta(a.id))), "_blank"); marcarWhatsEnviado(a.id); }
   if (b.dataset.copiar) { const ok = await copiar(linkResposta(a.id)); b.textContent = ok ? "Link copiado!" : "Não copiou"; setTimeout(() => (b.textContent = "Copiar link"), 2000); }
   if (b.dataset.del) {
     if (!confirm(`Excluir o envio para ${a.patientName}? O link deixará de funcionar.`)) return;
@@ -384,7 +411,7 @@ $("novo-envio").onclick = () => {
     const ok = criados.filter(c => !c.falhou);
     res.innerHTML = `<span class="eyebrow">${ok.length} link(s) gerado(s)</span>
       <h3>Agora é só enviar</h3>
-      <p class="sub">O WhatsApp abre uma conversa por vez, com a mensagem pronta. Toque em cada aluno e depois em enviar no WhatsApp.</p>
+      <p class="sub">O WhatsApp abre uma conversa por vez, com a mensagem pronta. Toque em cada aluno e depois em enviar no WhatsApp. Pode parar no meio: os links ficam salvos e quem ainda não recebeu aparece no painel como "Falta enviar o WhatsApp".</p>
       <div class="lote-res">${criados.map(c => c.falhou ? `<div class="lote-item"><b>${esc(c.patientName)}</b><span class="erro">Não foi possível gerar — tente de novo.</span></div>` :
         `<div class="lote-item" data-id="${esc(c.id)}"><div><b>${esc(c.patientName)}</b><span class="sub">${esc(formatTel(c.telefone) || "sem telefone")}</span></div>
           <div class="pessoa-acoes">${telWhats(c.telefone).length >= 12 ? `<button class="btn btn-primary btn-sm" data-l-whats>Enviar WhatsApp</button>` : ""}<button class="btn btn-ghost btn-sm" data-l-copiar>Copiar link</button></div></div>`).join("")}</div>
@@ -394,6 +421,7 @@ $("novo-envio").onclick = () => {
       if (e.target.closest("[data-l-whats]") && reg) {
         window.open(linkWhats(reg.telefone, mensagemEnvio(reg.patientName, linkResposta(reg.id))), "_blank");
         const b = e.target.closest("[data-l-whats]"); b.textContent = "Enviado ✓"; b.classList.replace("btn-primary", "btn-ghost");
+        marcarWhatsEnviado(reg.id);
       }
       if (e.target.closest("[data-l-copiar]") && reg) { const b = e.target.closest("[data-l-copiar]"); b.textContent = (await copiar(linkResposta(reg.id))) ? "Copiado!" : "Não copiou"; }
       if (e.target.id === "lote-todos") { const txt = ok.map(c => `${c.patientName}: ${linkResposta(c.id)}`).join("\n"); e.target.textContent = (await copiar(txt)) ? "Todos copiados!" : "Não copiou"; }
