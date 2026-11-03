@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="paginas-versao" content="2026-11-03-1">
+<title>Páginas i9Treino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: mapa do site — seções do i9treino.com.br em blocos, um quadro por página */
+:root {
+  --bg: #0a0b0d;
+  --surface: #13151a;
+  --surface-2: #1b1e25;
+  --line: #262a33;
+  --fg: #f1f3f6;
+  --muted: #9aa1ad;
+  --accent: #c8f542;
+  --accent-ink: #0b0b0b;
+  --font-display: "Montserrat", "Arial Black", system-ui, sans-serif;
+  --font-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg: #f4f6f2; --surface: #ffffff; --surface-2: #eef0ea; --line: #d9dcd2; --fg: #12140f; --muted: #5a5e55; --accent: #5f8a0c; --accent-ink: #ffffff; color-scheme: light; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { padding-block: 30px 10px; }
+.brand { font: 900 22px var(--font-display); letter-spacing: -.02em; }
+.brand b { color: var(--accent); }
+h1 { font: 900 clamp(28px, 5vw, 42px)/1.05 var(--font-display); margin: 10px 0 6px; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; max-width: 60ch; }
+.status { color: var(--muted); font-size: 13px; margin: 10px 0 0; min-height: 1.4em; }
+section { padding-block: 22px 4px; }
+section h2 { font: 800 12px var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.card { display: flex; flex-direction: column; gap: 6px; min-height: 150px; padding: 18px 18px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; color: var(--fg); text-decoration: none; min-width: 0; }
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: transform .15s ease, border-color .15s ease; } }
+.card .title { font: 800 18px/1.2 var(--font-display); text-wrap: balance; }
+.card .desc { color: var(--muted); font-size: 14.5px; }
+.card .foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding-top: 8px; }
+.card .path { font: 600 12.5px ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--muted); word-break: break-all; }
+.tag { font: 800 10.5px var(--font-display); letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 5px; background: var(--surface-2); color: var(--muted); }
+.tag.main { background: var(--accent); color: var(--accent-ink); }
+footer { color: var(--muted); font-size: 13px; padding-block: 34px 40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">i<b>9</b>Treino</div>
+    <h1>Todas as páginas</h1>
+    <p class="sub">Escolha para onde ir. Toda página nova publicada no i9treino.com.br aparece aqui sozinha.</p>
+    <p class="status" id="status" aria-live="polite"></p>
+  </header>
+  <main id="main"></main>
+</div>
+<footer><div class="wrap">Página interna, não indexada.</div></footer>
+<script>
+(function () {
+  var REPO = "lucasherculiani/i9fit", BRANCH = "main";
+  var AQUI = "paginas/";
+
+  // Seções na ordem em que aparecem; a página entra na primeira cuja pasta casa.
+  var SECOES = [
+    { id: "principal", nome: "Principal", casa: function (p) { return p === ""; } },
+    { id: "comeceaqui", nome: "Comece aqui", casa: function (p) { return p.indexOf("comeceaqui/") === 0; } },
+    { id: "produtos", nome: "Produtos", casa: function (p) { return p.indexOf("produtos/") === 0; } },
+    { id: "avaliacoes", nome: "Avaliações", casa: function (p) { return p.indexOf("avaliacoes/") === 0; } },
+    { id: "calendario", nome: "Calendários", casa: function (p) { return p.indexOf("calendario/") === 0; } },
+    { id: "admin", nome: "Administração", casa: function (p) { return p.indexOf("admin/") === 0; } },
+    { id: "outras", nome: "Outras páginas", casa: function () { return true; } }
+  ];
+
+  // Textos para as páginas que não têm descrição própria.
+  var DESCRICOES = {
+    "": "Página principal do i9Treino.",
+    "admin/": "Painel de gestão do i9Treino: alunos, protocolos e avaliações. Exige login.",
+    "avaliacoes/inoveavalia/": "Avaliação multifuncional InoveAvalia.",
+    "avaliacoes/inoveavaliaplus/": "Avaliação funcional InoveAvalia Plus, para pessoas com 60 anos ou mais.",
+    "avaliacoes/responder/": "Formulário de anamnese para o aluno responder.",
+    "calendario/": "Lista de clientes com calendário de conteúdo. Escolha um cliente para ver o mês.",
+    "paginas/": ""
+  };
+  var DESTAQUE = { "": true, "comeceaqui/": true };
+
+  // Cópia da lista de 03/11/2026, usada se o GitHub não responder.
+  var RESERVA = [
+    { p: "", t: "i9Fit" },
+    { p: "admin/", t: "Painel i9Treino", ni: true },
+    { p: "avaliacoes/", t: "Avaliações InoveAvalia | i9Treino", d: "Avaliações funcionais do i9Treino: InoveAvalia (multifuncional) e InoveAvalia Plus (60+)." },
+    { p: "avaliacoes/inoveavalia/", t: "InoveAvalia — Avaliação Multifuncional | i9Treino", ni: true },
+    { p: "avaliacoes/inoveavaliaplus/", t: "InoveAvalia Plus — Avaliação 60+ | i9Treino", ni: true },
+    { p: "avaliacoes/responder/", t: "Sua anamnese | i9Treino", ni: true },
+    { p: "calendario/", t: "Calendários de clientes", ni: true },
+    { p: "calendario/lucas-herculiani/", t: "Calendário i9 Novembro", ni: true },
+    { p: "calendario/rej-mercado/", t: "Calendário R&J Mercado Novembro", ni: true },
+    { p: "comeceaqui/", t: "Projeto Verão i9Treino — Emagreça sem fechar a boca", d: "Projeto Verão do i9Treino: treino de musculação semana a semana, movimento diário, sono, ambiente e acompanhamento. Emagreça sem privação e mantenha o resultado." },
+    { p: "produtos/", t: "Produtos e Calculadora de Suplementação | i9treino", d: "Calculadora educativa de creatina e beta-alanina do i9treino. Simule a fase de carga, manutenção e consumo do período." }
+  ];
+
+  var main = document.getElementById("main"), status = document.getElementById("status");
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function limpaTitulo(t) { return (t || "").replace(/\s*[|·]\s*i9\s?treino\s*$/i, "").trim(); }
+  function nomePelaPasta(p) {
+    var ult = p.replace(/\/$/, "").split("/").pop();
+    return ult ? ult.replace(/[-_]+/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); }) : "Principal";
+  }
+
+  function render(paginas) {
+    main.innerHTML = "";
+    SECOES.forEach(function (s) {
+      var lista = paginas.filter(function (pg) { return pg.secao === s.id; });
+      if (!lista.length) return;
+      var sec = document.createElement("section");
+      sec.innerHTML = "<h2>" + esc(s.nome) + "</h2>";
+      var grid = document.createElement("div"); grid.className = "grid";
+      lista.forEach(function (pg) {
+        var a = document.createElement("a");
+        a.className = "card"; a.href = "/" + pg.p;
+        var desc = pg.d || DESCRICOES[pg.p] || "";
+        var tags = [];
+        if (DESTAQUE[pg.p]) tags.push('<span class="tag main">Público</span>');
+        if (pg.ni) tags.push('<span class="tag">Interna</span>');
+        a.innerHTML =
+          '<span class="title">' + esc(limpaTitulo(pg.t) || nomePelaPasta(pg.p)) + "</span>" +
+          (desc ? '<span class="desc">' + esc(desc) + "</span>" : "") +
+          '<span class="foot"><span class="path">i9treino.com.br/' + esc(pg.p) + "</span>" + tags.join("") + "</span>";
+        grid.appendChild(a);
+      });
+      sec.appendChild(grid);
+      main.appendChild(sec);
+    });
+  }
+
+  function classifica(lista) {
+    return lista
+      .filter(function (pg) { return pg.p !== AQUI; })
+      .map(function (pg) {
+        for (var i = 0; i < SECOES.length; i++) if (SECOES[i].casa(pg.p)) { pg.secao = SECOES[i].id; break; }
+        return pg;
+      })
+      .sort(function (a, b) { return a.p.localeCompare(b.p, "pt-BR"); });
+  }
+
+  // 1. Mostra a cópia na hora; 2. busca a lista real no GitHub e o título de cada página.
+  render(classifica(RESERVA.slice()));
+  status.textContent = "Atualizando a lista…";
+
+  fetch("https://api.github.com/repos/" + REPO + "/git/trees/" + BRANCH + "?recursive=1", { headers: { Accept: "application/vnd.github+json" } })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (arv) {
+      var caminhos = arv.tree
+        .filter(function (f) { return f.type === "blob" && /(^|\/)index\.html$/i.test(f.path); })
+        .map(function (f) { return f.path.replace(/index\.html$/i, ""); });
+      var html = arv.tree
+        .filter(function (f) { return f.type === "blob" && /\.html$/i.test(f.path) && !/(^|\/)index\.html$/i.test(f.path) && !/^(404|google[0-9a-f]+)\.html$/i.test(f.path); })
+        .map(function (f) { return f.path; });
+      caminhos = caminhos.concat(html);
+      return Promise.all(caminhos.map(function (p) {
+        return fetch("/" + p, { cache: "no-cache" })
+          .then(function (r) { return r.ok ? r.text() : ""; })
+          .catch(function () { return ""; })
+          .then(function (txt) {
+            var doc = new DOMParser().parseFromString(txt, "text/html");
+            var meta = function (n) { var m = doc.querySelector('meta[name="' + n + '"]'); return m ? m.getAttribute("content") || "" : ""; };
+            return { p: p, t: (doc.title || "").trim(), d: meta("description"), ni: /noindex/i.test(meta("robots")) };
+          });
+      }));
+    })
+    .then(function (lista) {
+      var paginas = classifica(lista);
+      render(paginas);
+      status.textContent = paginas.length + " páginas encontradas no site.";
+    })
+    .catch(function () {
+      status.textContent = "Mostrando a lista salva em 03/11/2026 (não consegui consultar o GitHub agora).";
+    });
+})();
+</script>
+</body>
+</html>
