@@ -48,6 +48,7 @@ const TONS = { poor: "#e5533d", low: "#f0913a", mid: "#e8c13c", good: "#a8d932",
 /* ───────────────────── envio da Parte 1 ao aluno (WhatsApp / link) ───────────────────── */
 
 export const STATUS = {
+  em_andamento: "Em andamento",
   aguardando: "Aguardando o aluno",
   respondida: "Parte 1 respondida",
   concluida: "Avaliação concluída"
@@ -406,7 +407,7 @@ export async function montarFormulario(root, tipo) {
         const fd = { ...(av.formData || {}) };
         st.id = av.id; st.criadoEm = av.criadoEm; st.status = av.status || null;
         st.nomeRegistro = av.patientName || "";
-        st.extra = { enviadoEm: av.enviadoEm, respondidaEm: av.respondidaEm };
+        st.extra = { enviadoEm: av.enviadoEm, respondidaEm: av.respondidaEm, whatsEnviadoEm: av.whatsEnviadoEm };
         st.meta = { nome: av.patientName || "", nasc: fd.dataNascimento || "", data: av.assessmentDate || hoje(), telefone: av.telefone || "" };
         delete fd.dataNascimento; delete fd.avaliacoesDatas;
         st.values = fd;
@@ -499,6 +500,7 @@ export async function montarFormulario(root, tipo) {
     <p class="erro" data-erro role="alert"></p>
     <div class="acoes">
       <span class="status" data-status>Rascunho salvo automaticamente neste aparelho.</span>
+      <button type="button" class="btn btn-ghost" data-acao="salvar-depois">Salvar e continuar depois</button>
       <button type="button" class="btn btn-primary" data-acao="salvar">Salvar avaliação</button>
     </div>
   </div>`;
@@ -672,6 +674,7 @@ export async function montarFormulario(root, tipo) {
     const acao = e.target.closest("[data-acao]")?.dataset.acao;
     if (acao === "parecer") gerarParecer();
     if (acao === "salvar") salvar();
+    if (acao === "salvar-depois") salvarDepois();
     if (acao === "enviar-whats" || acao === "copiar-link") enviarParte1(acao === "enviar-whats");
     if (acao === "novo-aluno") {
       if (st.meta.nome.trim() && !confirm("Começar uma avaliação em branco para outro aluno?\n\nO que você digitou nesta tela e ainda não foi enviado ou salvo será perdido.")) return;
@@ -745,12 +748,12 @@ export async function montarFormulario(root, tipo) {
       const registro = await salvarAvaliacao({
         ...st.extra, id: st.id || undefined, criadoEm: st.criadoEm || undefined, type: tipo,
         patientName: st.meta.nome.trim(), patientAge: idade(), assessmentDate: st.meta.data,
-        telefone: st.meta.telefone.trim(), status: st.status && st.status !== "aguardando" ? st.status : "aguardando",
-        enviadoEm: new Date().toISOString(), formData
+        telefone: st.meta.telefone.trim(), status: st.status && st.status !== "aguardando" && st.status !== "em_andamento" ? st.status : "aguardando",
+        enviadoEm: new Date().toISOString(), whatsEnviadoEm: viaWhats ? new Date().toISOString() : st.extra.whatsEnviadoEm, formData
       });
       st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
       st.nomeRegistro = registro.patientName;
-      st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm };
+      st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm, whatsEnviadoEm: registro.whatsEnviadoEm };
       history.replaceState(null, "", `?editar=${encodeURIComponent(st.id)}`);
       try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
       const link = linkResposta(st.id);
@@ -767,6 +770,42 @@ export async function montarFormulario(root, tipo) {
       if (aba) aba.close();
       msgEl.textContent = "Não foi possível gerar o link. Verifique a internet e tente de novo.";
     }
+  }
+
+  /**
+   * Guarda a avaliação como está, sem fechar: aparece no painel em "Em andamento" e pode ser
+   * continuada depois, de qualquer aparelho. Não exige data de nascimento nem os testes.
+   */
+  async function salvarDepois() {
+    const erro = root.querySelector("[data-erro]");
+    const aviso = root.querySelector("[data-status]");
+    const btn = root.querySelector('[data-acao="salvar-depois"]');
+    if (!st.meta.nome.trim()) { erro.textContent = "Preencha o nome do aluno para salvar."; root.querySelector('[data-meta="nome"]').focus(); return; }
+    erro.textContent = "";
+    separarSeForOutroAluno();
+    btn.disabled = true; btn.textContent = "Salvando...";
+    try {
+      await mesclarRespostas();
+      const formData = { ...st.values };
+      if (isIsoDate(st.meta.nasc)) formData.dataNascimento = st.meta.nasc;
+      const registro = await salvarAvaliacao({
+        ...st.extra, id: st.id || undefined, criadoEm: st.criadoEm || undefined, type: tipo,
+        patientName: st.meta.nome.trim(), patientAge: idade(), assessmentDate: st.meta.data,
+        telefone: st.meta.telefone.trim(), status: st.status === "aguardando" || st.status === "respondida" ? st.status : "em_andamento",
+        formData
+      });
+      st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
+      st.nomeRegistro = registro.patientName;
+      st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm, whatsEnviadoEm: registro.whatsEnviadoEm };
+      history.replaceState(null, "", `?editar=${encodeURIComponent(st.id)}`);
+      try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
+      const hora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      aviso.innerHTML = `Salvo às ${hora}. Para continuar depois, abra o <a href="/admin/#anamneses">painel</a> em "Em andamento". Para o próximo aluno, toque em <b>+ Outro aluno</b>.`;
+    } catch (e) {
+      console.error(e);
+      erro.textContent = "Não foi possível salvar. Verifique a internet e tente de novo — seus dados continuam nesta tela.";
+    }
+    btn.disabled = false; btn.textContent = "Salvar e continuar depois";
   }
 
   async function salvar() {
