@@ -383,6 +383,57 @@ function secaoForm(sec, numero, ctx) {
 
 /* ───────────────────────────── formulário ───────────────────────────── */
 
+/* ───────────────────── data de nascimento em Dia / Mês / Ano ───────────────────── */
+// O campo nativo de data abre no mês atual e esconde a troca de ano (principalmente no celular),
+// então quem nasceu em 1958 não conseguia chegar lá. Três listas resolvem: o ano desce direto até o nascimento.
+// Um campo escondido com data-meta continua guardando a data no formato AAAA-MM-DD, como antes.
+const MESES_NOME = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+function estiloData3() {
+  if (document.getElementById("estilo-data3")) return;
+  document.head.insertAdjacentHTML("beforeend", `<style id="estilo-data3">
+    .data3{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr) minmax(0,1.1fr);gap:6px}
+    .data3 select{padding-right:6px}
+    .data3-erro{display:block;margin-top:4px;font-size:.78rem;color:var(--erro,#ff6b5b)}
+    .data3-erro:empty{display:none}
+    .pessoa{grid-template-columns:minmax(0,1.7fr) minmax(0,1.2fr) minmax(0,1.9fr) minmax(0,1fr) auto}
+    @media(max-width:760px){.pessoa{grid-template-columns:1fr 1fr}.pessoa .nasc{grid-column:1/-1}}</style>`);
+}
+export function campoDataNasc(valor, meta = "nasc") {
+  estiloData3();
+  const [a, m, d] = isIsoDate(valor) ? valor.split("-").map(Number) : [0, 0, 0];
+  const anoAtual = new Date().getFullYear();
+  const op = (v, t, sel) => `<option value="${v}"${sel ? " selected" : ""}>${t}</option>`;
+  let dias = op("", "Dia", !d), meses = op("", "Mês", !m), anos = op("", "Ano", !a);
+  for (let i = 1; i <= 31; i++) dias += op(i, i, i === d);
+  MESES_NOME.forEach((n, i) => { meses += op(i + 1, n.charAt(0).toUpperCase() + n.slice(1), i + 1 === m); });
+  for (let y = anoAtual; y >= anoAtual - 110; y--) anos += op(y, y, y === a);
+  return `<div class="data3" role="group" aria-label="Data de nascimento">
+      <select class="inp" data-d3="d" aria-label="Dia">${dias}</select>
+      <select class="inp" data-d3="m" aria-label="Mês">${meses}</select>
+      <select class="inp" data-d3="a" aria-label="Ano">${anos}</select>
+      <input type="hidden" data-meta="${meta}" value="${isIsoDate(valor) ? valor : ""}">
+    </div><small class="data3-erro" data-d3-erro></small>`;
+}
+document.addEventListener("change", e => {
+  const sel = e.target.closest?.("[data-d3]");
+  if (!sel) return;
+  const box = sel.closest(".data3");
+  const v = k => Number(box.querySelector(`[data-d3="${k}"]`).value);
+  const d = v("d"), m = v("m"), a = v("a");
+  const oculto = box.querySelector("input[type=hidden]");
+  const erro = box.parentElement.querySelector("[data-d3-erro]");
+  let iso = "";
+  if (d && m && a) {
+    const dt = new Date(a, m - 1, d);
+    if (dt.getMonth() === m - 1 && dt <= new Date()) iso = `${a}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
+  if (erro) erro.textContent = d && m && a && !iso ? `Essa data não existe (${MESES_NOME[m - 1]} não tem dia ${d}).` : "";
+  if (oculto.value === iso) return;
+  oculto.value = iso;
+  oculto.dispatchEvent(new Event("input", { bubbles: true }));
+});
+const focarDataNasc = root => root.querySelector(".data3 select")?.focus();
+
 export async function montarFormulario(root, tipo) {
   const T = TIPOS[tipo];
   const todas = sectionsForType(tipo);
@@ -468,7 +519,7 @@ export async function montarFormulario(root, tipo) {
     <div class="pessoa">
       <div class="fbox nome"><label>Nome do aluno</label><input class="inp" data-meta="nome" value="${esc(st.meta.nome)}" autocomplete="off"></div>
       <div class="fbox"><label>Telefone (WhatsApp)</label><input class="inp" type="tel" inputmode="tel" data-meta="telefone" value="${esc(st.meta.telefone)}" placeholder="(14) 99999-9999"></div>
-      <div class="fbox"><label>Data de nascimento</label><input class="inp" type="date" data-meta="nasc" max="${hoje()}" value="${esc(st.meta.nasc)}"></div>
+      <div class="fbox nasc"><label>Data de nascimento</label>${campoDataNasc(st.meta.nasc)}</div>
       <div class="fbox"><label>Data da avaliação</label><input class="inp" type="date" data-meta="data" value="${esc(st.meta.data)}"></div>
       <div class="idade" data-idade></div>
     </div>
@@ -823,7 +874,7 @@ export async function montarFormulario(root, tipo) {
     const btn = root.querySelector('[data-acao="salvar"]');
     const id = idade();
     if (!st.meta.nome.trim()) { erro.textContent = "Preencha o nome do aluno."; root.querySelector('[data-meta="nome"]').focus(); return; }
-    if (!isIsoDate(st.meta.nasc) || id === null) { erro.textContent = "Informe uma data de nascimento válida."; root.querySelector('[data-meta="nasc"]').focus(); return; }
+    if (!isIsoDate(st.meta.nasc) || id === null) { erro.textContent = "Informe uma data de nascimento válida."; focarDataNasc(root); return; }
     erro.textContent = "";
     separarSeForOutroAluno();
     btn.disabled = true; btn.textContent = "Salvando...";
@@ -991,7 +1042,7 @@ export async function montarResposta(root, id) {
     <div class="secao-head"><span class="num">1</span><div><h3>Seus dados</h3></div></div>
     <div class="grid-campos">
       <div class="fbox full"><label>Nome completo</label><input class="inp" data-meta="nome" value="${esc(st.meta.nome)}" autocomplete="name"></div>
-      <div class="fbox"><label>Data de nascimento</label><input class="inp" type="date" data-meta="nasc" max="${hoje()}" value="${esc(st.meta.nasc)}"></div>
+      <div class="fbox"><label>Data de nascimento</label>${campoDataNasc(st.meta.nasc)}</div>
       <div class="fbox"><label>Telefone (WhatsApp)</label><input class="inp" type="tel" inputmode="tel" data-meta="telefone" value="${esc(st.meta.telefone)}" autocomplete="tel"></div>
     </div>
     ${ident ? `<div style="margin-top:14px">${grade(paraAluno(ident.fields), ctx)}</div>` : ""}
@@ -1031,7 +1082,7 @@ export async function montarResposta(root, id) {
   root.querySelector("[data-enviar]").addEventListener("click", async ev => {
     const btn = ev.currentTarget, erro = root.querySelector("[data-erro]");
     if (!st.meta.nome.trim()) { erro.textContent = "Preencha o seu nome."; root.querySelector('[data-meta="nome"]').focus(); return; }
-    if (!isIsoDate(st.meta.nasc)) { erro.textContent = "Preencha a sua data de nascimento."; root.querySelector('[data-meta="nasc"]').focus(); return; }
+    if (!isIsoDate(st.meta.nasc)) { erro.textContent = "Preencha a sua data de nascimento (dia, mês e ano)."; focarDataNasc(root); return; }
     erro.textContent = ""; btn.disabled = true; btn.textContent = "Enviando...";
     try {
       const atual = (await obterAvaliacao(id)) || av;
