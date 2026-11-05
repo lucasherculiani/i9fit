@@ -36,6 +36,15 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .btn-primary:hover{background:var(--accent2)}.btn-primary:active{transform:scale(.98)}
 .login-admin-link{margin-top:2rem;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;text-decoration:underline}
 .login-admin-link:hover{color:var(--accent)}
+.login-escolha{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem}
+.login-opcao{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:1.4rem .75rem;cursor:pointer;color:var(--text);font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.12em;transition:border-color .2s,background .2s,transform .15s}
+.login-opcao:hover{border-color:var(--accent);transform:translateY(-2px)}
+.login-opcao svg{width:34px;height:34px;color:var(--muted);transition:color .2s}
+.login-opcao.ativo{border-color:var(--accent);background:rgba(200,245,66,.08)}
+.login-opcao.ativo svg{color:var(--accent)}
+.login-painel{display:none;animation:loginIn .25s ease}
+.login-painel.ativo{display:block}
+@keyframes loginIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .login-error{background:#1a0a0a;border:1px solid #3d1212;color:var(--danger);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.85rem;margin-top:.75rem;display:none}
 .admin-badge{display:inline-block;font-size:.7rem;background:var(--surface3);border:1px solid var(--border2);border-radius:4px;padding:.25rem .6rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.5rem}
 /* TOPBAR */
@@ -375,12 +384,29 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-login" class="view active">
   <div class="login-box fade-in">
     <div class="login-logo">i9<span>Fit</span></div>
-    <div class="login-sub">Acesse seu protocolo de treinamento</div>
-    <label>Seu nome ou nick</label>
-    <input type="text" id="login-input" placeholder="ex: joao, aninha..." autocomplete="off" autocapitalize="off">
-    <div class="login-error" id="login-error">Aluno nao encontrado. Verifique com seu treinador.</div>
-    <button class="btn-primary" onclick="loginAluno()">Entrar</button>
-    <div class="login-admin-link" onclick="showView('view-admin-login')">Acesso do treinador</div>
+    <div class="login-sub">Como você quer entrar?</div>
+    <div class="login-escolha">
+      <button type="button" class="login-opcao" id="opcao-aluno" onclick="escolherAcesso('aluno')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+        ALUNO
+      </button>
+      <button type="button" class="login-opcao" id="opcao-treinador" onclick="escolherAcesso('treinador')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>
+        TREINADOR
+      </button>
+    </div>
+    <div class="login-painel" id="painel-aluno">
+      <label>Seu nome ou nick</label>
+      <input type="text" id="login-input" placeholder="ex: joao, aninha..." autocomplete="off" autocapitalize="off">
+      <div class="login-error" id="login-error">Aluno nao encontrado. Verifique com seu treinador.</div>
+      <button class="btn-primary" onclick="loginAluno()">Entrar</button>
+    </div>
+    <div class="login-painel" id="painel-treinador">
+      <label>Senha de acesso</label>
+      <input type="password" id="admin-senha-input" placeholder="senha">
+      <div class="login-error" id="admin-error">Senha incorreta.</div>
+      <button class="btn-primary" onclick="loginAdmin()">Acessar painel</button>
+    </div>
   </div>
 </div>
 
@@ -396,20 +422,6 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
   </div>
   <div id="checkpoint-protocolos-aluno"></div>
   <div class="protocolos-escolha-wrap fade-in" id="grid-protocolos-aluno"></div>
-</div>
-
-<!-- LOGIN ADMIN -->
-<div id="view-admin-login" class="view">
-  <div class="login-box fade-in">
-    <div class="admin-badge">Area do Treinador</div>
-    <div class="login-logo">i9<span>Fit</span></div>
-    <div class="login-sub">Gerencie protocolos e alunos</div>
-    <label>Senha de acesso</label>
-    <input type="password" id="admin-senha-input" placeholder="senha">
-    <div class="login-error" id="admin-error">Senha incorreta.</div>
-    <button class="btn-primary" onclick="loginAdmin()">Acessar painel</button>
-    <div class="login-admin-link" onclick="showView('view-login')">Voltar</div>
-  </div>
 </div>
 
 <!-- SEMANAS DO ALUNO -->
@@ -1537,6 +1549,18 @@ function deleteAvaliacaoFisica(avId){
 }
 function countAvaliacoesPendentes(d){return (d.alunos||[]).filter(function(a){return avaliacaoPendente(a);}).length;}
 
+// ESCOLHA DO ACESSO (ALUNO / TREINADOR)
+function escolherAcesso(tipo){
+  var aluno = tipo === 'aluno';
+  document.getElementById('opcao-aluno').classList.toggle('ativo', aluno);
+  document.getElementById('opcao-treinador').classList.toggle('ativo', !aluno);
+  document.getElementById('painel-aluno').classList.toggle('ativo', aluno);
+  document.getElementById('painel-treinador').classList.toggle('ativo', !aluno);
+  document.getElementById('login-error').style.display='none';
+  document.getElementById('admin-error').style.display='none';
+  setTimeout(function(){ document.getElementById(aluno ? 'login-input' : 'admin-senha-input').focus(); }, 50);
+}
+
 // LOGIN ALUNO
 function loginAluno(){
   var nick=document.getElementById('login-input').value.trim().toLowerCase();
@@ -2511,6 +2535,7 @@ function gerarRelatorio(){
 
 // Disponibiliza as funcoes para os botoes onclick do HTML quando o script roda como modulo.
 Object.assign(window, {
+  escolherAcesso,
   abrirEditEx,
   abrirEditarProtocolo,
   abrirFormDia,
