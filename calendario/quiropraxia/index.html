@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="calendario-versao" content="2026-11-05T16:07:42.932Z">
+<title>Calendário Quiropraxia Novembro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Nunito+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: mesa de produção — calendário do mês fixo à esquerda, ficha do dia à direita (empilha no celular) */
+:root {
+  --bg: #0a0b0d;
+  --surface: #13151a;
+  --surface-2: #1b1e25;
+  --line: #262a33;
+  --fg: #f1f3f6;
+  --muted: #9aa1ad;
+  --accent: #3FC1B0;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(63, 193, 176, .14);
+  --lime: #c8f542;
+  --warn: #ffb020;
+  --font-display: "Montserrat", "Arial Black", system-ui, sans-serif;
+  --font-body: "Nunito Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eaeef4; --line: #d7dde6;
+    --fg: #10141a; --muted: #586170; --accent: #0E6B66; --accent-ink: #ffffff;
+    --accent-soft: rgba(14, 107, 102, .10); --lime: #5f8a0c; --warn: #a86400; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eaeef4; --line: #d7dde6;
+  --fg: #10141a; --muted: #586170; --accent: #0E6B66; --accent-ink: #ffffff;
+  --accent-soft: rgba(14, 107, 102, .10); --lime: #5f8a0c; --warn: #a86400; color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { padding-block: 26px 18px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.eyebrow { font: 800 12px var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 900 clamp(28px, 5vw, 42px)/1.05 var(--font-display); margin: 6px 0 0; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.btn { font: 800 13px var(--font-display); border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 9px 14px; border-radius: 8px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; }
+.top-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-block: 0 60px; }
+@media (min-width: 980px) {
+  .layout { grid-template-columns: 430px minmax(0, 1fr); align-items: start; }
+  .cal-col { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+}
+
+/* Calendário */
+.cal { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.cal-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.cal-head strong { font: 800 18px var(--font-display); }
+.cal-head small { color: var(--muted); font-size: 12.5px; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.dow { font: 700 11px var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: center; padding-block: 2px 4px; }
+.day { position: relative; min-height: 70px; text-align: left; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); border-radius: 8px; padding: 6px; cursor: pointer; display: flex; flex-direction: column; gap: 3px; font: inherit; min-width: 0; }
+.day:hover { border-color: var(--accent); }
+.day .n { font: 800 15px var(--font-display); font-variant-numeric: tabular-nums; line-height: 1; }
+.day .tags { display: flex; flex-wrap: wrap; gap: 3px; }
+.tag { font: 700 9.5px var(--font-display); letter-spacing: .03em; text-transform: uppercase; padding: 2px 4px; border-radius: 4px; background: var(--bg); color: var(--muted); line-height: 1.2; }
+.tag.feed { background: var(--accent); color: var(--accent-ink); }
+.tag.lq { background: var(--lime); color: #0b0b0b; }
+.day.past { opacity: .5; }
+.day.today { box-shadow: inset 0 0 0 2px var(--lime); }
+.day[aria-selected="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.day .star { position: absolute; top: 5px; right: 6px; color: var(--warn); font-size: 11px; }
+.empty { min-height: 70px; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+@media (max-width: 480px) {
+  .day { min-height: 58px; padding: 5px 4px; }
+  .tag { font-size: 8.5px; padding: 1px 3px; }
+  .tag.sub { display: none; }
+}
+
+/* Ficha do dia */
+.sheet { min-width: 0; }
+.sheet-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 12px; border-bottom: 2px solid var(--accent); }
+.sheet-head h2 { font: 900 clamp(22px, 3.4vw, 30px)/1.15 var(--font-display); margin: 0; text-wrap: balance; }
+.nav { display: flex; gap: 6px; }
+.section-label { font: 800 12px var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 26px 0 8px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; min-width: 0; }
+.card h3 { font: 800 19px/1.3 var(--font-display); margin: 0 0 2px; text-wrap: balance; }
+.card .meta { font: 700 12px var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.none { color: var(--muted); font-style: italic; }
+.routine { font-size: 14.5px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; margin-top: 10px; }
+.doc p, .doc li { max-width: 72ch; }
+.doc h3 { font: 700 16.5px var(--font-display); margin: 18px 0 6px; }
+.doc a { color: var(--accent); }
+.doc hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+.doc blockquote { margin: 12px 0; padding: 10px 14px; border-left: 3px solid var(--warn); background: var(--surface-2); border-radius: 0 6px 6px 0; }
+.doc blockquote p { margin: 0; }
+.doc code { font-family: var(--font-mono); font-size: .88em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+.tbl { overflow-x: auto; margin: 10px 0; border: 1px solid var(--line); border-radius: 8px; }
+.doc table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.doc th, .doc td { text-align: left; vertical-align: top; padding: 7px 9px; border-bottom: 1px solid var(--line); min-width: 100px; }
+.doc th { font: 700 11.5px var(--font-display); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); }
+.doc tr:last-child td { border-bottom: 0; }
+.block { margin: 10px 0 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.block .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border-bottom: 1px solid var(--line); }
+.block .kind { font: 700 10.5px var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.block pre { margin: 0; padding: 12px 14px 14px; white-space: pre-wrap; word-break: break-word; font: 13px/1.6 var(--font-mono); overflow-x: auto; }
+.block pre code { background: none; padding: 0; font-size: inherit; }
+.copy { font: 800 12px var(--font-display); background: var(--accent); color: var(--accent-ink); border: 0; padding: 7px 13px; border-radius: 6px; cursor: pointer; flex: 0 0 auto; }
+.copy.done { background: var(--lime); color: #0b0b0b; }
+details.art { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin-bottom: 10px; }
+details.art summary { cursor: pointer; padding: 12px 16px; font: 800 15px var(--font-display); list-style: none; display: flex; gap: 10px; align-items: center; }
+details.art summary::-webkit-details-marker { display: none; }
+details.art summary::before { content: "+"; color: var(--accent); font-size: 18px; width: 14px; }
+details.art[open] summary::before { content: "−"; }
+details.art summary b { color: var(--accent); }
+details.art .doc { padding: 0 16px 10px; }
+.focus { margin: 0 0 12px; color: var(--muted); }
+.focus strong { color: var(--fg); }
+.story { border-left: 3px solid var(--accent); }
+.story-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.story-n { font: 900 14px var(--font-display); letter-spacing: .06em; text-transform: uppercase; background: var(--accent); color: var(--accent-ink); padding: 3px 10px; border-radius: 6px; }
+.story-h { font: 800 14px var(--font-display); font-variant-numeric: tabular-nums; color: var(--lime); }
+.story-t { font: 700 13px var(--font-display); color: var(--fg); }
+.story-dir { margin: 0 0 8px; max-width: 72ch; }
+.field { font: 700 10.5px var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+.sticker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 12px 0 4px; padding: 10px 12px; background: var(--surface-2); border-radius: 8px; font-size: 14.5px; }
+.stk-kind { font: 800 11px var(--font-display); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.stk-q { font-weight: 700; }
+.stk-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.stk-opts i { font-style: normal; font: 700 12.5px var(--font-display); border: 1px solid var(--line); background: var(--bg); padding: 3px 9px; border-radius: 999px; }
+.stk-ok { font: 700 12.5px var(--font-display); color: var(--lime); }
+.same { color: var(--muted); font-size: 14px; margin: 10px 0 0; }
+details.art.inner { margin: 12px 0 0; background: var(--bg); }
+footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">@quiropraxiaoficial · Coluna sem achismo · 2 posts por semana</div>
+      <h1>Calendário <span>novembro 2026</span></h1>
+    </div>
+    <div class="top-actions"><a class="btn" href="../">← Clientes</a><button class="btn" id="kit-btn" type="button" aria-pressed="false">Kit fixo (ChatGPT, capa, AI Studio)</button></div>
+  </header>
+
+  <div class="layout">
+    <div class="cal-col">
+      <div class="cal">
+        <div class="cal-head"><strong>Novembro</strong><small>Toque no dia para ver tudo</small></div>
+        <div class="grid" id="grid" role="grid" aria-label="Novembro de 2026"></div>
+        <div class="legend">
+          <span><i class="tag feed">Reels</i> post no feed</span>
+          <span><i class="tag">Quiz</i> <i class="tag">Caixinha</i> <i class="tag">Enquete</i> <i class="tag">WhatsApp</i> nos Stories</span>
+          <span><b style="color:var(--warn)">★</b> dia especial</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="sheet" id="sheet" aria-live="polite"></section>
+  </div>
+</div>
+<footer><div class="wrap">Fotos citadas: pasta D:\CLIENTES\QUIROPRAXIA\Fotos Evora · Página interna, não indexada.</div></footer>
+
+<script>
+(function () {
+  var DATA = {"cfg":{"ano":2026,"mes":11,"mesNome":"novembro","etiquetas":[{"rotulo":"Quiz","busca":"Quiz:"},{"rotulo":"Caixinha","busca":"Caixinha:"},{"rotulo":"Enquete","busca":"Enquete:"},{"rotulo":"WhatsApp","busca":"wa.me"}]},"feed":{"6":[{"head":"(sex) 11h | POST ÚNICO | Atração","title":"Lombar travada: ficar de cama ajuda?","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1756148159063-01.jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nUse a imagem anexada em tela cheia, com enquadramento quadrado, sem alterar a pessoa, a maca nem a técnica. Aplique um degradê petróleo #0E3B43 subindo da base até 55% da altura.\nEtiqueta (pílula verde-água #3FC1B0, Montserrat Bold, caixa alta, texto petróleo): &quot;LOMBAR TRAVADA&quot;\nTítulo (Montserrat ExtraBold, branco, até 3 linhas): &quot;FICAR DE CAMA PODE NÃO SER O MELHOR&quot;, com &quot;DE CAMA&quot; em verde-água.\nApoio (Poppins Medium, branco): &quot;O que a pesquisa encontrou está na legenda.&quot;\nLogo: carimbado em branco na lateral da maca.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Lombar travada: ficar de cama é mesmo o melhor caminho?\n\nA vontade é não sair do lugar. Mas uma revisão Cochrane sobre dor lombar aguda encontrou uma pequena vantagem em manter as atividades, dentro do possível, em comparação com o repouso na cama.\n\nIsso não significa forçar o corpo. Significa evitar o repouso prolongado e entender a causa da dor.\n\nProcure atendimento urgente se houver perda de controle da urina ou das fezes, dormência na região genital ou perda de força na perna.\n\nFicou com alguma dúvida? Envie LOMBAR no direct.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#LombarTravada #QuiropraxiaMarilia #Marilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza realiza um ajuste na região lombar de uma paciente deitada na maca, com o texto “Ficar de cama pode não ser o melhor”.\u003c/p>\n"}],"7":[{"head":"(sáb) 10h | POST ÚNICO | Nutrição","title":"O estalo não é osso voltando ao lugar","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1756149281186-01.jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nDivida a arte: metade superior com fundo creme #F4EFE6 e metade inferior com a imagem anexada, recortada sem alterar as pessoas nem a técnica.\nEtiqueta (pílula coral #C8553D, Montserrat Bold, caixa alta, texto branco): &quot;MITO&quot;\nTítulo (Montserrat ExtraBold, caixa alta, petróleo #0E3B43, até 3 linhas): &quot;O ESTALO NÃO É O OSSO VOLTANDO AO LUGAR&quot;, com &quot;ESTALO&quot; em coral.\nLogo: dentro de um pequeno selo redondo verde-água #3FC1B0, sobre a linha que divide as metades.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Estalo na coluna: não é o osso voltando ao lugar.\n\nEm 2015, pesquisadores usaram ressonância magnética em tempo real para observar articulações dos dedos no momento do estalo. O som foi associado à formação de uma cavidade de gás dentro da articulação (Kawchuk et al., PLOS ONE).\n\nPor isso, o barulho não serve como medida de que o ajuste funcionou. Nem todo atendimento precisa ter estalo.\n\nO que orienta a escolha da técnica é a avaliação do seu caso.\n\nTem medo do estalo? Envie ESTALO no direct e tire sua dúvida.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#Quiropraxia #SaudeDaColuna #Marilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza posiciona a cabeça de uma paciente sentada na maca, abaixo do texto “O estalo não é o osso voltando ao lugar”.\u003c/p>\n"}],"10":[{"head":"(ter) 11h | POST ÚNICO | Conversão","title":"Como é a primeira consulta","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1756147724319-01.jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nUse a imagem anexada em tela cheia, sem alterar a pessoa nem os certificados. Aplique um degradê petróleo #0E3B43 subindo da base até 60% da altura.\nTítulo (Montserrat ExtraBold, branco, até 2 linhas): &quot;ANTES DO AJUSTE, VEM A AVALIAÇÃO&quot;, com &quot;AVALIAÇÃO&quot; em verde-água #3FC1B0.\nTrês itens em uma linha (Poppins Medium, branco), separados por pontos: &quot;Histórico · Exames · Plano&quot;\nLogo: em relevo discreto na mesa, à direita.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Primeira consulta de quiropraxia: o que acontece?\n\nNinguém deveria deitar na maca sem antes ser avaliado. A consulta começa pelo seu histórico, pela sua dor e pelos exames que você já tem.\n\nCom isso, eu verifico se a quiropraxia é indicada, se existe alguma contraindicação e qual técnica faz sentido. Se o seu caso pedir outro profissional, eu digo.\n\nA diretriz de 2017 do American College of Physicians inclui a manipulação da coluna entre as opções sem remédio para dor lombar. Mesmo assim, a decisão é sempre individual.\n\nQuer agendar? Envie CONSULTA no direct.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#QuiropraxiaMarilia #PrimeiraConsulta #Marilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza sentada à mesa do consultório, com certificados na parede e o texto “Antes do ajuste, vem a avaliação”.\u003c/p>\n"}],"13":[{"head":"(sex) 11h | POST ÚNICO | Nutrição","title":"Tenho diabetes, posso fazer quiropraxia?","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1 (5).jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nFundo creme #F4EFE6. Use a imagem anexada em um grande recorte de cantos arredondados na metade direita, sem alterar as pessoas.\nEtiqueta (pílula petróleo #0E3B43, Montserrat Bold, caixa alta, texto branco): &quot;14/11 · DIA MUNDIAL DO DIABETES&quot;\nTítulo (Montserrat ExtraBold, petróleo, até 4 linhas): &quot;TENHO DIABETES. POSSO FAZER QUIROPRAXIA?&quot;, com &quot;POSSO&quot; em coral #C8553D.\nApoio (Poppins Medium, petróleo): &quot;A resposta começa na avaliação.&quot;\nLogo: pequeno, em uma aba verde-água #3FC1B0 presa à borda do recorte.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Diabetes e quiropraxia: é possível fazer?\n\nTer diabetes, por si só, não responde a essa pergunta. O que importa é como está o seu quadro.\n\nNa avaliação, é importante contar se há alteração de sensibilidade nos pés ou nas pernas, feridas, osteoporose ou outras condições. Essas informações ajudam a decidir se o atendimento é indicado e como conduzi-lo.\n\nA quiropraxia não trata diabetes e não substitui o seu acompanhamento médico. Nunca altere sua medicação por conta própria.\n\nTem diabetes e dor na coluna? Envie AVALIAÇÃO no direct.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#Diabetes #QuiropraxiaMarilia #Marilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza orienta uma paciente idosa sentada na maca, ao lado do texto “Tenho diabetes. Posso fazer quiropraxia?”.\u003c/p>\n"}],"17":[{"head":"(ter) 11h | POST ÚNICO | Atração","title":"Novembro Azul: homem que só procura quando trava","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1756151184977-01.jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nUse a imagem anexada em tela cheia, sem alterar as pessoas. Aplique um degradê azul-marinho #12355B subindo da base até 55% da altura.\nEtiqueta (pílula branca, Montserrat Bold, caixa alta, texto azul-marinho): &quot;NOVEMBRO AZUL&quot;\nTítulo (Montserrat ExtraBold, branco, até 3 linhas): &quot;CUIDAR DA SAÚDE NÃO É SÓ QUANDO TRAVA&quot;, com &quot;QUANDO TRAVA&quot; em azul-claro #7CC4FF.\nLogo: em branco, como um pequeno bordado na manga do jaleco da profissional.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Novembro Azul: dor nas costas também merece atenção.\n\nMuito homem aguenta a dor até o dia em que não consegue levantar da cama. Não precisa esperar chegar a esse ponto.\n\nE um alerta: dor nas costas que piora à noite, não melhora com repouso ou vem com perda de peso sem explicação precisa de avaliação médica.\n\nNovembro Azul é também um lembrete para conversar com o médico sobre os exames de próstata. Uma coisa não substitui a outra.\n\nMarque aquele homem que sempre diz “já vai passar”.\n\nPara agendar sua avaliação, envie COLUNA no direct.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#NovembroAzul #SaudeDoHomem #QuiropraxiaMarilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza avalia o movimento do ombro de um paciente sentado na maca, com o texto “Cuidar da saúde não é só quando trava”.\u003c/p>\n"}],"19":[{"head":"(qui) 11h | POST ÚNICO | Nutrição","title":"Feriado: viagem longa sem sair travado","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1 (1).jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nFundo petróleo #0E3B43. Use a imagem anexada em um recorte quadrado de cantos arredondados, na metade inferior, sem alterar as pessoas.\nEtiqueta (pílula verde-água #3FC1B0, Montserrat Bold, caixa alta, texto petróleo): &quot;FERIADO DE 20/11&quot;\nTítulo (Montserrat ExtraBold, branco, até 2 linhas): &quot;VAI PEGAR A ESTRADA? SUA COLUNA VAI JUNTO.&quot;, com &quot;ESTRADA&quot; em verde-água.\nLogo: como uma pequena placa de estrada branca, no canto superior direito da área central.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Dor na coluna em viagem longa: como reduzir o desconforto.\n\nSalve estes cuidados para o feriado:\n\n• Ajuste o banco antes de sair, com os joelhos levemente dobrados e as costas apoiadas.\n• Programe paradas para levantar e caminhar um pouco. Para quem dirige, elas também ajudam a combater o cansaço.\n• Evite levantar malas pesadas logo depois de muitas horas sentado. Caminhe antes.\n• Mantenha a carteira fora do bolso de trás.\n\nSe você já tem dor, não espere a volta da viagem para buscar orientação.\n\nEnvie VIAGEM no direct e tire sua dúvida.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#SaudeDaColuna #QuiropraxiaMarilia #Marilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza posiciona o pescoço de um paciente deitado na maca, abaixo do texto “Vai pegar a estrada? Sua coluna vai junto”.\u003c/p>\n"}],"24":[{"head":"(ter) 11h | POST ÚNICO | Autoridade","title":"Ciática: consultório ou pronto-socorro?","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1756150958193-01.jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nUse a imagem anexada em tela cheia, sem alterar as pessoas nem a técnica. Aplique um degradê petróleo #0E3B43 descendo do topo até 50% da altura.\nTítulo (Montserrat ExtraBold, branco, até 3 linhas): &quot;DOR NA PERNA: QUANDO NÃO DÁ PARA ESPERAR&quot;, com &quot;NÃO DÁ PARA ESPERAR&quot; em coral #C8553D sobre uma faixa creme #F4EFE6.\nApoio (Poppins Medium, branco): &quot;Os sinais de alerta estão na legenda.&quot;\nLogo: em branco, na lateral da maca.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Dor ciática: quando procurar o consultório e quando ir ao pronto-socorro.\n\nDor que desce da lombar para a perna pode ter causas diferentes e precisa de avaliação.\n\nVá ao pronto-socorro, sem esperar, se houver:\n\n• perda de controle da urina ou das fezes;\n• dificuldade para urinar;\n• dormência na região genital ou na parte interna das coxas;\n• fraqueza na perna que está piorando.\n\nEsses sinais podem indicar compressão de nervos e exigem atendimento urgente.\n\nSem esses sinais, uma avaliação ajuda a entender a origem da dor e os próximos passos. Salve este post e compartilhe com quem convive com essa dor.\n\nDúvidas? Envie CIÁTICA no direct.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#Ciatica #DorNaLombar #QuiropraxiaMarilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza realiza uma técnica na região lombar de um paciente deitado de lado, com o texto “Dor na perna: quando não dá para esperar”.\u003c/p>\n"}],"27":[{"head":"(sex) 11h | POST ÚNICO | Conversão","title":"Black Friday: sua coluna não tem troca","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1756148471070-01.jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nFundo preto-petróleo #071F24. Use a imagem anexada em um recorte de cantos arredondados na metade inferior, sem alterar as pessoas.\nEtiqueta no formato de uma etiqueta de loja (creme #F4EFE6, Montserrat Bold, texto petróleo), levemente inclinada: &quot;SEM TROCA&quot;\nTítulo (Montserrat ExtraBold, branco, até 2 linhas): &quot;SUA COLUNA NÃO ENTRA EM PROMOÇÃO&quot;, com &quot;COLUNA&quot; em verde-água #3FC1B0.\nLogo: impresso na etiqueta de loja, ao lado do texto.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Dor na coluna não entra em promoção: hoje todo mundo fala de ofertas, e eu vou falar da única coluna que você tem.\n\nEla não tem troca, devolução nem modelo novo. Por isso, antes de tratar, eu avalio. Antes de ajustar, explico. E, quando a quiropraxia não é indicada, digo isso com clareza.\n\nSe a dor já está mudando a sua rotina, este é um bom momento para investigar.\n\nEnvie AVALIAÇÃO no direct e receba as informações para agendar.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#BlackFriday #SaudeDaColuna #QuiropraxiaMarilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza atende uma paciente deitada na maca, com uma etiqueta “Sem troca” e o texto “Sua coluna não entra em promoção”.\u003c/p>\n"}],"30":[{"head":"(seg) 11h | POST ÚNICO | Atração","title":"Fim de ano: caixas e escadas sem machucar a coluna","kind":"post","mascote":false,"html":"\u003cp>\u003cstrong>Imagem sugerida:\u003c/strong> \u003ccode>1756149700054-01.jpeg\u003c/code>\u003c/p>\n\u003cp>\u003cstrong>Prompt\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nPost de feed quadrado 1:1, 1080x1080, seguindo as instruções do projeto.\nFundo creme #F4EFE6 com um detalhe discreto de fita verde-água #3FC1B0 no canto, como em uma caixa de presente. Use a imagem anexada em um recorte circular grande à direita, sem alterar as pessoas nem o instrumento.\nTítulo (Montserrat ExtraBold, petróleo #0E3B43, até 3 linhas): &quot;A FAXINA DE FIM DE ANO TAMBÉM PESA NA COLUNA&quot;, com &quot;COLUNA&quot; em coral #C8553D.\nLogo: em um pequeno cartão de presente preso à fita.\nTextos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Legenda\u003c/strong>\u003c/p>\n\u003cpre>\u003ccode>Dor nas costas no fim de ano: cuidado com caixas, escadas e faxina.\n\nAntes de descer a decoração do armário, salve estes cuidados:\n\n• Traga a caixa para perto do corpo antes de levantar.\n• Divida o peso em mais de uma viagem.\n• Dobre os joelhos e evite girar o tronco com carga nas mãos.\n• Use uma escada firme, com outra pessoa por perto, e não tente alcançar além do seu braço.\n\nSentiu dor forte, fraqueza ou dormência depois de um esforço? Não insista na tarefa e procure avaliação.\n\nMarque quem sempre inventa de arrumar tudo sozinho.\n\nPara agendar, envie COLUNA no direct.\n\n📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\n#SaudeDaColuna #QuiropraxiaMarilia #Marilia\n\u003c/code>\u003c/pre>\n\u003cp>\u003cstrong>Texto alternativo:\u003c/strong> Évora de Souza utiliza um instrumento de ajuste no ombro de uma paciente, ao lado do texto “A faxina de fim de ano também pesa na coluna”.\u003c/p>\n"}]},"arts":{"S1":{"title":"Modelo A: Pergunta para a Évora","html":"\u003cp>Imagem sugerida: \u003ccode>1756150218971-01.jpeg\u003c/code>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nArte de Story vertical 9:16, 1080x1920, seguindo as instruções do projeto.\nUse a imagem anexada na metade superior da arte, entre 250 px e 900 px de altura, com leve aumento de nitidez e luz natural, sem mudar pessoas nem cenário. A parte de baixo se funde em um fundo petróleo #0E3B43.\nEtiqueta (pílula verde-água #3FC1B0, Montserrat Bold, caixa alta, texto petróleo), em 930 px de altura: &quot;PERGUNTA PARA A ÉVORA&quot;\nTítulo (Montserrat ExtraBold, branco, até 2 linhas), logo abaixo: &quot;O QUE SUA COLUNA ANDA TE PERGUNTANDO?&quot;, com &quot;COLUNA&quot; em verde-água.\nEntre 1200 px e 1500 px, deixe um cartão creme #F4EFE6 vazio, com cantos arredondados, para colar o sticker.\nLogo: pequeno, dentro de um selo redondo creme sobre a borda superior direita do cartão.\nNada nos 250 px do topo nem nos 350 px da base. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n"},"S2":{"title":"Modelo B: Mito ou verdade","html":"\u003cp>Imagem sugerida: \u003ccode>1756149281186-01.jpeg\u003c/code>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nArte de Story vertical 9:16, 1080x1920, seguindo as instruções do projeto.\nFundo creme #F4EFE6 com textura sutil de papel. Use a imagem anexada recortada em um círculo de 520 px, centralizado entre 270 px e 790 px de altura, com contorno verde-água #3FC1B0.\nTítulo (Montserrat ExtraBold, caixa alta, petróleo #0E3B43), centralizado, em 840 px de altura: &quot;MITO OU VERDADE?&quot;, com &quot;VERDADE&quot; em coral #C8553D.\nApoio (Poppins Medium, petróleo), logo abaixo: &quot;Responda antes de ver a resposta.&quot;\nDeixe a área entre 1080 px e 1500 px totalmente livre para o sticker de quiz.\nLogo: discreto, carimbado em petróleo na curva inferior do círculo.\nNada nos 250 px do topo nem nos 350 px da base. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n"},"S3":{"title":"Modelo C: Primeira consulta","html":"\u003cp>Imagem sugerida: \u003ccode>1756147724319-01.jpeg\u003c/code>\u003c/p>\n\u003cpre>\u003ccode>IDENTITYLOCK\nArte de Story vertical 9:16, 1080x1920, seguindo as instruções do projeto.\nUse a imagem anexada em tela cheia, ampliando o cenário do consultório nas partes superior e inferior sem alterar a pessoa, os certificados nem os móveis. Aplique um degradê petróleo #0E3B43 subindo da base até 55% da altura.\nEtiqueta (pílula creme #F4EFE6, Montserrat Bold, caixa alta, texto petróleo), em 960 px de altura: &quot;PRIMEIRA CONSULTA&quot;\nTítulo (Montserrat ExtraBold, branco, até 3 linhas), logo abaixo: &quot;ANTES DE AJUSTAR, EU AVALIO.&quot;, com &quot;AVALIO&quot; em verde-água #3FC1B0.\nApoio (Poppins Medium, branco): &quot;Histórico, exames e o que é indicado para o seu caso.&quot;\nDeixe livre a faixa entre 1400 px e 1560 px para o sticker de link.\nLogo: em branco, como placa discreta na parede do consultório, à direita.\nNada nos 250 px do topo nem nos 350 px da base. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n"}},"kit":[{"title":"Instruções do projeto no ChatGPT (cole uma vez)","html":"\u003cpre>\u003ccode>Você é o diretor de arte da marca Évora de Souza Quiropraxia. Toda imagem que eu pedir segue estas regras:\n\nCOMANDO IDENTITYLOCK\nQuando o prompt contiver IDENTITYLOCK, preserve 100% o rosto, a identidade, o corpo, as roupas e a posição das pessoas da imagem anexada. Não crie pessoas nem altere a técnica mostrada.\n\nFORMATOS\n- Feed: 1080x1080, 1:1. Textos e logo dentro dos 800 px centrais, com 140 px livres em cada lateral.\n- Story: 1080x1920, 9:16. Nada de texto ou logo nos 250 px do topo nem nos 350 px da base.\n\nMARCA\n- Petróleo #0E3B43, verde-água #3FC1B0, creme #F4EFE6, coral #C8553D (só para destaque) e branco.\n- Fontes: Montserrat ExtraBold nos títulos e Poppins Medium nos textos de apoio.\n- Visual de clínica: limpo, sóbrio e acolhedor. Sem raio-x falso, esqueleto brilhante, setas de dor ou efeitos futuristas.\n- Aplique o logo anexado sem redesenhar e com uma solução criativa diferente em cada arte.\n- Escreva em português do Brasil, exatamente como no prompt. Nenhum outro texto.\n\u003c/code>\u003c/pre>\n"},{"title":"Rodapé fixo das legendas","html":"\u003cpre>\u003ccode>📍 Rua Sete de Setembro, 796 · Marília/SP\n📲 WhatsApp: (14) 99731-5080\n\u003c/code>\u003c/pre>\n"},{"title":"Regras dos Stories","html":"\u003cul>\n\u003cli>Um Story em dias alternados, revezando os modelos A, B e C. Gere cada arte uma vez e reutilize.\u003c/li>\n\u003cli>Dimensão de 1080x1920 (9:16), sem textos nos 250 px do topo nem nos 350 px da base.\u003c/li>\n\u003cli>O texto e o sticker do dia entram no próprio Instagram, na área livre da arte.\u003c/li>\n\u003cli>Responda às caixinhas sem dar diagnóstico. Avaliação individual é feita na consulta.\u003c/li>\n\u003c/ul>\n"}],"seq":{"6":{"d":6,"foco":"Modelo A · dúvida sobre lombar","stories":[{"h":"10h","tipo":"Arte · Modelo A","dir":"Poste a arte S1 e cole o sticker no cartão creme. Responda às dúvidas sem dar diagnóstico.","stk":"Caixinha: “Qual sua maior dúvida sobre dor na lombar?”","ref":"S1"}]},"8":{"d":8,"foco":"Modelo B · estalo","stories":[{"h":"10h","tipo":"Arte · Modelo B","dir":"Poste a arte S2 e cole o quiz na área livre. Resposta para quem perguntar: o som é associado à formação de uma cavidade de gás dentro da articulação.","stk":"Quiz: “O estalo é o osso voltando ao lugar?” | MITO / VERDADE | correta: MITO","ref":"S2"}]},"10":{"d":10,"foco":"Modelo C · como é a primeira consulta","stories":[{"h":"10h","tipo":"Arte · Modelo C","dir":"Poste a arte S3, escreva o texto do dia acima da faixa livre e cole o sticker de link.","txt":"Quer saber se a quiropraxia é indicada para o seu caso?","stk":"Link: https://wa.me/5514997315080 | texto do link: “Falar no WhatsApp”","ref":"S3"}]},"12":{"d":12,"foco":"Modelo A · onde incomoda","stories":[{"h":"10h","tipo":"Arte · Modelo A","dir":"Poste a arte S1 e cole o sticker no cartão creme. Responda às dúvidas sem dar diagnóstico.","stk":"Enquete: “Onde incomoda mais?” | LOMBAR / PESCOÇO","ref":"S1"}]},"14":{"d":14,"foco":"Modelo B · repouso","stories":[{"h":"10h","tipo":"Arte · Modelo B","dir":"Poste a arte S2 e cole o quiz na área livre. Resposta para quem perguntar: em dor lombar aguda, manter-se ativo dentro do possível costuma ser melhor do que repouso na cama. Em caso de sinal de alerta, procure atendimento.","stk":"Quiz: “Lombar travada: o melhor é ficar de cama?” | MITO / VERDADE | correta: MITO","ref":"S2"}]},"16":{"d":16,"foco":"Modelo C · homens","stories":[{"h":"10h","tipo":"Arte · Modelo C","dir":"Poste a arte S3, escreva o texto do dia acima da faixa livre e cole o sticker de link.","txt":"Homem também cuida da coluna antes de travar.","stk":"Link: https://wa.me/5514997315080 | texto do link: “Falar no WhatsApp”","ref":"S3"}]},"18":{"d":18,"foco":"Modelo A · dúvida sobre ciática","stories":[{"h":"10h","tipo":"Arte · Modelo A","dir":"Poste a arte S1 e cole o sticker no cartão creme. Responda às dúvidas sem dar diagnóstico.","stk":"Caixinha: “O que você quer saber sobre ciática?”","ref":"S1"}]},"20":{"d":20,"foco":"Modelo B · viagem longa","stories":[{"h":"10h","tipo":"Arte · Modelo B","dir":"Poste a arte S2 e cole o quiz na área livre. Resposta para quem perguntar: fazer pausas ajuda a mudar de posição e reduz o tempo sentado.","stk":"Quiz: “Em viagem longa, vale parar para caminhar?” | MITO / VERDADE | correta: VERDADE","ref":"S2"}]},"22":{"d":22,"foco":"Modelo C · volta do feriado","stories":[{"h":"10h","tipo":"Arte · Modelo C","dir":"Poste a arte S3, escreva o texto do dia acima da faixa livre e cole o sticker de link.","txt":"Voltou do feriado com a coluna reclamando?","stk":"Link: https://wa.me/5514997315080 | texto do link: “Falar no WhatsApp”","ref":"S3"}]},"24":{"d":24,"foco":"Modelo A · dor na perna","stories":[{"h":"10h","tipo":"Arte · Modelo A","dir":"Poste a arte S1 e cole o sticker no cartão creme. Responda às dúvidas sem dar diagnóstico.","stk":"Enquete: “Sua dor desce para a perna?” | SIM / NÃO","ref":"S1"}]},"26":{"d":26,"foco":"Modelo B · osteoporose","stories":[{"h":"10h","tipo":"Arte · Modelo B","dir":"Poste a arte S2 e cole o quiz na área livre. Resposta para quem perguntar: a avaliação define o que é possível. Osteoporose ativa ou severa é contraindicação.","stk":"Quiz: “Toda osteoporose impede a quiropraxia?” | MITO / VERDADE | correta: MITO","ref":"S2"}]},"28":{"d":28,"foco":"Modelo C · agenda de fim de ano","stories":[{"h":"10h","tipo":"Arte · Modelo C","dir":"Poste a arte S3, escreva o texto do dia acima da faixa livre e cole o sticker de link.","txt":"Comece dezembro sabendo o que sua coluna precisa.","stk":"Link: https://wa.me/5514997315080 | texto do link: “Falar no WhatsApp”","ref":"S3"}]},"30":{"d":30,"foco":"Modelo A · tarefas de fim de ano","stories":[{"h":"10h","tipo":"Arte · Modelo A","dir":"Poste a arte S1 e cole o sticker no cartão creme. Responda às dúvidas sem dar diagnóstico.","stk":"Enquete: “O que mais pesa nas costas no fim de ano?” | CAIXAS / FAXINA","ref":"S1"}]}}};
+  var YEAR = DATA.cfg.ano, MONTH = DATA.cfg.mes - 1; // 0 = janeiro
+  var MES_NOME = DATA.cfg.mesNome;
+  var DOW = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+  var DOW_SHORT = ["D", "S", "T", "Q", "Q", "S", "S"];
+  var KIND = { reels: "Reels", carrossel: "Carrossel", post: "Post", stories: "Só Stories" };
+  var daysInMonth = new Date(YEAR, MONTH + 1, 0).getDate();
+  var firstDow = new Date(YEAR, MONTH, 1).getDay();
+  var now = new Date();
+  var todayN = now.getFullYear() === YEAR && now.getMonth() === MONTH ? now.getDate() : null;
+  var grid = document.getElementById("grid"), sheet = document.getElementById("sheet"), kitBtn = document.getElementById("kit-btn");
+  var selected = null;
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  // Etiquetas dos Stories (config.json → etiquetas), procuradas no texto dos Stories do dia
+  function storyTags(d) {
+    var day = DATA.seq[d], t = [];
+    if (!day) return t;
+    var txt = day.foco + " " + day.stories.map(function (s) { return [s.tipo, s.dir, s.fala, s.txt, s.stk].join(" "); }).join(" ");
+    (DATA.cfg.etiquetas || []).forEach(function (e) { if (new RegExp(e.busca, e.ignorar_maiusculas ? "i" : "").test(txt)) t.push(e.rotulo); });
+    return t;
+  }
+
+  // Calendário
+  DOW_SHORT.forEach(function (l, i) { var h = document.createElement("div"); h.className = "dow"; h.textContent = l; h.title = DOW[i]; grid.appendChild(h); });
+  for (var e = 0; e < firstDow; e++) { var x = document.createElement("div"); x.className = "empty"; grid.appendChild(x); }
+  for (var d = 1; d <= daysInMonth; d++) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "day"; b.dataset.day = d; b.setAttribute("role", "gridcell");
+    if (todayN && d < todayN) b.classList.add("past");
+    if (d === todayN) b.classList.add("today");
+    var n = document.createElement("span"); n.className = "n"; n.textContent = d; b.appendChild(n);
+    var tags = document.createElement("span"); tags.className = "tags";
+    (DATA.feed[d] || []).forEach(function (p) {
+      if (p.kind === "stories") return;
+      var t = document.createElement("i"); t.className = "tag " + (p.mascote ? "lq" : "feed"); t.textContent = KIND[p.kind]; tags.appendChild(t);
+    });
+    storyTags(d).forEach(function (s) { var t = document.createElement("i"); t.className = "tag sub"; t.textContent = s; tags.appendChild(t); });
+    b.appendChild(tags);
+    if (DATA.seq[d] && DATA.seq[d].especial) { var st = document.createElement("span"); st.className = "star"; st.textContent = "★"; st.setAttribute("aria-hidden", "true"); b.appendChild(st); }
+    var feedNames = (DATA.feed[d] || []).map(function (p) { return KIND[p.kind]; }).join(", ");
+    b.setAttribute("aria-label", DOW[new Date(YEAR, MONTH, d).getDay()] + ", " + d + " de " + MES_NOME + (feedNames ? ": " + feedNames : ""));
+    b.addEventListener("click", (function (day) { return function () { openDay(day, true); }; })(d));
+    grid.appendChild(b);
+  }
+
+  // Blocos de código com botão Copiar
+  function kindOf(pre) {
+    if (pre.dataset && pre.dataset.kind) return pre.dataset.kind;
+    var prev = pre.closest(".block") ? null : pre.previousElementSibling;
+    var label = prev ? prev.textContent.toLowerCase() : "";
+    var code = pre.textContent.trim();
+    if (code.indexOf("Você é o diretor de arte") === 0) return "Instruções do projeto · ChatGPT";
+    if (code.indexOf("IDENTITYLOCK. Anime") === 0) return "Prompt de vídeo · CapCut";
+    if (code.indexOf("Vídeo vertical") > -1) return "Prompt de vídeo · Google AI Studio";
+    if (code.indexOf("IDENTITYLOCK") > -1) return "Prompt de imagem · ChatGPT";
+    if (label.indexOf("legenda") > -1 || /\n#[a-z]/.test(code)) return "Legenda";
+    return "Texto";
+  }
+  function copyText(btn, text, pre) {
+    function ok() { btn.textContent = "Copiado"; btn.classList.add("done"); setTimeout(function () { btn.textContent = "Copiar"; btn.classList.remove("done"); }, 1600); }
+    function fallback() {
+      var r = document.createRange(); r.selectNodeContents(pre);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      try { if (document.execCommand("copy")) { ok(); return; } } catch (e) {}
+      btn.textContent = "Selecionado: use Ctrl+C";
+    }
+    try { navigator.clipboard.writeText(text).then(ok, fallback); } catch (e) { fallback(); }
+  }
+  function enhance(root) {
+    root.querySelectorAll("table").forEach(function (t) { if (t.parentNode.classList.contains("tbl")) return; var w = document.createElement("div"); w.className = "tbl"; t.parentNode.insertBefore(w, t); w.appendChild(t); });
+    root.querySelectorAll("pre").forEach(function (pre) {
+      if (pre.parentNode.classList.contains("block")) return;
+      var kind = kindOf(pre);
+      var box = document.createElement("div"); box.className = "block";
+      var bar = document.createElement("div"); bar.className = "bar";
+      var k = document.createElement("span"); k.className = "kind"; k.textContent = kind;
+      var btn = document.createElement("button"); btn.className = "copy"; btn.type = "button"; btn.textContent = "Copiar";
+      bar.appendChild(k); bar.appendChild(btn);
+      pre.parentNode.insertBefore(box, pre); box.appendChild(bar); box.appendChild(pre);
+      btn.addEventListener("click", function () { copyText(btn, pre.textContent.replace(/\n$/, ""), pre); });
+    });
+  }
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function codeBlock(text, kind) { var pre = document.createElement("pre"); pre.dataset.kind = kind; pre.textContent = text; return pre; }
+  function stickerLine(stk) {
+    var parts = stk.split(" | ");
+    var box = el("div", "sticker");
+    var first = parts.shift();
+    var m = first.match(/^([^:]+):s*(.*)$/);
+    box.appendChild(el("span", "stk-kind", esc(m ? m[1] : "Sticker")));
+    if (m && m[2]) box.appendChild(el("span", "stk-q", esc(m[2])));
+    parts.forEach(function (part) {
+      var correct = part.match(/^correta:s*(.*)$/);
+      if (correct) { box.appendChild(el("span", "stk-ok", "Correta: " + esc(correct[1]))); return; }
+      var opts = el("span", "stk-opts");
+      part.split(" / ").forEach(function (o) { opts.appendChild(el("i", null, esc(o))); });
+      box.appendChild(opts);
+    });
+    return box;
+  }
+  function el(tag, cls, html) { var x = document.createElement(tag); if (cls) x.className = cls; if (html != null) x.innerHTML = html; return x; }
+
+  // Ficha do dia
+  function openDay(d, scroll) {
+    selected = d; kitBtn.setAttribute("aria-pressed", "false");
+    grid.querySelectorAll(".day").forEach(function (b) { b.setAttribute("aria-selected", +b.dataset.day === d ? "true" : "false"); });
+    var dow = new Date(YEAR, MONTH, d).getDay();
+    sheet.innerHTML = "";
+
+    var head = el("div", "sheet-head");
+    head.appendChild(el("h2", null, DOW[dow] + ", " + pad(d) + "/" + pad(MONTH + 1) + (d === todayN ? ' <span style="color:var(--lime)">· hoje</span>' : "")));
+    var nav = el("div", "nav");
+    var prev = el("button", "btn", "← " + (d > 1 ? pad(d - 1) : "")); prev.type = "button"; prev.disabled = d === 1; prev.setAttribute("aria-label", "Dia anterior");
+    var next = el("button", "btn", (d < daysInMonth ? pad(d + 1) : "") + " →"); next.type = "button"; next.disabled = d === daysInMonth; next.setAttribute("aria-label", "Próximo dia");
+    prev.addEventListener("click", function () { openDay(d - 1, false); });
+    next.addEventListener("click", function () { openDay(d + 1, false); });
+    nav.appendChild(prev); nav.appendChild(next); head.appendChild(nav);
+    sheet.appendChild(head);
+
+    // Feed
+    sheet.appendChild(el("div", "section-label", "No feed"));
+    var posts = (DATA.feed[d] || []).filter(function (p) { return p.kind !== "stories"; });
+    if (!posts.length) sheet.appendChild(el("p", "none", "Sem post no feed hoje. Foque nos Stories."));
+    posts.forEach(function (p) {
+      var c = el("article", "card");
+      c.appendChild(el("div", "meta", p.head));
+      c.appendChild(el("h3", null, p.title));
+      c.appendChild(el("div", "doc", p.html));
+      sheet.appendChild(c);
+    });
+
+    // Stories, numerados na ordem de postagem
+    var day = DATA.seq[d];
+    var list = day ? day.stories : [];
+    sheet.appendChild(el("div", "section-label", "Nos Stories" + (list.length ? " · " + list.length + " stories" : "")));
+    if (day) sheet.appendChild(el("p", "focus", "<strong>Foco do dia:</strong> " + esc(day.foco)));
+    var seen = {};
+    list.forEach(function (st, i) {
+      var c = el("article", "card story");
+      var top = el("div", "story-top");
+      top.appendChild(el("span", "story-n", "Story " + (i + 1)));
+      top.appendChild(el("span", "story-h", esc(st.h)));
+      top.appendChild(el("span", "story-t", esc(st.tipo)));
+      c.appendChild(top);
+      c.appendChild(el("p", "story-dir", "<strong>Direção:</strong> " + esc(st.dir)));
+      if (st.fala) { c.appendChild(el("div", "field", "Fala")); c.appendChild(codeBlock(st.fala, "Fala")); }
+      if (st.txt) { c.appendChild(el("div", "field", "Texto na tela")); c.appendChild(codeBlock(st.txt, "Texto na tela")); }
+      if (st.stk) c.appendChild(stickerLine(st.stk));
+      if (st.ref && DATA.arts[st.ref]) {
+        if (seen[st.ref]) {
+          c.appendChild(el("p", "same", "Prompt: mesma arte do Story " + seen[st.ref] + " (" + st.ref + "). Gere uma vez e reutilize."));
+        } else {
+          seen[st.ref] = i + 1;
+          var a = DATA.arts[st.ref];
+          var det = el("details", "art inner");
+          det.open = true;
+          det.appendChild(el("summary", null, "<b>Prompt " + st.ref + "</b> " + esc(a.title)));
+          det.appendChild(el("div", "doc", a.html));
+          c.appendChild(det);
+        }
+      }
+      sheet.appendChild(c);
+    });
+    if (!list.length) sheet.appendChild(el("p", "none", "Sem Stories planejados para este dia."));
+
+    enhance(sheet);
+    try { history.replaceState(null, "", "#d" + pad(d)); } catch (e) {}
+    if (scroll && (window.matchMedia && window.matchMedia("(max-width: 979px)").matches)) sheet.scrollIntoView();
+  }
+
+  function openKit() {
+    selected = null; kitBtn.setAttribute("aria-pressed", "true");
+    grid.querySelectorAll(".day").forEach(function (b) { b.setAttribute("aria-selected", "false"); });
+    sheet.innerHTML = "";
+    var head = el("div", "sheet-head"); head.appendChild(el("h2", null, "Kit fixo")); sheet.appendChild(head);
+    sheet.appendChild(el("p", null, "Configure isto uma vez. Os prompts de cada dia contam com estas regras."));
+    DATA.kit.forEach(function (k, i) {
+      var det = el("details", "art"); if (i === 0) det.open = true;
+      det.appendChild(el("summary", null, k.title));
+      det.appendChild(el("div", "doc", k.html));
+      sheet.appendChild(det);
+    });
+    enhance(sheet);
+    try { history.replaceState(null, "", "#kit"); } catch (e) {}
+    if ((window.matchMedia && window.matchMedia("(max-width: 979px)").matches)) sheet.scrollIntoView();
+  }
+  kitBtn.addEventListener("click", openKit);
+
+  document.addEventListener("keydown", function (ev) {
+    if (!selected || /input|textarea/i.test(ev.target.tagName)) return;
+    if (ev.key === "ArrowRight" && selected < daysInMonth) openDay(selected + 1, false);
+    if (ev.key === "ArrowLeft" && selected > 1) openDay(selected - 1, false);
+  });
+
+  var h = (location.hash || "").replace("#", "");
+  var m = h.match(/^d(\d\d)$/);
+  if (h === "kit") openKit();
+  else openDay(m && +m[1] >= 1 && +m[1] <= daysInMonth ? +m[1] : (todayN || 1), false);
+})();
+</script>
+
+</body>
+</html>
