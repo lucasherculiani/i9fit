@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>[hidden]{display:none!important}img{max-width:100%}body{margin:0}</style>
+<title>Calendário Jucimara Firmino</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: mês fixo à esquerda, dia selecionado à direita, no padrão dos calendários da agência. */
+:root{
+  color-scheme:dark;
+  --bg:#0b0a0e;--panel:#15131a;--panel2:#1d1a24;--line:#30293a;--fg:#f6f3f7;--muted:#aaa2b0;
+  --pink:#ff3ea5;--purple:#b48cff;--ink:#16040e;
+  --display:"Montserrat","Arial Black",system-ui,sans-serif;--body:"Nunito Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--body);padding-block:24px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:auto}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:20px}
+.eyebrow{font:800 .78rem var(--display);letter-spacing:.09em;color:var(--pink);text-transform:uppercase}
+h1{font:900 clamp(1.9rem,5vw,3rem)/1.08 var(--display);margin:.2rem 0 0}
+h1 span{color:var(--pink)}
+button{font:700 .9rem var(--display);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:.65rem .9rem;cursor:pointer}
+button:hover{border-color:var(--pink)}
+button:focus-visible,.day:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:24px;align-items:start}
+.month{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.month h2{font:800 1.05rem var(--display);margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.month h2 small{font:400 .8rem var(--body);color:var(--muted)}
+.dow,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dow span{font:700 .72rem var(--display);text-align:center;color:var(--muted);padding-block:4px}
+.day{min-height:68px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:6px 5px;text-align:left;color:var(--fg);display:flex;flex-direction:column;gap:3px;font:800 .95rem var(--display);overflow:hidden}
+.day:disabled{opacity:.3;cursor:default;border-color:transparent}
+.day.sel{border:2px solid var(--pink);background:#2b1423}
+.badge{font:800 .55rem var(--display);border-radius:4px;padding:2px 3px;width:fit-content;max-width:100%;letter-spacing:.02em}
+.b-post{background:var(--pink);color:var(--ink)}.b-st{background:#000;color:var(--purple);border:1px solid var(--purple)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;color:var(--muted);font-size:.8rem;align-items:center}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+main{min-width:0}
+.dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;border-bottom:2px solid var(--pink);padding-bottom:12px;margin-bottom:18px}
+.dayhead h2{font:900 clamp(1.35rem,3vw,1.9rem) var(--display);margin:0}
+.nav{display:flex;gap:8px}
+.section{font:800 .78rem var(--display);letter-spacing:.09em;color:var(--pink);text-transform:uppercase;margin:0 0 8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px;min-width:0}
+.card h3{font:800 1.2rem/1.25 var(--display);margin:.2rem 0 .6rem;text-wrap:balance}
+.meta{font:700 .76rem var(--display);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.lab{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:16px 0 6px;font:800 .84rem var(--display)}
+.lab button{padding:.4rem .7rem;font-size:.76rem;white-space:nowrap}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;background:#0f0d13;border:1px solid var(--line);border-radius:9px;padding:13px;font:400 .94rem/1.55 var(--body);max-height:380px;overflow:auto}
+p{margin:.45rem 0}.small{color:var(--muted);font-size:.88rem}
+.empty{color:var(--muted)}
+.kit[hidden]{display:none}
+.kit h3{margin-top:0}.kit ul{padding-left:1.15rem;margin:.4rem 0}.kit a{color:var(--purple)}
+.kit li{margin:.25rem 0}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:800 .74rem var(--display);color:var(--muted)}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.month{position:static}.day{min-height:60px}}
+@media(max-width:480px){.day{padding:5px 3px}.badge{font-size:.5rem;padding:2px}.days,.dow{gap:4px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">@jucimara_firmino · 5/nov a 3/dez</div>
+      <h1>Calendário <span>novembro 2026</span></h1>
+    </div>
+    <button id="kitbtn" type="button">Kit fixo (estratégia, ChatGPT, Stories)</button>
+  </header>
+  <div class="grid">
+    <aside class="month">
+      <h2>Programação <small>Toque no dia para ver tudo</small></h2>
+      <div class="dow"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+      <div class="days" id="days"></div>
+      <div class="legend"><span><i class="badge b-post">POST</i> feed 1:1</span><span><i class="badge b-st">S1</i> Stories 9:16</span></div>
+    </aside>
+    <main>
+      <section id="day"></section>
+      <section id="kit" class="kit" hidden></section>
+    </main>
+  </div>
+</div>
+
+<script>
+const IDENTITY = `IDENTITYLOCK (regra máxima): use a(s) foto(s) anexada(s) como base real. Não altere rosto, traços, tom de pele, cabelo, corpo, idade ou expressão de nenhuma pessoa. Não troque ninguém, não crie rostos novos e não embeleze. A roupa e a logo da camiseta também permanecem como na foto.`;
+const SAFE = `FORMATO: 1080x1920 pixels (vertical, proporção 9:16)
+
+ZONAS DE EXCLUSÃO DE TEXTO (dead zones), OBRIGATÓRIO RESPEITAR:
+- Topo: os primeiros 250px (de 0px a 250px, ~13% da altura) ficam LIVRES de texto, título, logo ou elemento de leitura. Só fundo ou imagem decorativa.
+- Base: os últimos 350px (de 1570px a 1920px, ~18% da altura) ficam LIVRES de texto, CTA, legenda ou elemento de leitura. Só fundo ou imagem decorativa.
+- Todo texto, CTA, ícone e logo fica CONTIDO na área central de 1080x1320px (entre 250px e 1570px de altura).
+Se algum elemento textual ultrapassar essas margens, a imagem está incorreta e deve ser refeita.`;
+
+function feedPrompt(p){return `Crie uma arte para post único do Instagram.
+
+FORMATO: 1080x1080 pixels, proporção 1:1. Deixe 140px livres de texto e logo nas laterais.
+
+${IDENTITY}
+
+FOTO: use a foto anexada (${p.foto}). ${p.cena}
+
+IDENTIDADE VISUAL: fundo e sombras em preto, destaque em pink magenta (#FF1F8F), texto em branco. Fonte Montserrat, títulos em ExtraBold. Visual profissional de personal trainer, com a pessoa real em evidência e sem aparência de banco de imagens.
+
+TEXTOS EXATOS, sem alterar nenhuma palavra ou acento:
+- Etiqueta pequena em pink, no alto: ${p.tag}
+- Título em branco, grande: ${p.titulo}
+- Destaque em pink dentro do título: ${p.destaque}
+- Texto de apoio menor: ${p.apoio}
+- Rodapé discreto: @jucimara_firmino | Personal Trainer
+
+LOGO: se a logo JF Jucimara Firmino estiver anexada, aplique assim: ${p.logo}
+
+Mantenha o título sobre uma área escura da imagem, com contraste alto. O texto não pode cobrir nenhum rosto. Não acrescente texto, número, selo ou ícone além do que foi pedido.`;}
+
+function storyPrompt(cena,textos,fecho){return `Crie uma arte para Stories do Instagram.
+
+${SAFE}
+
+${IDENTITY}
+
+FOTO: use a foto anexada. ${cena}
+
+IDENTIDADE VISUAL: fundo preto com luz pink magenta (#FF1F8F), texto em branco e detalhes em pink. Fonte Montserrat, títulos em ExtraBold. Visual limpo e com leitura fácil no celular.
+
+TEXTOS EXATOS, sem alterar nenhuma palavra ou acento:
+${textos}
+
+${fecho}
+
+CHECKLIST FINAL: nada de texto ou logo acima de 250px (13%) nem abaixo de 1570px (últimos 18%). O texto não cobre o rosto. Nada foi acrescentado além do pedido.`;}
+
+const STORY = {
+ S1:{nome:"Quem é a Jucimara",foto:"Jucimara sozinha, olhando para a câmera",
+  prompt:storyPrompt("Coloque Jucimara na metade inferior da área central, com a cabeça abaixo do bloco de título.",
+`- Etiqueta: PRAZER, EU SOU
+- Título: Jucimara Firmino
+- Linha 1: Profissional de Educação Física e personal trainer
+- Linha 2: Crossfit | Les Mills | Core360
+- Linha 3: Rio de Janeiro, RJ`,
+"LOGO: se a logo JF estiver anexada, aplique pequena ao lado da etiqueta, dentro da área central.")},
+ S2:{nome:"Como treinar comigo",foto:"Jucimara orientando uma aluna ou em treino",
+  prompt:storyPrompt("Coloque a foto na parte de baixo da área central e reserve o terço superior dela para os textos.",
+`- Etiqueta: COMO TREINAR COMIGO
+- Título: Presencial no Rio ou online, de onde você estiver
+- Item 1: Personal trainer presencial
+- Item 2: Consultoria online com treino personalizado
+- Item 3: Acompanhamento pelo WhatsApp
+- Item 4: Reavaliação mensal`,
+"Mostre os quatro itens como uma lista vertical, com um marcador simples em pink. LOGO: se a logo JF estiver anexada, aplique como marca d'água discreta atrás da lista, sem prejudicar a leitura.")},
+ S3:{nome:"Fala comigo no WhatsApp",foto:"Jucimara sorrindo, de preferência apontando para a frente ou para o lado",
+  prompt:storyPrompt("Coloque Jucimara em um dos lados da área central, com espaço livre do outro lado. Reserve também uma faixa vazia de 180px de altura, entre 1350px e 1530px, para eu colocar o sticker de link depois.",
+`- Etiqueta: QUER COMEÇAR?
+- Título: Seu treino começa com uma conversa
+- Texto: Me conte seu objetivo e sua rotina. Eu te mostro o melhor caminho.
+- Chamada: Fale comigo no WhatsApp`,
+"Não desenhe botão, link ou ícone na faixa vazia. LOGO: se a logo JF estiver anexada, aplique pequena junto à etiqueta, dentro da área central.")}
+};
+
+const POSTS = {
+"2026-11-05":{pilar:"Autoridade",t:"Treino pesado depois da menopausa: perigo ou proteção?",foto:"Jucimara sozinha, em pé, usando a camiseta da marca",
+ legenda:`Treino de força na menopausa ainda assusta muita mulher. Muitas escutam que precisam pegar leve para proteger os ossos.
+
+O estudo LIFTMOR testou outro caminho com mulheres na pós-menopausa e baixa massa óssea: treino de alta intensidade com impacto, 2 vezes por semana, 30 minutos por sessão, sempre com supervisão, durante 8 meses.
+
+Nos resultados preliminares, com 28 mulheres, a densidade da coluna subiu 1,6% no grupo que treinou forte e caiu 1,7% no grupo de exercício leve em casa. Não houve registro de lesão.
+
+A palavra mais importante aqui é supervisão. Carga alta exige avaliação, técnica e progressão. Se você tem osteoporose, alinhe tudo com seu médico antes de mudar o treino.
+
+Na prática, eu começo pela técnica e subo a carga conforme a resposta de cada aluna.
+
+Salva este post para mostrar na próxima consulta. E me manda OSSO no direct para saber como começar com segurança.
+
+#treinodeforca #menopausa #saudedamulher`,
+ alt:`Jucimara Firmino em pé com camiseta da marca, ao lado do título: Treino pesado depois da menopausa: perigo ou proteção?`,
+ p:{foto:"Jucimara sozinha, em pé",cena:"Coloque Jucimara à direita, com fundo de academia escurecido e título à esquerda.",tag:"MULHER 40+",titulo:"Treino pesado depois da menopausa: perigo ou proteção?",destaque:"proteção?",apoio:"Estudo LIFTMOR: 8 meses, 2x por semana, 30 minutos, com supervisão.",logo:"pequena, no canto superior direito, dentro da margem de 140px."}},
+"2026-11-09":{pilar:"Nutrição",t:"Treina direito e o músculo não responde? Olhe a proteína",foto:"Jucimara em ação na academia ou segurando um halter",
+ legenda:`Proteína e ganho de massa muscular andam juntos, mas mais não é sempre melhor.
+
+Uma revisão publicada no British Journal of Sports Medicine reuniu 49 estudos e 1.863 participantes. Em adultos saudáveis que faziam treino de força, a proteína ajudou nos ganhos, e o benefício deixou de crescer perto de 1,6 g por kg de peso por dia.
+
+Para uma mulher de 70 kg, esse número da pesquisa dá cerca de 112 g por dia, somando toda a alimentação. Isso é uma referência, não uma prescrição. Seu valor depende da sua rotina e da sua saúde, e quem ajusta é o nutricionista.
+
+Antes de comprar outro suplemento, confira o básico: você sabe quanto come hoje? Seu treino tem progressão? O estímulo vem do treino. A proteína ajuda na construção.
+
+Salva para levar na próxima consulta com a nutri. E me manda PROTEÍNA no direct para eu te contar o que olho primeiro no seu treino.
+
+#proteina #massamuscular #treinofeminino`,
+ alt:`Jucimara Firmino em treino na academia, com o título: Treina direito e o músculo não responde? Olhe a proteína.`,
+ p:{foto:"Jucimara em ação na academia",cena:"Mantenha o movimento real da foto, com Jucimara à esquerda e luz pink suave no ambiente.",tag:"SALVA ESSE POST",titulo:"Treina direito e o músculo não responde? Olhe a proteína.",destaque:"Olhe a proteína.",apoio:"Revisão com 49 estudos: o ganho estabilizou perto de 1,6 g/kg ao dia.",logo:"como selo circular pequeno sobre o canto inferior direito da imagem."}},
+"2026-11-12":{pilar:"Atração",t:"Você fica 10 segundos em um pé só?",foto:"Jucimara ou aluna em equilíbrio sobre uma perna",
+ legenda:`Teste de equilíbrio de 10 segundos: faça agora, perto de uma parede.
+
+Um estudo com 1.702 brasileiros de 51 a 75 anos pediu exatamente isso, e 20,5% não conseguiram. Em cerca de 7 anos de acompanhamento, esse grupo teve risco de morte 84% maior, mesmo após ajustes por idade, sexo e condições de saúde.
+
+Calma: o estudo é observacional. Ele mostra uma associação, não prova que o equilíbrio foi a causa. Não conseguiu? Isso não define sua saúde, mas é um bom motivo para colocar equilíbrio e força no treino.
+
+Eu incluo esse trabalho porque ele aparece no dia a dia: descer escada, pegar o ônibus, evitar uma queda.
+
+Faz com segurança e me conta nos comentários quantos segundos você ficou. Para receber exercícios de equilíbrio, me manda EQUILÍBRIO no direct.
+
+#equilibrio #longevidade #saude`,
+ alt:`Pessoa em equilíbrio sobre uma perna na academia, com o título: Você fica 10 segundos em um pé só?`,
+ p:{foto:"pessoa em equilíbrio sobre uma perna",cena:"Mantenha a pessoa inteira no quadro, centralizada à direita, com fundo escuro e limpo.",tag:"TESTE RÁPIDO",titulo:"Você fica 10 segundos em um pé só?",destaque:"10 segundos",apoio:"Faça perto de uma parede. Depois me conte seu tempo.",logo:"dentro de um pequeno marcador circular, como um cronômetro, sem números."}},
+"2026-11-16":{pilar:"Prova social",t:"Nenhuma mulher desta foto treina igual à outra",foto:"foto nova em grupo com alunas da Comunidade JF",
+ legenda:`Treino personalizado para mulheres começa por entender a vida de cada uma.
+
+Nesta foto tem rotina diferente, objetivo diferente e fase da vida diferente. Por isso, o treino também muda.
+
+O que une essa turma é outra coisa: elas aparecem, se incentivam e seguem evoluindo no próprio ritmo. Aqui ninguém precisa treinar igual à outra para fazer parte.
+
+Aluna JF, me ajuda aqui: conta nos comentários o que mudou na sua rotina desde que você começou.
+
+E se você está procurando esse ambiente, me manda COMUNIDADE no direct.
+
+#treinofeminino #personaltrainer #riodejaneiro`,
+ alt:`Jucimara Firmino com alunas na academia, sorrindo, com o título: Nenhuma mulher desta foto treina igual à outra.`,
+ p:{foto:"grupo de alunas com Jucimara",cena:"Mantenha todas as pessoas e todos os rostos visíveis. Use uma faixa escura na parte de cima da imagem para o título.",tag:"COMUNIDADE JF",titulo:"Nenhuma mulher desta foto treina igual à outra.",destaque:"treina igual",apoio:"Rotinas diferentes. O mesmo compromisso.",logo:"pequena, centralizada no alto, acima da etiqueta."}},
+"2026-11-19":{pilar:"Atração",t:"Mulher, manda este post para o homem que adia tudo",foto:"Jucimara com aluno homem ou o parceiro, com autorização",
+ legenda:`Novembro Azul também é assunto de quem vive cuidando de todo mundo. Sabe aquele homem que só procura médico quando já não dá para ignorar?
+
+Segundo o INCA, o câncer de próstata é o segundo mais comum entre os homens no Brasil, sem contar o câncer de pele não melanoma. Quando e quais exames fazer é uma conversa individual com o médico. Essa conversa precisa sair da lista de "depois eu vejo".
+
+Treino não substitui consulta, mas faz parte do cuidado. A OMS recomenda para adultos de 150 a 300 minutos de atividade moderada por semana e fortalecimento muscular em pelo menos 2 dias.
+
+Marca ou encaminha para ele. E se ele quiser começar, me manda ELE no direct.
+
+#novembroazul #saudedohomem #treinodeforca`,
+ alt:`Jucimara Firmino ao lado de um aluno na academia, com luz azul, e o título: Mulher, manda este post para o homem que adia tudo.`,
+ p:{foto:"Jucimara com um homem, em ambiente de treino",cena:"Mantenha as duas pessoas à direita. Acrescente um toque sutil de luz azul ao fundo, ligado ao Novembro Azul.",tag:"NOVEMBRO AZUL",titulo:"Mulher, manda este post para o homem que adia tudo.",destaque:"adia tudo.",apoio:"Consulta em dia. Treino na rotina.",logo:"pequena, no canto inferior direito, ao lado do rodapé."}},
+"2026-11-23":{pilar:"Nutrição",t:"Caminhar faz bem, mas não substitui treino de força",foto:"Jucimara em foto externa, na orla ou em um parque do Rio",
+ legenda:`Caminhada e treino de força têm funções diferentes, e o ideal é ter os dois.
+
+A caminhada na orla pode continuar. Ela conta para a atividade aeróbica da semana. Mas as diretrizes da OMS também recomendam fortalecimento muscular em 2 dias ou mais por semana. A partir dos 65 anos, entram ainda atividades com foco em equilíbrio e força em pelo menos 3 dias.
+
+Sair da caminhada e pegar peso sem direção não é o caminho. O começo pode ser simples: agachar, empurrar, puxar e carregar, com carga adequada e técnica. Depois, a progressão vai acontecendo.
+
+Salva este post e marca aquela amiga que só caminha. Para saber como colocar força na sua semana, me manda FORÇA no direct.
+
+#caminhada #treinodeforca #longevidade`,
+ alt:`Jucimara Firmino em área externa do Rio de Janeiro, com o título: Caminhar faz bem, mas não substitui treino de força.`,
+ p:{foto:"Jucimara em ambiente externo",cena:"Mantenha o local real da foto, escureça o céu e as áreas de texto e preserve Jucimara em boa luz.",tag:"ROTINA CARIOCA",titulo:"Caminhar faz bem, mas não substitui treino de força.",destaque:"treino de força.",apoio:"OMS: fortalecimento muscular em 2 dias ou mais por semana.",logo:"aplicada em uma pequena etiqueta pink, colada à lateral da foto."}},
+"2026-11-26":{pilar:"Conversão",t:"Antes de comprar outro plano nesta Black Friday, responda isto",foto:"Jucimara sozinha, apontando para a câmera",
+ legenda:`Black Friday de academia e treino: antes de fechar mais um plano, faça três perguntas.
+
+1. Você vai usar, ou vai ser mais um pagamento esquecido?
+2. Alguém vai acompanhar sua evolução?
+3. O treino vai mudar quando sua rotina mudar?
+
+Foi para isso que criei a minha consultoria online: treino personalizado, acompanhamento pelo WhatsApp e reavaliação mensal, de onde você estiver. Se você está no Rio, também atendo como personal trainer presencial.
+
+Me manda CONSULTORIA no direct, com seu objetivo e sua rotina, e eu te explico como funciona.
+
+#consultoriaonline #personaltrainer #blackfriday`,
+ alt:`Jucimara Firmino apontando para a câmera em fundo preto e pink, com o título: Antes de comprar outro plano, responda isto.`,
+ p:{foto:"Jucimara apontando para a câmera",cena:"Coloque Jucimara à direita, com fundo preto e um brilho pink atrás dela.",tag:"BLACK FRIDAY",titulo:"Antes de comprar outro plano, responda isto.",destaque:"responda isto.",apoio:"Você vai usar? Alguém vai acompanhar? O treino muda com a sua rotina?",logo:"recortada em um pequeno selo preto com borda pink, no canto da imagem."}},
+"2026-11-30":{pilar:"Nutrição",t:"Dezembro apertou? Reduza o treino, não abandone",foto:"Jucimara em treino curto ou Home Training",
+ legenda:`Treino em dezembro: quando a agenda aperta, reduzir pode ser melhor do que parar.
+
+Um ensaio clínico treinou adultos por 16 semanas e depois testou 32 semanas com menos volume, de 1/3 e de 1/9 do treino inicial.
+
+Nos adultos de 20 a 35 anos, as duas doses preservaram o ganho de tamanho muscular. Nos de 60 a 75 anos, não. A força foi mais resistente, mas o músculo pediu mais estímulo com a idade.
+
+O recado para dezembro é este: não dá para tratar o mês como pausa total. Eu prefiro reduzir, priorizar os exercícios principais e manter a rotina viva até o ano virar.
+
+Salva este post para a semana mais corrida do mês. E me manda DEZEMBRO no direct para ajustar o treino à sua agenda.
+
+#treinofeminino #treinodeforca #musculacao`,
+ alt:`Jucimara Firmino treinando em ambiente simples, com o título: Dezembro apertou? Reduza o treino, não abandone.`,
+ p:{foto:"Jucimara durante um treino",cena:"Mantenha o ambiente real da foto, com vinheta escura e um brilho pink discreto.",tag:"ROTINA DE DEZEMBRO",titulo:"Dezembro apertou? Reduza o treino, não abandone.",destaque:"não abandone.",apoio:"Com a idade, o músculo pede mais estímulo para se manter.",logo:"bem pequena, junto ao rodapé, à esquerda do @."}},
+"2026-12-03":{pilar:"Conversão",t:"Não espere janeiro. Hábito leva tempo",foto:"Jucimara sozinha, em pose confiante, com a camiseta da marca",
+ legenda:`Criar o hábito de treinar leva tempo, e 21 dias é pouco para a maioria das pessoas.
+
+Um estudo clássico da University College London encontrou uma mediana de 66 dias para um comportamento se tornar automático, com grande variação: de 18 a 254 dias. Perder uma oportunidade isolada não atrapalhou de forma relevante.
+
+Se você começar hoje, 66 dias caem em 7 de fevereiro. Quem espera janeiro para começar também espera mais para esse treino deixar de ser uma briga.
+
+Você não precisa de uma rotina perfeita em dezembro. Precisa de um começo que caiba na sua semana.
+
+Presencial no Rio ou consultoria online: me manda AGORA no direct e vamos montar esse começo.
+
+#personaltrainer #consultoriaonline #habitos`,
+ alt:`Jucimara Firmino em pose confiante com camiseta da marca e o título: Não espere janeiro. Hábito leva tempo.`,
+ p:{foto:"Jucimara sozinha em pose confiante",cena:"Coloque Jucimara à esquerda, com a logo da camiseta visível e fundo escuro de academia.",tag:"COMECE AGORA",titulo:"Não espere janeiro. Hábito leva tempo.",destaque:"Não espere janeiro.",apoio:"Estudo: mediana de 66 dias, com grande variação entre as pessoas.",logo:"grande e translúcida ao fundo, atrás de Jucimara, sem competir com o título."}}
+};
+
+const STICKERS = [
+ "Enquete: “O que mais te trava hoje?” | TEMPO / CONSTÂNCIA",
+ "Caixa de perguntas: “Qual é sua maior dúvida sobre treino?”",
+ "Link: “Fale comigo” | bit.ly/ContatoJucimaraFirmino",
+ "Quiz: “Mulher que treina pesado fica musculosa demais?” | SIM / NÃO | correta: NÃO",
+ "Enquete: “Você prefere treinar em qual modelo?” | PRESENCIAL / ONLINE",
+ "Link: “Fale comigo” | bit.ly/ContatoJucimaraFirmino",
+ "Controle deslizante: “Quanto você está treinando com constância?”",
+ "Enquete: “Consultoria online: você já conhecia?” | SIM / AINDA NÃO",
+ "Link: “Quero começar” | bit.ly/ContatoJucimaraFirmino",
+ "Enquete: “Você faz treino de força?” | SIM / AINDA NÃO",
+ "Caixa de perguntas: “O que você gostaria de saber sobre a consultoria?”",
+ "Link: “Quero entender como funciona” | bit.ly/ContatoJucimaraFirmino",
+ "Enquete: “Dezembro para você é...” | CORRERIA / FOCO",
+ "Quiz: “Reavaliação ajuda a ajustar o treino?” | SIM / NÃO | correta: SIM",
+ "Link: “Quero começar agora” | bit.ly/ContatoJucimaraFirmino"
+];
+
+const STORIES = {};
+(function(){let d=new Date(2026,10,5,12),i=0;const end=new Date(2026,11,3,12);const c=["S1","S2","S3"];
+ while(d<=end){STORIES[iso(d)]={c:c[i%3],sticker:STICKERS[i]};d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+2,12);i++}})();
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const NAMES=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const FIRST="2026-11-05",LAST="2026-12-03";
+const dates=[];for(let d=new Date(2026,10,1,12);dates.length<35;d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,12))dates.push(new Date(d));
+const inRange=s=>s>=FIRST&&s<=LAST;
+const active=dates.map(iso).filter(s=>POSTS[s]||STORIES[s]);
+let sel=FIRST;
+const esc=s=>s.replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const store={};let nid=0;
+function block(label,text){const id="t"+(nid++);store[id]=text;return `<div class="lab"><span>${label}</span><button type="button" data-copy="${id}">Copiar</button></div><pre id="${id}">${esc(text)}</pre>`}
+function fmt(s){const d=new Date(s+"T12:00:00");return `${NAMES[d.getDay()]}, ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`}
+function renderCal(){document.getElementById("days").innerHTML=dates.map(d=>{const s=iso(d),on=inRange(s)&&(POSTS[s]||STORIES[s]);
+ const b=(POSTS[s]?'<i class="badge b-post">POST</i>':'')+(STORIES[s]?`<i class="badge b-st">${STORIES[s].c}</i>`:'');
+ return `<button type="button" class="day${s===sel?" sel":""}" data-d="${s}" ${on?"":"disabled"} aria-label="${fmt(s)}">${d.getDate()}${b}</button>`}).join("")}
+function renderDay(){nid=0;for(const k in store)delete store[k];const i=active.indexOf(sel),p=POSTS[sel],st=STORIES[sel];
+ let h=`<div class="dayhead"><h2>${fmt(sel)}</h2><div class="nav"><button type="button" data-d="${active[i-1]||""}" ${i>0?"":"disabled"}>← Anterior</button><button type="button" data-d="${active[i+1]||""}" ${i<active.length-1?"":"disabled"}>Próximo →</button></div></div>`;
+ if(p){h+=`<div class="section">No feed</div><article class="card"><div class="meta">19h | Post único 1:1 | ${p.pilar}</div><h3>${esc(p.t)}</h3><p><b>Foto a anexar:</b> ${esc(p.foto)}.</p>${block("Legenda",p.legenda)}${block("Texto alternativo",p.alt)}${block("Prompt para o ChatGPT (1080x1080)",feedPrompt(p.p))}</article>`}
+ if(st){const s=STORY[st.c];h+=`<div class="section">Nos Stories</div><article class="card"><div class="meta">9h | Story 1 | 9:16 | ${st.c}</div><h3>${s.nome}</h3><p><b>Foto a anexar:</b> ${s.foto}. Use uma foto diferente da última vez em que este modelo saiu.</p>${block("Sticker",st.sticker)}${block("Prompt para o ChatGPT (1080x1920)",s.prompt)}</article>`}
+ document.getElementById("day").innerHTML=h}
+function go(s){if(!s)return;sel=s;document.getElementById("kit").hidden=true;document.getElementById("day").hidden=false;renderCal();renderDay()}
+function renderKit(){const rows=active.map(s=>`<tr><td>${fmt(s)}</td><td>${POSTS[s]?esc(POSTS[s].t):"-"}</td><td>${POSTS[s]?POSTS[s].pilar:"-"}</td><td>${STORIES[s]?STORIES[s].c:"-"}</td></tr>`).join("");
+ const k=document.getElementById("kit");
+ k.innerHTML=`<div class="dayhead"><h2>Kit fixo</h2><button type="button" id="back">← Voltar ao dia</button></div>
+ <article class="card"><h3>Estratégia</h3><ul>
+ <li><b>O que continua:</b> ganchos diretos, ciência acessível, preto e pink, fotos reais e temas Mulher 40+ e Comunidade JF.</li>
+ <li><b>O que muda:</b> foto diferente em cada post, oferta clara em 26/11 e 03/12, e prova social coletada nos comentários de 16/11.</li>
+ <li><b>Público principal:</b> mulheres a partir de 35 anos, no Rio e online. O post de 19/11 fala com elas para alcançar os homens da família.</li>
+ <li><b>Conversão:</b> cada post pede uma palavra no direct. Os Stories S3 levam ao WhatsApp.</li></ul></article>
+ <article class="card"><h3>Calendário resumido</h3><div class="tw"><table><thead><tr><th>Dia</th><th>Post</th><th>Pilar</th><th>Stories</th></tr></thead><tbody>${rows}</tbody></table></div></article>
+ <article class="card"><h3>Como usar no ChatGPT</h3><ul><li>Anexe a foto indicada no dia e, se tiver, a logo JF em PNG.</li><li>Cole o prompt inteiro e confira rosto, textos e acentos antes de postar.</li><li>Se o texto invadir a zona morta dos Stories, peça para movê-lo citando a distância em pixels.</li></ul>${block("Regra IDENTITYLOCK",IDENTITY)}</article>
+ <article class="card"><h3>Prompts de Stories</h3>${["S1","S2","S3"].map(c=>block(c+" | "+STORY[c].nome,STORY[c].prompt)).join("")}</article>
+ <article class="card"><h3>Confirmar antes de postar</h3><ul>
+ <li>Horários de 19h e 9h, e dias de segunda e quinta, são sugestões.</li>
+ <li>Black Friday: nenhum desconto foi criado. Se houver oferta, inclua na legenda de 26/11.</li>
+ <li>Jucimara precisa validar as frases em primeira pessoa e o funcionamento atual da consultoria.</li>
+ <li>Pessoas que aparecem nas fotos precisam autorizar o uso, principalmente em 16/11 e 19/11.</li>
+ <li>Teste o bit.ly antes de usar: o destino dele não foi aberto.</li></ul></article>
+ <article class="card"><h3>Fontes</h3><ul>
+ <li><a href="https://research-repository.griffith.edu.au/items/70307370-05b3-5d8b-8454-78b328f0f15b" target="_blank" rel="noopener">LIFTMOR, resultados preliminares (05/11)</a></li>
+ <li><a href="https://bjsm.bmj.com/content/52/6/376" target="_blank" rel="noopener">Morton et al., proteína e treino de força (09/11)</a></li>
+ <li><a href="https://www.bristol.ac.uk/news/2022/june/tne-second-one-legged-stance.html" target="_blank" rel="noopener">Araujo et al., teste de 10 segundos (12/11)</a></li>
+ <li><a href="https://ninho.inca.gov.br/jspui/bitstream/123456789/9086/1/Informe%20INCA%20341-11.pdf" target="_blank" rel="noopener">INCA, câncer de próstata (19/11)</a></li>
+ <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9618974/table/tbl2" target="_blank" rel="noopener">Diretrizes da OMS de 2020 (19/11 e 23/11)</a></li>
+ <li><a href="https://pubmed.ncbi.nlm.nih.gov/21131862/" target="_blank" rel="noopener">Bickel et al., dose de manutenção (30/11)</a></li>
+ <li><a href="https://siliconcanals.com/t-habit-systematic-review-59-66-335-days/" target="_blank" rel="noopener">Resumo sobre Lally et al. e formação de hábitos (03/12)</a></li></ul></article>`;
+ k.hidden=false;document.getElementById("day").hidden=true}
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.copy){const id=b.dataset.copy,t=store[id];const ok=()=>{b.textContent="Copiado";setTimeout(()=>b.textContent="Copiar",1500)};
+  const fb=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById(id));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selecionado"};
+  try{navigator.clipboard.writeText(t).then(ok,fb)}catch(_){fb()}return}
+ if(b.id==="kitbtn"){renderKit();return}
+ if(b.id==="back"){go(sel);return}
+ if(b.dataset.d)go(b.dataset.d)});
+renderCal();renderDay();
+</script>
+
+</body>
+</html>
