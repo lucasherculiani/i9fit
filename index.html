@@ -714,7 +714,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, getDocsFromServer, writeBatch, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs, getDocsFromServer, writeBatch, deleteDoc, onSnapshot, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC6xUfFJ59fXT1_eR1HDD7UPiQ8aakSkHY",
@@ -756,7 +756,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-07-25-fix-checkpoint-nested-array-v10";
+const I9_BUILD = "2026-11-19-cache-incremental-v11";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -845,6 +845,125 @@ async function __lerColecao(nome){
   });
 }
 
+// ===== CACHE NO APARELHO + LEITURA INCREMENTAL =====
+// Antes, cada abertura do app lia do servidor TODAS as colecoes inteiras
+// (todos os exercicios de todos os protocolos, todo o progresso e todas as cargas),
+// o que esgotava a cota diaria gratuita do Firestore com poucas aberturas.
+// Agora cada aparelho guarda uma copia local de cada colecao e, nas proximas
+// aberturas, busca somente os documentos alterados desde a ultima vez (campo
+// updatedAt). Exclusoes nao aparecem nessa busca, entao quem exclui algo marca
+// a colecao em sistema/i9fit_versoes e os outros aparelhos recarregam so ela.
+// Se o servidor nao responder (sem internet ou cota esgotada), o app abre com
+// a copia local em vez de ficar vazio.
+const VERSOES_REF = doc(db, "sistema", "i9fit_versoes");
+const CACHE_PREFIXO = "i9cache_v1_";
+let __versoes = {};
+let __usandoCacheOffline = false;
+const __desdeColecao = {};
+// Recarga completa de seguranca a cada 7 dias (pega alteracoes feitas por versoes antigas do app).
+const CACHE_RECARGA_MS = 7 * 24 * 60 * 60 * 1000;
+
+function __lsReal(){ try{ return window.localStorage; }catch(e){ return null; } }
+function __cacheLer(nome){
+  try{ const ls = __lsReal(); const raw = ls && ls.getItem(CACHE_PREFIXO + nome); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+function __cacheGravar(nome, c){
+  const ls = __lsReal(); if(!ls) return;
+  try{ ls.setItem(CACHE_PREFIXO + nome, JSON.stringify(c)); }
+  catch(e){ try{ ls.removeItem(CACHE_PREFIXO + nome); }catch(_){} }
+}
+function __millis(ts){
+  if(!ts) return 0;
+  if(typeof ts.toMillis === 'function') return ts.toMillis();
+  if(typeof ts.seconds === 'number') return ts.seconds * 1000 + Math.floor((ts.nanoseconds || 0) / 1e6);
+  return 0;
+}
+function __docParaItem(d){
+  const data = d.data() || {};
+  const ms = __millis(data.updatedAt);
+  delete data.updatedAt;
+  if(!data.id) data.id = decodeURIComponent(d.id);
+  return { data, ms };
+}
+async function __getDocsServidor(ref){
+  try{ return await getDocsFromServer(ref); }
+  catch(err){
+    if(err && (err.code === 'resource-exhausted' || err.code === 'permission-denied')) throw err;
+    console.warn('Leitura direta do servidor falhou; usando fallback:', err);
+    return await getDocs(ref);
+  }
+}
+function __novaVersao(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+async function __lerVersoes(){
+  try{
+    const snap = await getDoc(VERSOES_REF);
+    __versoes = snap.exists() ? (snap.data() || {}) : {};
+    __cacheGravar('__versoes', __versoes);
+    return true;
+  }catch(err){
+    console.warn('Nao foi possivel ler as versoes; usando copia local:', err);
+    __versoes = __cacheLer('__versoes') || {};
+    return false;
+  }
+}
+
+async function __lerColecaoComCache(nome, online){
+  const full = String(__versoes[nome] || '0');
+  let c = __cacheLer(nome);
+  const cacheValido = !!(c && c.docs && c.full === full && c.cheio && (Date.now() - c.cheio) < CACHE_RECARGA_MS);
+  if(!online && c && c.docs){
+    __usandoCacheOffline = true;
+    __desdeColecao[nome] = c.desde || 0;
+    return Object.keys(c.docs).map(function(k){ return c.docs[k]; });
+  }
+  try{
+    if(!cacheValido){
+      const snap = await __getDocsServidor(collection(db, nome));
+      c = { full: full, desde: 0, cheio: Date.now(), docs: {} };
+      snap.docs.forEach(function(d){ const r = __docParaItem(d); c.docs[d.id] = r.data; if(r.ms > c.desde) c.desde = r.ms; });
+    }else{
+      const q = query(collection(db, nome), where('updatedAt', '>', Timestamp.fromMillis(Math.max(0, (c.desde || 0) - 1))));
+      const snap = await __getDocsServidor(q);
+      snap.docs.forEach(function(d){ const r = __docParaItem(d); c.docs[d.id] = r.data; if(r.ms > c.desde) c.desde = r.ms; });
+    }
+  }catch(err){
+    const antigo = __cacheLer(nome);
+    if(antigo && antigo.docs){
+      console.warn('Servidor indisponivel; usando copia local de', nome, err);
+      __usandoCacheOffline = true;
+      __desdeColecao[nome] = antigo.desde || 0;
+      return Object.keys(antigo.docs).map(function(k){ return antigo.docs[k]; });
+    }
+    throw err;
+  }
+  __cacheGravar(nome, c);
+  __desdeColecao[nome] = c.desde || 0;
+  return Object.keys(c.docs).map(function(k){ return c.docs[k]; });
+}
+
+// Atualiza a copia local depois de gravacoes feitas por este aparelho.
+function __cacheAplicar(nome, sets, deletes, msNovo){
+  const c = __cacheLer(nome);
+  if(!c || !c.docs) return;
+  (sets || []).forEach(function(s){ c.docs[s.docId] = __deepClone(s.data); });
+  (deletes || []).forEach(function(id){ delete c.docs[id]; });
+  if(msNovo && msNovo > (c.desde || 0)) c.desde = msNovo;
+  __cacheGravar(nome, c);
+}
+
+// Exclusoes nao sao vistas pela leitura incremental: marca a colecao para
+// que os outros aparelhos a recarreguem inteira uma unica vez.
+async function __marcarRecargaCompleta(nome){
+  const v = __novaVersao();
+  __versoes[nome] = v;
+  await setDoc(VERSOES_REF, { [nome]: v }, { merge: true });
+  __cacheGravar('__versoes', __versoes);
+  const c = __cacheLer(nome);
+  if(c){ c.full = v; __cacheGravar(nome, c); }
+}
+
 function __normalizarStorageAntigo(raw){
   const storage = raw && raw.storage && typeof raw.storage === "object" ? raw.storage : {};
   if(!storage.pt_data && raw && (raw.alunos || raw.protocolos || raw.semanas || raw.dias || raw.exercicios)){
@@ -866,14 +985,19 @@ function __normalizarStorageAntigo(raw){
 }
 
 async function __carregarDasColecoes(){
-  const alunos = ordenarAlunosAZ(await __lerColecao(COLECOES_I9.alunos));
-  const protocolos = ordenarProtocolosAZ(await __lerColecao(COLECOES_I9.protocolos));
-  const semanas = await __lerColecao(COLECOES_I9.semanas);
-  const dias = await __lerColecao(COLECOES_I9.dias);
-  const exercicios = await __lerColecao(COLECOES_I9.exercicios);
-  const avaliacoes = await __lerColecao(COLECOES_I9.avaliacoes);
-  const cargasDocs = await __lerColecao(COLECOES_I9.cargas);
-  const estadoDocs = await __lerColecao(COLECOES_I9.estado);
+  __usandoCacheOffline = false;
+  const online = await __lerVersoes();
+  const nomes = [COLECOES_I9.alunos, COLECOES_I9.protocolos, COLECOES_I9.semanas, COLECOES_I9.dias,
+    COLECOES_I9.exercicios, COLECOES_I9.avaliacoes, COLECOES_I9.cargas, COLECOES_I9.estado];
+  const lidos = await Promise.all(nomes.map(function(n){ return __lerColecaoComCache(n, online); }));
+  const alunos = ordenarAlunosAZ(lidos[0]);
+  const protocolos = ordenarProtocolosAZ(lidos[1]);
+  const semanas = lidos[2];
+  const dias = lidos[3];
+  const exercicios = lidos[4];
+  const avaliacoes = lidos[5];
+  const cargasDocs = lidos[6];
+  const estadoDocs = lidos[7];
 
   const porAluno = {};
   avaliacoes.forEach(function(av){
@@ -927,10 +1051,11 @@ async function __gravarColecaoCompleta(nome, itens, preparar){
     const batch = writeBatch(db);
     ops.slice(i, i+450).forEach(function(op){
       if(op.tipo === "delete") batch.delete(op.ref);
-      else batch.set(op.ref, __sanitizarFirestore(op.data), {merge:false});
+      else batch.set(op.ref, Object.assign(__sanitizarFirestore(op.data), {updatedAt: serverTimestamp()}), {merge:false});
     });
     await batch.commit();
   }
+  await __marcarRecargaCompleta(nome);
 }
 
 async function __salvarFirebaseAgora(){
@@ -964,9 +1089,15 @@ async function __salvarFirebaseAgora(){
       const batch=writeBatch(db);
       ops.slice(i,i+450).forEach(function(op){
         if(op.tipo==='delete') batch.delete(op.ref);
-        else batch.set(op.ref,__sanitizarFirestore(op.data),{merge:false});
+        else batch.set(op.ref,Object.assign(__sanitizarFirestore(op.data),{updatedAt:serverTimestamp()}),{merge:false});
       });
       await batch.commit();
+    }
+    if(ops.length){
+      const sets=ops.filter(function(op){return op.tipo==='set';}).map(function(op){return {docId:op.ref.id,data:__sanitizarFirestore(op.data)};});
+      const dels=ops.filter(function(op){return op.tipo==='delete';}).map(function(op){return op.ref.id;});
+      __cacheAplicar(nome,sets,dels);
+      if(dels.length) await __marcarRecargaCompleta(nome);
     }
   }
   function splitStorage(storage){
@@ -1047,6 +1178,7 @@ async function __salvarCargaImediata(chave, valor){
       updatedAt: serverTimestamp()
     }, {merge:false});
 
+    __cacheAplicar(COLECOES_I9.cargas, [{docId: docId, data: {id: docId, chave: chave, valor: valorTexto}}], []);
     if(!__lastSyncedStorage) __lastSyncedStorage = __deepClone(__storageCache);
     else __lastSyncedStorage.pt_pesos = __storageCache.pt_pesos;
     return true;
@@ -1074,6 +1206,7 @@ async function __salvarEstadoImediato(chave, valor){
       updatedAt: serverTimestamp()
     }, {merge:false});
 
+    __cacheAplicar(COLECOES_I9.estado, [{docId: docId, data: {id: docId, chave: chave, valor: valorTexto}}], []);
     if(!__lastSyncedStorage) __lastSyncedStorage = __deepClone(__storageCache);
     else __lastSyncedStorage[chave] = valorTexto;
     return true;
@@ -1197,12 +1330,16 @@ function __iniciarSincronizacaoTempoReal(){
   if(__syncTempoRealIniciada) return;
   __syncTempoRealIniciada = true;
 
-  __unsubscribeEstado = onSnapshot(collection(db, COLECOES_I9.estado), function(snap){
+  const __desdeRT = function(nome){ return Timestamp.fromMillis(Math.max(0, (__desdeColecao[nome] || (Date.now() - 60000)) - 1)); };
+  // Escuta apenas documentos alterados depois do carregamento (antes lia a colecao inteira).
+  __unsubscribeEstado = onSnapshot(query(collection(db, COLECOES_I9.estado), where('updatedAt', '>', __desdeRT(COLECOES_I9.estado))), function(snap){
     let mudou = false;
     snap.docChanges().forEach(function(change){
       const item = change.doc.data() || {};
       const chave = item.chave;
       if(!chave) return;
+      if(change.type === 'removed') __cacheAplicar(COLECOES_I9.estado, [], [change.doc.id]);
+      else __cacheAplicar(COLECOES_I9.estado, [{docId: change.doc.id, data: {id: item.id || change.doc.id, chave: chave, valor: String(item.valor ?? '')}}], [], __millis(item.updatedAt));
       if(change.type === 'removed'){
         if(Object.prototype.hasOwnProperty.call(__storageCache, chave)){ delete __storageCache[chave]; mudou = true; }
       }else{
@@ -1225,7 +1362,7 @@ function __iniciarSincronizacaoTempoReal(){
     }
   }, function(err){ console.error('Erro na sincronizacao em tempo real do progresso:', err); });
 
-  __unsubscribeCargas = onSnapshot(collection(db, COLECOES_I9.cargas), function(snap){
+  __unsubscribeCargas = onSnapshot(query(collection(db, COLECOES_I9.cargas), where('updatedAt', '>', __desdeRT(COLECOES_I9.cargas))), function(snap){
     let pesos = {};
     try{ pesos = JSON.parse(__storageCache.pt_pesos || '{}') || {}; }catch(e){ pesos = {}; }
     let mudou = false;
@@ -1233,6 +1370,8 @@ function __iniciarSincronizacaoTempoReal(){
       const item = change.doc.data() || {};
       const chave = item.chave;
       if(!chave) return;
+      if(change.type === 'removed') __cacheAplicar(COLECOES_I9.cargas, [], [change.doc.id]);
+      else __cacheAplicar(COLECOES_I9.cargas, [{docId: change.doc.id, data: {id: item.id || change.doc.id, chave: chave, valor: String(item.valor ?? '')}}], [], __millis(item.updatedAt));
       if(change.type === 'removed'){
         if(Object.prototype.hasOwnProperty.call(pesos, chave)){ delete pesos[chave]; mudou = true; }
       }else{
@@ -2194,9 +2333,10 @@ async function salvarEdicaoAluno(id){
     delete alunoFirebase.avaliacoes;
     await setDoc(
       doc(db,COLECOES_I9.alunos,__safeDocId(alunoFirebase.id)),
-      alunoFirebase,
+      Object.assign({},alunoFirebase,{updatedAt:serverTimestamp()}),
       {merge:false}
     );
+    __cacheAplicar(COLECOES_I9.alunos,[{docId:__safeDocId(alunoFirebase.id),data:alunoFirebase}],[]);
 
     toggleEditAluno(id);
     renderAdminAlunos();
