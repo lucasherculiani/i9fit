@@ -1,0 +1,42 @@
+{
+  "versao": "2026-11-20T15:02:42.518Z",
+  "endereco": "https://www.i9treino.com.br/calendario/",
+  "clientes": [
+    {
+      "slug": "quiropraxia",
+      "cliente": "Évora de Souza | Quiropraxia",
+      "instagram": "@quiropraxiaoficial",
+      "ano": 2026,
+      "mes": 11,
+      "mesNome": "novembro",
+      "posts": 9
+    },
+    {
+      "slug": "jucimara-firmino",
+      "cliente": "Jucimara Firmino",
+      "instagram": "@jucimara_firmino",
+      "ano": 2026,
+      "mes": 11,
+      "mesNome": "novembro",
+      "posts": 9
+    },
+    {
+      "slug": "lucas-herculiani",
+      "cliente": "Lucas Herculiani",
+      "instagram": "@lucasherculiani",
+      "ano": 2026,
+      "mes": 11,
+      "mesNome": "novembro",
+      "posts": 22
+    },
+    {
+      "slug": "rej-mercado",
+      "cliente": "R&J Mercado",
+      "instagram": "@rejmercadomarilia",
+      "ano": 2026,
+      "mes": 11,
+      "mesNome": "novembro",
+      "posts": 28
+    }
+  ]
+}
