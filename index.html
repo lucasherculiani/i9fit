@@ -516,6 +516,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
         <h4>Cadastrar aluno</h4>
         <div class="form-row"><label>Nick (login - sem espacos)</label><input id="f-aluno-nick" placeholder="ex: joao, ana123"></div>
         <div class="form-row"><label>Nome completo (opcional)</label><input id="f-aluno-nome" placeholder="Nome para exibicao"></div>
+        <div class="form-row"><label>Telefone / WhatsApp (opcional)</label><input id="f-aluno-tel" type="tel" inputmode="tel" placeholder="(14) 99999-9999"></div>
         <div class="form-row"><label>Protocolos vinculados</label>
           <div id="f-aluno-protocolos" class="multi-prot-list"><div class="multi-prot-empty">Crie protocolos para vincular ao aluno.</div></div>
         </div>
@@ -756,7 +757,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-11-19-cache-incremental-v11";
+const I9_BUILD = "2026-11-20-cadastro-unico-v12";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -2278,11 +2279,13 @@ function renderAdminAlunos(){
     row.className='admin-item-row';
     row.innerHTML='<div class="admin-item-info">'
       +'<div class="admin-item-title">'+nomeAlunoExibicao(a)+' <span style="color:var(--muted);font-size:.75rem">/ '+a.nick+'</span></div>'
+      +(a.telefone?'<div class="admin-item-sub">&#128222; '+String(a.telefone).replace(/</g,'&lt;')+'</div>':'')
       +'<div class="admin-item-sub">&#128203; '+protResumo+'</div>'
       +'<div class="admin-item-sub">&#128207; '+avResumo+(avPend?' <span class="tag" style="color:var(--accent)">Pendente</span>':'')+'</div>'
       +'<div class="admin-item-sub">&#127919; Checkpoint: '+(normalizarCheckpoint(a).colunas.length?(normalizarCheckpoint(a).ativo?'Ativo':'Oculto'):'Nao configurado')+'</div>'
       +'</div>'
       +'<div class="admin-item-actions">'
+      +'<a class="btn-icon" title="Avaliacoes InoveAvalia (painel)" href="/admin/?aluno='+encodeURIComponent(a.id)+'" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">&#128202;</a>'
       +'<button class="btn-icon bava" title="Avaliacoes">&#128207;</button>'
       +'<button class="btn-icon bea" title="Editar">&#9998;</button>'
       +'<button class="btn-icon del bda">&#10005;</button>'
@@ -2296,6 +2299,7 @@ function renderAdminAlunos(){
     form.className='edit-aluno-form';
     form.id='edit-aluno-'+a.id;
     form.innerHTML='<div class="form-row"><label>Nome de exibicao</label><input id="ean-'+a.id+'" value="'+(a.nome||'').replace(/"/g,'&quot;')+'" placeholder="Nome completo"></div>'
+      +'<div class="form-row"><label>Telefone / WhatsApp</label><input id="eat-'+a.id+'" type="tel" inputmode="tel" value="'+(a.telefone||'').replace(/"/g,'&quot;')+'" placeholder="(14) 99999-9999"></div>'
       +'<div class="form-row"><label>Protocolos vinculados</label>'
       +'<div id="eap-'+a.id+'" class="multi-prot-list">'+protocolosCheckboxesHtml(d,ids)+'</div></div>'
       +'<div class="form-row"><label>METAS QUANTITATIVAS - CHECKPOINT</label>'+checkpointEditorHtml(a.id,normalizarCheckpoint(a))+'</div>'
@@ -2316,8 +2320,12 @@ async function salvarEdicaoAluno(id){
   if(idx<0)return;
 
   var nomeEl=document.getElementById('ean-'+id);
+  var telEl=document.getElementById('eat-'+id);
   var ids=getSelectedProtocolosFromContainer('eap-'+id);
+  var dup=acharAlunoDuplicado(d,{nome:nomeEl?nomeEl.value.trim():'',telefone:telEl?telEl.value.trim():''},id);
+  if(dup)return alert(msgDuplicado(dup));
   if(nomeEl)d.alunos[idx].nome=nomeEl.value.trim();
+  if(telEl){var tv=telEl.value.trim();if(tv)d.alunos[idx].telefone=tv;else delete d.alunos[idx].telefone;}
   d.alunos[idx].metasCheckpoint=lerCheckpointEditor(id);
   setAlunoProtocolosIds(d.alunos[idx],ids);
 
@@ -2347,16 +2355,36 @@ async function salvarEdicaoAluno(id){
     alert('Os dados ficaram nesta tela, mas não foi possível confirmar o salvamento no Firebase. Verifique a conexão e as regras do Firestore.');
   }
 }
+// CADASTRO UNICO: o mesmo cadastro de alunos e usado pelo app de treino, pelas avaliacoes
+// InoveAvalia e pelo painel /admin. Antes de criar ou alterar, confere se ja existe alguem
+// com o mesmo login, o mesmo nome ou o mesmo telefone (com o mesmo primeiro nome).
+function __normCad(t){return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLowerCase();}
+function __fimTel(t){var x=String(t||'').replace(/\D/g,'');return x.length>=8?x.slice(-8):'';}
+function acharAlunoDuplicado(d,dados,ignorarId){
+  var nome=__normCad(dados.nome),tel=__fimTel(dados.telefone),prim=nome.split(' ')[0];
+  for(var i=0;i<d.alunos.length;i++){
+    var a=d.alunos[i];if(a.id===ignorarId)continue;
+    if(dados.nick&&a.nick===dados.nick)return {aluno:a,motivo:'login'};
+    if(nome&&__normCad(a.nome)===nome)return {aluno:a,motivo:'nome'};
+    if(tel&&__fimTel(a.telefone)===tel){var pa=__normCad(a.nome||a.nick).split(' ')[0];if(!prim||!pa||pa===prim)return {aluno:a,motivo:'telefone'};}
+  }
+  return null;
+}
+function msgDuplicado(dup){return 'Ja existe um aluno com este '+dup.motivo+': '+(dup.aluno.nome||dup.aluno.nick)+' (login: '+dup.aluno.nick+').\n\nCada aluno tem um cadastro so. Edite o cadastro existente em vez de criar outro.';}
 function salvarAluno(){
   var nick=document.getElementById('f-aluno-nick').value.trim().toLowerCase().replace(/\s+/g,'');
   var nome=document.getElementById('f-aluno-nome').value.trim();
+  var tel=(document.getElementById('f-aluno-tel')||{value:''}).value.trim();
   var ids=getSelectedProtocolosFromContainer('f-aluno-protocolos');
   if(!nick)return alert('Nick obrigatorio!');
-  var d=getData();for(var i=0;i<d.alunos.length;i++){if(d.alunos[i].nick===nick)return alert('Ja existe aluno com este nick!');}
+  var d=getData();
+  var dup=acharAlunoDuplicado(d,{nick:nick,nome:nome,telefone:tel},null);
+  if(dup)return alert(msgDuplicado(dup));
   var novo={id:uid(),nick:nick,nome:nome,protocoloId:''};
+  if(tel)novo.telefone=tel;
   setAlunoProtocolosIds(novo,ids);
   d.alunos.push(novo);saveData(d);
-  document.getElementById('f-aluno-nick').value='';document.getElementById('f-aluno-nome').value='';
+  document.getElementById('f-aluno-nick').value='';document.getElementById('f-aluno-nome').value='';if(document.getElementById('f-aluno-tel'))document.getElementById('f-aluno-tel').value='';
   populateSelectProtocolos();
   toggleForm('form-novo-aluno');renderAdminAlunos();renderAdminProtocolos();
 }

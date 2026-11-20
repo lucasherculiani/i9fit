@@ -311,3 +311,8 @@ table.ref th.col-idade small{display:block;font-size:.62rem;color:var(--accent);
   .gauge svg{max-width:300px}
   .g-pe-txt,.g-tick,.g-fim{fill:#111}
 }
+
+/* Cadastro único: status do vínculo com o aluno do i9Treino */
+.cad-status{display:block;margin-top:5px;font-size:.78rem;line-height:1.35;color:var(--muted)}
+.cad-status b{color:var(--text)}
+.cad-status:empty{display:none}

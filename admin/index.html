@@ -33,6 +33,12 @@
   .tipo{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-right:6px}
   .tipo-multifuncional{background:rgba(200,245,66,.12);color:var(--accent)}
   .tipo-longev{background:rgba(79,179,255,.14);color:var(--d)}
+  .tipo-sem{background:rgba(255,255,255,.07);color:var(--muted)}
+  .treino-linha{display:block;margin-top:4px;font-size:.8rem;color:var(--muted)}
+  .pessoa-card .nm .treino-linha{display:block;margin-top:4px;font-size:.8rem;color:var(--muted)}
+  .treino-linha .v{color:var(--text);font-weight:700}
+  .treino-linha.sem{opacity:.8}
+  .pessoa-card.sem-av{opacity:.92}
   .kv small{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
   .kv b{font-size:.92rem}
   .pessoa-acoes{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
@@ -135,18 +141,20 @@
   <div class="pendentes" id="pendentes"><div class="vazio-grande">Carregando...</div></div>
 
   <div class="bloco-t" id="avaliacoes">
-    <h2>Avaliações</h2>
+    <div><h2>Alunos e avaliações</h2><p class="sub">Cadastro único: o mesmo aluno do app de treino, com as avaliações e o treino de cada um.</p></div>
     <div class="acoes-linha" style="margin:0">
       <button class="btn btn-ghost btn-sm" id="exp-csv">Exportar planilha (CSV)</button>
       <button class="btn btn-ghost btn-sm" id="exp-json">Backup (JSON)</button>
     </div>
   </div>
   <div class="filtros">
-    <input class="inp busca" id="f-busca" placeholder="Buscar por nome ou telefone">
+    <input class="inp busca" id="f-busca" placeholder="Buscar por nome, login ou telefone">
     <select class="inp" id="f-tipo"><option value="">Todos os protocolos</option><option value="multifuncional">InoveAvalia</option><option value="longev">InoveAvalia Plus</option></select>
+    <select class="inp" id="f-situacao"><option value="">Todos os alunos</option><option value="com">Com avaliação</option><option value="sem">Sem avaliação</option><option value="semtreino">Sem treino no app</option></select>
     <select class="inp" id="f-periodo"><option value="">Todo o período</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="365">Último ano</option></select>
     <button class="btn btn-ghost btn-sm" id="recarregar">Atualizar</button>
   </div>
+  <datalist id="alunos-cadastro"></datalist>
   <div class="pessoas" id="pessoas"><div class="vazio-grande">Carregando avaliações...</div></div>
 </main>
 
@@ -157,7 +165,7 @@
 
 <script type="module">
 import { exigirAcesso, sair } from "../avaliacoes/assets/acesso.js";
-import { listarAvaliacoes, excluirAvaliacao, contar } from "../avaliacoes/assets/db.js";
+import { listarAvaliacoes, excluirAvaliacao, contar, listarAlunosI9, listarProtocolosI9 } from "../avaliacoes/assets/db.js";
 import { relatorioHTML, TIPOS, esc, dataBR, STATUS, formatTel, telWhats, linkResposta, linkWhats, mensagemEnvio, copiar, abrirAba, irPara } from "../avaliacoes/assets/avaliacao.js";
 import { salvarAvaliacao, obterAvaliacao } from "../avaliacoes/assets/db.js";
 import * as C from "../avaliacoes/assets/catalogo.js";
@@ -165,58 +173,110 @@ import * as C from "../avaliacoes/assets/catalogo.js";
 await exigirAcesso("Painel i9Treino");
 document.getElementById("sair").onclick = e => { e.preventDefault(); sair(); };
 
-let TODAS = [];
+let TODAS = [], ALUNOS = [], PROTS = new Map();
 const concluida = a => !a.status || a.status === "concluida";
 const CONC = () => TODAS.filter(concluida);
 const $ = id => document.getElementById(id);
 const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-const chavePessoa = a => `${a.type}|${norm(a.patientName)}|${(a.formData || {}).dataNascimento || ""}`;
+// Cada aluno aparece uma vez só: as avaliações são agrupadas pelo cadastro (alunoId).
+const chavePessoa = a => a.alunoId ? `al:${a.alunoId}` : `${norm(a.patientName)}|${(a.formData || {}).dataNascimento || ""}`;
+const chaveEvo = a => `${chavePessoa(a)}|${a.type}`;
+const alunoDe = id => ALUNOS.find(x => x.id === id);
+const treinoDe = al => { if (!al) return []; const ids = Array.isArray(al.protocolosIds) && al.protocolosIds.length ? al.protocolosIds : (al.protocoloId ? [al.protocoloId] : []); return ids.map(id => PROTS.get(id)).filter(Boolean); };
 const porData = (a, b) => String(a.assessmentDate).localeCompare(String(b.assessmentDate)) || String(a.criadoEm).localeCompare(String(b.criadoEm));
 const diasAtras = d => { const x = new Date(); x.setDate(x.getDate() - d); return x.toISOString().slice(0, 10); };
 
 async function carregar() {
   $("pessoas").innerHTML = '<div class="vazio-grande">Carregando avaliações...</div>';
-  try { TODAS = await listarAvaliacoes(); }
+  try {
+    const [av, al, pr] = await Promise.all([listarAvaliacoes(), listarAlunosI9(true), listarProtocolosI9()]);
+    TODAS = av; ALUNOS = al; PROTS = new Map(pr.map(p => [p.id, p.nome || p.id]));
+    const dl = $("alunos-cadastro");
+    if (dl) dl.innerHTML = ALUNOS.slice().sort((a, b) => String(a.nome || a.nick).localeCompare(String(b.nome || b.nick), "pt-BR"))
+      .map(a => `<option value="${esc(a.nome || a.nick)}">${esc(a.nick)}${a.telefone ? " · " + esc(formatTel(a.telefone)) : ""}</option>`).join("");
+    const pAluno = new URLSearchParams(location.search).get("aluno"), alP = pAluno && alunoDe(pAluno);
+    if (alP && !$("f-busca").value) $("f-busca").value = alP.nome || alP.nick;
+  }
   catch (e) { console.error(e); $("pessoas").innerHTML = '<div class="vazio-grande">Não foi possível carregar as avaliações. Verifique a internet e clique em Atualizar.</div>'; return; }
   const s = k => document.querySelector(`[data-s="${k}"]`);
   s("total").textContent = CONC().length;
   s("multi").textContent = CONC().filter(a => a.type === "multifuncional").length;
   s("plus").textContent = CONC().filter(a => a.type === "longev").length;
   s("mes").textContent = CONC().filter(a => String(a.assessmentDate) >= diasAtras(30)).length;
+  if (ALUNOS.length) s("alunos").textContent = ALUNOS.length;
   renderPendentes();
   render();
 }
-contar("alunos").then(n => document.querySelector('[data-s="alunos"]').textContent = n ?? "–");
+contar("alunos").then(n => document.querySelector('[data-s="alunos"]').textContent = n ?? "–"); // atualizado em carregar()
 contar("protocolos").then(n => document.querySelector('[data-s="protocolos"]').textContent = n ?? "–");
 
+const bateBusca = (q, textos, tel) => !q || norm(textos.join(" ")).includes(q) || (q.replace(/\D/g, "") && String(tel || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")));
 function filtradas() {
   const q = norm($("f-busca").value), t = $("f-tipo").value, p = $("f-periodo").value;
-  return CONC().filter(a => (!t || a.type === t) && (!p || String(a.assessmentDate) >= diasAtras(Number(p))) &&
-    (!q || norm(`${a.patientName} ${a.telefone || ""}`).includes(q) || (q.replace(/\D/g, "") && String(a.telefone || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")))));
+  return CONC().filter(a => {
+    const al = alunoDe(a.alunoId);
+    return (!t || a.type === t) && (!p || String(a.assessmentDate) >= diasAtras(Number(p))) &&
+      (bateBusca(q, [a.patientName, a.telefone || "", al?.nick || "", al?.nome || ""], a.telefone) || (al && bateBusca(q, [], al.telefone)));
+  });
 }
 
+function linhaTreino(al) {
+  if (!al) return `<span class="treino-linha sem">Sem cadastro no i9Treino</span>`;
+  const t = treinoDe(al);
+  return `<span class="treino-linha${t.length ? "" : " sem"}">Treino: ${t.length ? t.map(n => `<span class="v">${esc(n)}</span>`).join(", ") : "nenhum protocolo no app"} · login <span class="v">${esc(al.nick)}</span></span>`;
+}
 function render() {
+  const sit = $("f-situacao").value, q = norm($("f-busca").value), t = $("f-tipo").value, p = $("f-periodo").value;
   const grupos = new Map();
-  for (const a of filtradas()) { const k = chavePessoa(a); if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(a); }
-  const lista = [...grupos.values()].map(g => g.sort(porData)).sort((a, b) => porData(b[b.length - 1], a[a.length - 1]));
+  if (sit !== "sem") for (const a of filtradas()) { const k = chavePessoa(a); if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(a); }
+  let lista = [...grupos.values()].map(g => ({ g: g.sort(porData), al: alunoDe(g[0].alunoId) }))
+    .sort((a, b) => porData(b.g[b.g.length - 1], a.g[a.g.length - 1]));
+  // Alunos do cadastro que ainda não têm avaliação concluída.
+  if (sit !== "com" && !t && !p) {
+    const comAv = new Set(CONC().map(a => a.alunoId).filter(Boolean));
+    const sem = ALUNOS.filter(al => !comAv.has(al.id) && bateBusca(q, [al.nome || "", al.nick || "", al.telefone || ""], al.telefone))
+      .sort((a, b) => String(a.nome || a.nick).localeCompare(String(b.nome || b.nick), "pt-BR")).map(al => ({ g: [], al }));
+    lista = lista.concat(sem);
+  }
+  if (sit === "semtreino") lista = lista.filter(x => !treinoDe(x.al).length);
   if (!lista.length) {
-    $("pessoas").innerHTML = CONC().length ? '<div class="vazio-grande">Nenhuma avaliação encontrada com esses filtros.</div>'
+    $("pessoas").innerHTML = (CONC().length || ALUNOS.length) ? '<div class="vazio-grande">Nenhum aluno encontrado com esses filtros.</div>'
       : '<div class="vazio-grande">Nenhuma avaliação registrada ainda.<br><br><a class="btn btn-primary btn-sm" href="/avaliacoes/">Fazer a primeira avaliação</a></div>';
     return;
   }
-  $("pessoas").innerHTML = lista.map(g => {
+  $("pessoas").innerHTML = lista.map(({ g, al }) => {
+    if (!g.length) {
+      const idade = al.dataNascimento ? C.ageFromBirthDate(al.dataNascimento) : null;
+      const plus = idade !== null && idade >= 60;
+      const pend = TODAS.filter(a => a.alunoId === al.id && !concluida(a)).sort(porData).pop();
+      const rotulo = pend ? (STATUS[pend.status] || "Avaliação em andamento") : "Sem avaliação";
+      return `<article class="pessoa-card sem-av">
+        <div class="pessoa-top">
+          <div class="nm"><span class="tipo tipo-sem">${esc(rotulo)}</span><b>${esc(al.nome || al.nick)}</b>
+            <span>${idade ?? "—"} anos${al.telefone ? ` · <a class="tel" href="https://wa.me/${telWhats(al.telefone)}" target="_blank" rel="noopener">${esc(formatTel(al.telefone))}</a>` : ""}</span>
+            ${linhaTreino(al)}</div>
+          <div class="pessoa-acoes">
+            ${pend ? `<a class="btn btn-primary btn-sm" href="${TIPOS[pend.type].rota}?editar=${encodeURIComponent(pend.id)}">Continuar avaliação</a>` : `
+            <a class="btn ${plus ? "btn-ghost" : "btn-primary"} btn-sm" href="/avaliacoes/inoveavalia/?aluno=${encodeURIComponent(al.id)}">Avaliar · InoveAvalia</a>
+            <a class="btn ${plus ? "btn-primary" : "btn-ghost"} btn-sm" href="/avaliacoes/inoveavaliaplus/?aluno=${encodeURIComponent(al.id)}">Avaliar · Plus</a>`}
+          </div>
+        </div></article>`;
+    }
     const u = g[g.length - 1], fd = u.formData || {};
     const idade = fd.dataNascimento ? C.ageFromBirthDate(fd.dataNascimento) : u.patientAge;
+    const tel = u.telefone || al?.telefone;
+    const tipos = [...new Set(g.map(a => a.type))];
     return `<article class="pessoa-card">
       <div class="pessoa-top">
-        <div class="nm"><span class="tipo tipo-${u.type}">${esc(TIPOS[u.type]?.nome || u.type)}</span><b>${esc(u.patientName)}</b>
-          <span>${idade ?? "—"} anos${u.telefone ? ` · <a class="tel" href="https://wa.me/${telWhats(u.telefone)}" target="_blank" rel="noopener">${esc(formatTel(u.telefone))}</a>` : ""}</span></div>
+        <div class="nm">${tipos.map(tp => `<span class="tipo tipo-${tp}">${esc(TIPOS[tp]?.nome || tp)}</span>`).join(" ")}<b>${esc(al?.nome || u.patientName)}</b>
+          <span>${idade ?? "—"} anos${tel ? ` · <a class="tel" href="https://wa.me/${telWhats(tel)}" target="_blank" rel="noopener">${esc(formatTel(tel))}</a>` : ""}</span>
+          ${linhaTreino(al)}</div>
         <div class="kv"><small>Avaliações</small><b>${g.length}</b></div>
         <div class="kv"><small>Última</small><b>${dataBR(u.assessmentDate)}</b></div>
         <div class="kv"><small>Nota geral</small><b>${fd.notaGeral ? esc(fd.notaGeral) + "/10" : "—"}</b></div>
         <div class="pessoa-acoes">
           <button class="btn btn-primary btn-sm" data-rel="${esc(u.id)}">Relatório</button>
-          ${g.length > 1 ? `<button class="btn btn-ghost btn-sm" data-evo="${esc(chavePessoa(u))}">Evolução</button>` : ""}
+          ${g.filter(a => a.type === u.type).length > 1 ? `<button class="btn btn-ghost btn-sm" data-evo="${esc(chaveEvo(u))}">Evolução</button>` : ""}
           <a class="btn btn-ghost btn-sm" href="${TIPOS[u.type].rota}?reavaliar=${encodeURIComponent(u.id)}">Reavaliar</a>
         </div>
       </div>
@@ -278,7 +338,7 @@ function evolucaoHTML(docs) {
 $("pessoas").addEventListener("click", async e => {
   const rel = e.target.closest("[data-rel]"), evo = e.target.closest("[data-evo]"), del = e.target.closest("[data-del]");
   if (rel) { const a = TODAS.find(x => x.id === rel.dataset.rel); if (a) abrir(relatorioHTML(a)); }
-  if (evo) abrir(evolucaoHTML(TODAS.filter(a => chavePessoa(a) === evo.dataset.evo)));
+  if (evo) abrir(evolucaoHTML(CONC().filter(a => chaveEvo(a) === evo.dataset.evo).sort(porData)));
   if (del) {
     const a = TODAS.find(x => x.id === del.dataset.del);
     if (!a || !confirm(`Excluir a avaliação de ${a.patientName} de ${dataBR(a.assessmentDate)}? Essa ação não pode ser desfeita.`)) return;
@@ -286,7 +346,7 @@ $("pessoas").addEventListener("click", async e => {
     catch (er) { alert("Não foi possível excluir. Tente de novo."); }
   }
 });
-["f-busca", "f-tipo", "f-periodo"].forEach(id => $(id).addEventListener("input", render));
+["f-busca", "f-tipo", "f-periodo", "f-situacao"].forEach(id => $(id).addEventListener("input", render));
 $("recarregar").onclick = carregar;
 
 /* Exportação */
@@ -361,7 +421,7 @@ $("pendentes").addEventListener("click", async e => {
 });
 
 $("novo-envio").onclick = () => {
-  const linha = (n = "", t = "") => `<div class="lote-linha"><input class="inp" name="nome" placeholder="Nome do aluno" value="${esc(n)}"><input class="inp" name="tel" type="tel" inputmode="tel" placeholder="(14) 99999-9999" value="${esc(t)}"><button type="button" class="btn btn-ghost btn-sm" data-rm title="Remover">✕</button></div>`;
+  const linha = (n = "", t = "") => `<div class="lote-linha"><input class="inp" name="nome" placeholder="Nome do aluno" list="alunos-cadastro" value="${esc(n)}"><input class="inp" name="tel" type="tel" inputmode="tel" placeholder="(14) 99999-9999" value="${esc(t)}"><button type="button" class="btn btn-ghost btn-sm" data-rm title="Remover">✕</button></div>`;
   abrir(`<form class="envio-form" id="f-envio" autocomplete="off">
     <span class="eyebrow">Parte 1 · Anamnese pelo celular</span>
     <h3>Enviar a anamnese para um ou vários alunos</h3>
@@ -376,6 +436,13 @@ $("novo-envio").onclick = () => {
     <p class="erro" style="text-align:left" data-envio-erro></p>
   </form><div class="envio-form" id="lote-res" hidden style="margin-top:12px"></div>`, false);
   const f = $("f-envio"), lote = $("lote");
+  // Escolheu um aluno do cadastro: traz o telefone dele.
+  lote.addEventListener("change", e => {
+    if (e.target.name !== "nome") return;
+    const al = ALUNOS.find(a => norm(a.nome) === norm(e.target.value) || norm(a.nick) === norm(e.target.value));
+    const tel = e.target.closest(".lote-linha").querySelector("[name=tel]");
+    if (al && al.telefone && !tel.value.trim()) tel.value = formatTel(al.telefone);
+  });
   $("lote-add").onclick = () => { lote.insertAdjacentHTML("beforeend", linha()); lote.lastElementChild.querySelector("input").focus(); };
   lote.addEventListener("click", e => { if (e.target.closest("[data-rm]")) { e.target.closest(".lote-linha").remove(); if (!lote.children.length) lote.innerHTML = linha(); } });
   $("lote-colar-abrir").onclick = () => { $("lote-colar").hidden = false; $("lote-colar").querySelector("textarea").focus(); };
@@ -404,6 +471,7 @@ $("novo-envio").onclick = () => {
         const reg = await salvarAvaliacao({ type: f.tipo.value, patientName: a.nome, telefone: a.tel, status: "aguardando",
           assessmentDate: new Date().toISOString().slice(0, 10), enviadoEm: new Date().toISOString(), formData: {} });
         TODAS.push(reg); criados.push(reg);
+        if (reg.alunoId && !alunoDe(reg.alunoId)) ALUNOS = await listarAlunosI9(true);
       } catch (er) { console.error(er); criados.push({ falhou: true, patientName: a.nome }); }
     }
     renderPendentes();

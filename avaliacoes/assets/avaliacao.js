@@ -1,7 +1,7 @@
 // InoveAvalia — formulário e relatório das avaliações (identidade i9Treino).
 // O catálogo (perguntas, testes, tabelas de referência e cálculos) vem de catalogo.js.
 import * as C from "./catalogo.js";
-import { salvarAvaliacao, obterAvaliacao } from "./db.js";
+import { salvarAvaliacao, obterAvaliacao, listarAlunosI9, acharAluno, normNome as normCad } from "./db.js";
 
 const {
   sectionsForType, protocolReferences, testResultGroupsFor, checklistSpans,
@@ -468,7 +468,7 @@ export async function montarFormulario(root, tipo) {
         const fd = { ...(av.formData || {}) };
         st.id = av.id; st.criadoEm = av.criadoEm; st.status = av.status || null;
         st.nomeRegistro = av.patientName || "";
-        st.extra = { enviadoEm: av.enviadoEm, respondidaEm: av.respondidaEm, whatsEnviadoEm: av.whatsEnviadoEm };
+        st.extra = { enviadoEm: av.enviadoEm, respondidaEm: av.respondidaEm, whatsEnviadoEm: av.whatsEnviadoEm, alunoId: av.alunoId || "" };
         st.meta = { nome: av.patientName || "", nasc: fd.dataNascimento || "", data: av.assessmentDate || hoje(), telefone: av.telefone || "" };
         delete fd.dataNascimento; delete fd.avaliacoesDatas;
         st.values = fd;
@@ -483,14 +483,23 @@ export async function montarFormulario(root, tipo) {
       if (av) {
         const fd = anamnesisValues(tipo, av.formData || {});
         st.meta = { nome: av.patientName || "", nasc: (av.formData || {}).dataNascimento || "", data: hoje(), telefone: av.telefone || "" };
+        st.extra.alunoId = av.alunoId || "";
         delete fd.dataNascimento;
         st.values = fd;
         aviso = `Nova avaliação de <b>${esc(av.patientName)}</b>: identificação e anamnese foram trazidas da avaliação de ${dataBR(av.assessmentDate)}. Medidas e testes começam em branco.`;
       }
+    } else if (params.get("aluno")) {
+      // Vindo do cadastro (painel ou app de treino): avaliação nova já ligada ao aluno.
+      const al = (await listarAlunosI9()).find(a => a.id === params.get("aluno"));
+      if (al) {
+        st.meta = { nome: al.nome || al.nick || "", nasc: al.dataNascimento || "", data: hoje(), telefone: al.telefone || "" };
+        st.extra.alunoId = al.id;
+        aviso = `Nova avaliação de <b>${esc(al.nome || al.nick)}</b>, já ligada ao cadastro do aluno no i9Treino.`;
+      }
     } else {
       const r = JSON.parse(localStorage.getItem(CHAVE_RASC) || "null");
       if (r && r.values) {
-        st.meta = { ...st.meta, ...r.meta }; st.values = r.values;
+        st.meta = { ...st.meta, ...r.meta }; st.values = r.values; if (r.alunoId) st.extra.alunoId = r.alunoId;
         aviso = `Rascunho recuperado (${new Date(r.ts).toLocaleString("pt-BR")}). <button type="button" class="link-btn" data-acao="descartar">Descartar e começar do zero</button>`;
       }
     }
@@ -517,7 +526,7 @@ export async function montarFormulario(root, tipo) {
   <section class="card" id="s-aluno">
     <div class="card-head"><span class="eyebrow">Aluno</span><h2>Quem será avaliado</h2></div>
     <div class="pessoa">
-      <div class="fbox nome"><label>Nome do aluno</label><input class="inp" data-meta="nome" value="${esc(st.meta.nome)}" autocomplete="off"></div>
+      <div class="fbox nome"><label>Nome do aluno</label><input class="inp" data-meta="nome" value="${esc(st.meta.nome)}" autocomplete="off" list="alunos-cadastro" placeholder="Busque no cadastro ou digite"><datalist id="alunos-cadastro"></datalist><small class="cad-status" data-cad></small></div>
       <div class="fbox"><label>Telefone (WhatsApp)</label><input class="inp" type="tel" inputmode="tel" data-meta="telefone" value="${esc(st.meta.telefone)}" placeholder="(14) 99999-9999"></div>
       <div class="fbox nasc"><label>Data de nascimento</label>${campoDataNasc(st.meta.nasc)}</div>
       <div class="fbox"><label>Data da avaliação</label><input class="inp" type="date" data-meta="data" value="${esc(st.meta.data)}"></div>
@@ -612,7 +621,7 @@ export async function montarFormulario(root, tipo) {
     if (st.id) return;
     clearTimeout(timerRasc);
     timerRasc = setTimeout(() => {
-      try { localStorage.setItem(CHAVE_RASC, JSON.stringify({ meta: st.meta, values: st.values, ts: Date.now() })); } catch (e) { /* sem storage */ }
+      try { localStorage.setItem(CHAVE_RASC, JSON.stringify({ meta: st.meta, values: st.values, alunoId: st.extra.alunoId || "", ts: Date.now() })); } catch (e) { /* sem storage */ }
     }, 500);
   }
 
@@ -635,10 +644,51 @@ export async function montarFormulario(root, tipo) {
     }
   }
 
+  /* Cadastro único: liga a avaliação ao aluno do i9Treino (mesmo cadastro do app de treino). */
+  let ALUNOS = [];
+  const cadEl = () => root.querySelector("[data-cad]");
+  function statusCadastro() {
+    const el = cadEl(); if (!el) return;
+    const al = ALUNOS.find(a => a.id === st.extra.alunoId);
+    if (al) el.innerHTML = `✓ Cadastro i9Treino: <b>${esc(al.nome || al.nick)}</b> · login <b>${esc(al.nick)}</b>`;
+    else if (st.meta.nome.trim()) el.textContent = "Aluno novo: o cadastro no i9Treino é criado ao salvar ou enviar.";
+    else el.textContent = "";
+  }
+  function preencherDoCadastro(al) {
+    if (!st.meta.telefone && al.telefone) { st.meta.telefone = al.telefone; const t = root.querySelector('[data-meta="telefone"]'); if (t) t.value = al.telefone; }
+    if (!st.meta.nasc && al.dataNascimento) {
+      st.meta.nasc = al.dataNascimento;
+      const box = root.querySelector(".pessoa .nasc");
+      if (box) box.innerHTML = `<label>Data de nascimento</label>${campoDataNasc(st.meta.nasc)}`;
+      atualizar();
+    }
+  }
+  function ligarCadastro(peloNome) {
+    if (!ALUNOS.length) return statusCadastro();
+    const atual = ALUNOS.find(a => a.id === st.extra.alunoId);
+    if (atual && st.id) return statusCadastro(); // avaliação já gravada: mantém o vínculo (correção de nome)
+    const exato = peloNome ? ALUNOS.find(a => normCad(a.nome) === normCad(st.meta.nome) || normCad(a.nick) === normCad(st.meta.nome)) : null;
+    const al = exato || acharAluno(ALUNOS, { nome: st.meta.nome, telefone: st.meta.telefone });
+    if (al) {
+      if (st.extra.alunoId !== al.id) { st.extra.alunoId = al.id; preencherDoCadastro(al); }
+    } else if (atual && normCad(atual.nome) !== normCad(st.meta.nome)) {
+      st.extra.alunoId = "";
+    }
+    statusCadastro();
+  }
+  listarAlunosI9().then(lista => {
+    ALUNOS = lista;
+    const dl = root.querySelector("#alunos-cadastro");
+    if (dl) dl.innerHTML = lista.slice().sort((a, b) => String(a.nome || a.nick).localeCompare(String(b.nome || b.nick), "pt-BR"))
+      .map(a => `<option value="${esc(a.nome || a.nick)}">${esc(a.nick)}${a.telefone ? " · " + esc(formatTel(a.telefone)) : ""}</option>`).join("");
+    if (!st.extra.alunoId && st.meta.nome) ligarCadastro(true); else statusCadastro();
+  });
+
   const aoMudar = e => {
     const el = e.target;
     if (el.dataset.meta) {
       st.meta[el.dataset.meta] = el.value;
+      if (el.dataset.meta === "nome" || el.dataset.meta === "telefone") ligarCadastro(el.dataset.meta === "nome");
       if (el.dataset.meta === "nasc" || el.dataset.meta === "data") atualizar();
       salvarRascunho();
       return;
@@ -814,6 +864,7 @@ export async function montarFormulario(root, tipo) {
       });
       st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
       st.nomeRegistro = registro.patientName;
+      st.extra.alunoId = registro.alunoId || st.extra.alunoId;
       st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm, whatsEnviadoEm: registro.whatsEnviadoEm };
       history.replaceState(null, "", urlEditar(st.id));
       try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }
@@ -857,6 +908,7 @@ export async function montarFormulario(root, tipo) {
       });
       st.id = registro.id; st.criadoEm = registro.criadoEm; st.status = registro.status;
       st.nomeRegistro = registro.patientName;
+      st.extra.alunoId = registro.alunoId || st.extra.alunoId;
       st.extra = { enviadoEm: registro.enviadoEm, respondidaEm: registro.respondidaEm, whatsEnviadoEm: registro.whatsEnviadoEm };
       history.replaceState(null, "", urlEditar(st.id));
       try { localStorage.removeItem(CHAVE_RASC); } catch (e) { /* sem storage */ }

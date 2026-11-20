@@ -2,7 +2,7 @@
 // Coleção própria "inoveavalia" — não mistura com a coleção "avaliacoes" da plataforma.
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, getCountFromServer
+  getFirestore, collection, doc, getDoc, getDocs, setDoc, deleteDoc, getCountFromServer, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -41,8 +41,17 @@ function limpar(formData) {
 export async function salvarAvaliacao(av) {
   const id = av.id || novoId();
   const agora = new Date().toISOString();
+  // Cadastro único: toda avaliação fica ligada a um aluno da plataforma (coleção "alunos").
+  let alunoId = av.alunoId || "";
+  try {
+    const aluno = await vincularAluno({
+      alunoId, nome: av.patientName, telefone: av.telefone, dataNascimento: (av.formData || {}).dataNascimento
+    });
+    if (aluno) alunoId = aluno.id;
+  } catch (e) { console.warn("Não foi possível vincular ao cadastro do aluno:", e); }
   const registro = {
     ...av,
+    alunoId,
     id,
     formData: limpar(av.formData),
     criadoEm: av.criadoEm || agora,
@@ -66,15 +75,96 @@ export async function excluirAvaliacao(id) {
   await deleteDoc(doc(db, COLECAO, id));
 }
 
-/** Alunos cadastrados na plataforma i9Treino (para vincular a avaliação). */
-export async function listarAlunosI9() {
+/* ===== Cadastro único de alunos =====
+ * A coleção "alunos" (a mesma do app de treino) é o cadastro de todas as pessoas.
+ * Avaliações guardam alunoId. Ninguém é cadastrado duas vezes: antes de criar,
+ * procura pelo telefone (últimos 8 dígitos), pelo nome e pelo nick.
+ */
+export const normNome = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+export const fimTel = t => { const d = String(t || "").replace(/\D/g, ""); return d.length >= 8 ? d.slice(-8) : ""; };
+const nickBase = t => normNome(t).replace(/[^a-z0-9 ]/g, "").split(" ").filter(Boolean);
+let CACHE_ALUNOS = null;
+
+/** Alunos cadastrados na plataforma i9Treino. */
+export async function listarAlunosI9(forcar = false) {
+  if (CACHE_ALUNOS && !forcar) return CACHE_ALUNOS;
   try {
     const snap = await getDocs(collection(db, "alunos"));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .filter(a => a && (a.nick || a.nome));
+    CACHE_ALUNOS = snap.docs.map(d => {
+      const a = { ...d.data() };
+      delete a.updatedAt;
+      if (!a.id) a.id = decodeURIComponent(d.id);
+      return a;
+    }).filter(a => a && (a.nick || a.nome));
+    return CACHE_ALUNOS;
   } catch (e) {
-    return [];
+    console.warn(e);
+    return CACHE_ALUNOS || [];
   }
+}
+
+/** Procura um aluno já cadastrado com o mesmo telefone, nome ou nick. */
+export function acharAluno(alunos, { nome, telefone, ignorarId } = {}) {
+  const tel = fimTel(telefone), n = normNome(nome), compacto = n.replace(/[^a-z0-9]/g, "");
+  const lista = alunos.filter(a => a.id !== ignorarId);
+  // Telefone igual só conta como a mesma pessoa se o primeiro nome também bater
+  // (mãe e filha podem usar o mesmo número).
+  const primeiro = n.split(" ")[0];
+  if (tel) {
+    const porTel = lista.find(a => fimTel(a.telefone) === tel && (!primeiro || !normNome(a.nome || a.nick) || normNome(a.nome || a.nick).split(" ")[0] === primeiro));
+    if (porTel) return porTel;
+  }
+  if (n) {
+    const porNome = lista.find(a => normNome(a.nome) === n || (compacto && a.nick === compacto));
+    if (porNome) return porNome;
+  }
+  return null;
+}
+
+function nickUnico(alunos, nome) {
+  const partes = nickBase(nome);
+  const usados = new Set(alunos.map(a => a.nick));
+  const tentativas = [partes[0], partes[0] && partes[partes.length - 1] && partes.length > 1 ? partes[0] + partes[partes.length - 1] : "", partes.join("")].filter(Boolean);
+  for (const t of tentativas) if (!usados.has(t)) return t;
+  const base = tentativas[0] || "aluno";
+  for (let i = 2; ; i++) if (!usados.has(base + i)) return base + i;
+}
+const idAluno = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+/**
+ * Liga uma avaliação ao cadastro do aluno: usa o alunoId informado, ou acha o aluno
+ * pelo telefone/nome, ou cria o cadastro. Completa telefone e nascimento que faltarem.
+ */
+export async function vincularAluno({ alunoId, nome, telefone, dataNascimento }) {
+  nome = String(nome || "").trim(); telefone = String(telefone || "").trim();
+  const alunos = await listarAlunosI9(true);
+  let aluno = alunoId ? alunos.find(a => a.id === alunoId) : null;
+  if (!aluno) aluno = acharAluno(alunos, { nome, telefone });
+  if (!aluno) {
+    if (!nome || nome === "Aluno") return null;
+    aluno = { id: idAluno(), nick: nickUnico(alunos, nome), nome, protocoloId: "", protocolosIds: [], origem: "avaliacao" };
+    if (telefone) aluno.telefone = telefone;
+    if (dataNascimento) aluno.dataNascimento = dataNascimento;
+    await setDoc(doc(db, "alunos", encodeURIComponent(aluno.id)), { ...aluno, updatedAt: serverTimestamp() });
+    CACHE_ALUNOS = [...alunos, aluno];
+    return aluno;
+  }
+  const extra = {};
+  if (telefone && !aluno.telefone) extra.telefone = telefone;
+  if (dataNascimento && !aluno.dataNascimento) extra.dataNascimento = dataNascimento;
+  if (Object.keys(extra).length) {
+    await setDoc(doc(db, "alunos", encodeURIComponent(aluno.id)), { ...extra, updatedAt: serverTimestamp() }, { merge: true });
+    Object.assign(aluno, extra);
+  }
+  return aluno;
+}
+
+/** Protocolos de treino do app (para mostrar o treino de cada aluno no painel). */
+export async function listarProtocolosI9() {
+  try {
+    const snap = await getDocs(collection(db, "protocolos"));
+    return snap.docs.map(d => { const p = d.data() || {}; return { id: p.id || decodeURIComponent(d.id), nome: p.nome || "" }; });
+  } catch (e) { console.warn(e); return []; }
 }
 
 export async function contar(nomeColecao) {
