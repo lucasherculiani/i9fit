@@ -1,0 +1,30 @@
+name: Calendario - apagar clientes excluidos
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: calendario-excluir
+  cancel-in-progress: false
+
+jobs:
+  apagar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apagar calendarios excluidos
+        run: python3 .github/scripts/calendario_excluir.py
+      - name: Enviar alteracoes
+        run: |
+          if [ -n "$(git status --porcelain calendario)" ]; then
+            git config user.name "i9 calendario"
+            git config user.email "actions@users.noreply.github.com"
+            git add -A calendario
+            git commit -m "Calendario: apaga clientes excluidos pela pagina"
+            git push
+          fi

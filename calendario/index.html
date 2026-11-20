@@ -54,14 +54,8 @@ h1 { font: 900 clamp(28px, 5vw, 42px)/1.05 var(--font-display); margin: 6px 0 0;
 .del:hover, .del:focus-visible { color: #ff6b6b; border-color: #ff6b6b; outline: none; }
 .del svg { width: 17px; height: 17px; }
 .client .name { padding-right: 34px; }
-.hidden-box { padding-block: 0 50px; }
-.hidden-box summary { cursor: pointer; color: var(--muted); font: 800 13px var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
-.hidden-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-.hidden-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
-.hidden-item span { font-weight: 700; }
 .btn { font: 800 13px var(--font-display); border-radius: 9px; padding: 10px 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); cursor: pointer; }
 .btn.danger { background: #d93a3a; border-color: #d93a3a; color: #fff; }
-.btn.ok { background: var(--accent); border-color: var(--accent); color: #0b0b0b; }
 dialog { background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 14px; padding: 22px; width: min(400px, calc(100vw - 32px)); }
 dialog::backdrop { background: rgba(0,0,0,.6); }
 dialog h2 { font: 900 20px/1.2 var(--font-display); margin: 0 0 8px; }
@@ -84,10 +78,6 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
     <input class="search" id="search" type="search" placeholder="Buscar cliente" aria-label="Buscar cliente" hidden>
   </header>
   <main class="grid" id="grid"></main>
-  <details class="hidden-box" id="hiddenBox" hidden>
-    <summary id="hiddenSum">Excluídos</summary>
-    <div class="hidden-list" id="hiddenList"></div>
-  </details>
 </div>
 <dialog id="dlg">
   <h2 id="dlgTitle"></h2>
@@ -99,15 +89,17 @@ footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
 <div class="toast" id="toast" role="status"></div>
 <footer><div class="wrap">Página interna, não indexada.</div></footer>
 <script type="module">
-// Exclusão de clientes: a lista de excluídos fica no Firestore (sistema/calendario_ocultos),
-// assim o cliente some da página para todos, e pode ser restaurado.
+// Exclusão definitiva de clientes: o slug vai para sistema/calendario_excluidos (Firestore).
+// O cliente some da lista na hora, para todos. Em até 10 minutos a rotina do GitHub
+// (.github/workflows/calendario-excluir.yml) apaga a pasta calendario/<slug>/ do site,
+// e o gerar-indice.js do modelo não coloca mais esse cliente na lista.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 var CLIENTES = [{"slug":"quiropraxia","cliente":"Évora de Souza | Quiropraxia","instagram":"@quiropraxiaoficial","subtitulo":"Coluna sem achismo · 2 posts por semana","ano":2026,"mes":11,"mesNome":"novembro","cor":"#3FC1B0","corClaro":"#0E6B66","mascote":"","posts":9,"stories":13,"repositorio":"lucasherculiani/i9fit","atualizado":"2026-11-05T16:07:42.932Z"},{"slug":"jucimara-firmino","cliente":"Jucimara Firmino","instagram":"@jucimara_firmino","subtitulo":"5/nov a 3/dez","ano":2026,"mes":11,"mesNome":"novembro","cor":"#FF3EA5","corClaro":"#C4126F","mascote":"","posts":9,"stories":15,"repositorio":"lucasherculiani/i9fit","atualizado":"2026-11-05T12:00:00.000Z"},{"slug":"lucas-herculiani","cliente":"Lucas Herculiani","instagram":"@lucasherculiani","subtitulo":"Novembro Azul","ano":2026,"mes":11,"mesNome":"novembro","cor":"#1E8BFF","corClaro":"#0A62C4","mascote":"LUQUINHA","posts":22,"stories":127,"repositorio":"lucasherculiani/i9fit","atualizado":"2026-11-03T11:18:30.362Z"},{"slug":"rej-mercado","cliente":"R&J Mercado","instagram":"@rejmercadomarilia","subtitulo":"Novembro em azul · 23 a 28 em preto","ano":2026,"mes":11,"mesNome":"novembro","cor":"#5EB8FF","corClaro":"#1E5BD8","mascote":"","posts":28,"stories":164,"repositorio":"lucasherculiani/i9fit","atualizado":"2026-11-03T12:36:30.674Z"}];
 var SENHA = "admin123";
 var fb = initializeApp({ apiKey: "AIzaSyC6xUfFJ59fXT1_eR1HDD7UPiQ8aakSkHY", authDomain: "i9fit-4b643.firebaseapp.com", projectId: "i9fit-4b643", storageBucket: "i9fit-4b643.firebasestorage.app", messagingSenderId: "60375557935", appId: "1:60375557935:web:b761c243672d50c7c263da" }, "calendario");
-var REF = doc(getFirestore(fb), "sistema", "calendario_ocultos");
-var ocultos = [];
+var REF = doc(getFirestore(fb), "sistema", "calendario_excluidos");
+var excluidos = [];
 var $ = function (id) { return document.getElementById(id); };
 var grid = $("grid"), search = $("search"), count = $("count");
 var LIXO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
@@ -115,7 +107,7 @@ function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").
 function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
 function fmt(iso) { var d = new Date(iso); return isNaN(d) ? "" : ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2); }
 function toast(t) { var el = $("toast"); el.textContent = t; el.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(function () { el.style.display = "none"; }, 3200); }
-function visiveis() { return CLIENTES.filter(function (c) { return ocultos.indexOf(c.slug) < 0; }); }
+function visiveis() { return CLIENTES.filter(function (c) { return excluidos.indexOf(c.slug) < 0; }); }
 function render(q) {
   q = (q || "").toLowerCase();
   var base = visiveis();
@@ -140,31 +132,18 @@ function render(q) {
     var del = document.createElement("button");
     del.type = "button"; del.className = "del"; del.innerHTML = LIXO;
     del.title = "Excluir cliente"; del.setAttribute("aria-label", "Excluir " + c.cliente);
-    del.addEventListener("click", function () { pedir("excluir", c); });
+    del.addEventListener("click", function () { pedir(c); });
     w.appendChild(a); w.appendChild(del); grid.appendChild(w);
-  });
-  var exc = CLIENTES.filter(function (c) { return ocultos.indexOf(c.slug) > -1; });
-  $("hiddenBox").hidden = !exc.length;
-  $("hiddenSum").textContent = "Excluídos (" + exc.length + ")";
-  $("hiddenList").innerHTML = "";
-  exc.forEach(function (c) {
-    var it = document.createElement("div"); it.className = "hidden-item";
-    it.innerHTML = "<span>" + esc(c.cliente) + "</span>";
-    var b = document.createElement("button"); b.type = "button"; b.className = "btn ok"; b.textContent = "Restaurar";
-    b.addEventListener("click", function () { pedir("restaurar", c); });
-    it.appendChild(b); $("hiddenList").appendChild(it);
   });
   search.hidden = base.length <= 6;
 }
 var acao = null;
 function liberado() { try { return sessionStorage.getItem("cal_admin") === "1"; } catch (e) { return false; } }
-function pedir(tipo, c) {
-  acao = { tipo: tipo, c: c };
-  var exc = tipo === "excluir";
-  $("dlgTitle").textContent = (exc ? "Excluir " : "Restaurar ") + c.cliente + "?";
-  $("dlgText").textContent = exc ? "O cliente sai da lista de calendários. Dá para restaurar depois em “Excluídos”." : "O cliente volta para a lista de calendários.";
-  $("dlgOk").textContent = exc ? "Excluir" : "Restaurar";
-  $("dlgOk").className = "btn " + (exc ? "danger" : "ok");
+function pedir(c) {
+  acao = { c: c };
+  $("dlgTitle").textContent = "Excluir " + c.cliente + "?";
+  $("dlgText").textContent = "A exclusão é definitiva: o cliente sai da lista na hora e o calendário dele é apagado do site em alguns minutos. Não dá para desfazer.";
+  $("dlgOk").textContent = "Excluir definitivamente";
   $("dlgPass").value = ""; $("dlgPass").hidden = liberado(); $("dlgErr").textContent = "";
   $("dlg").showModal();
   if (!liberado()) $("dlgPass").focus();
@@ -175,14 +154,13 @@ async function confirmar() {
     if ($("dlgPass").value !== SENHA) { $("dlgErr").textContent = "Senha incorreta."; return; }
     try { sessionStorage.setItem("cal_admin", "1"); } catch (e) {}
   }
-  var c = acao.c, exc = acao.tipo === "excluir";
+  var c = acao.c;
   $("dlgOk").disabled = true;
   try {
-    await setDoc(REF, { slugs: exc ? arrayUnion(c.slug) : arrayRemove(c.slug) }, { merge: true });
-    if (exc) { if (ocultos.indexOf(c.slug) < 0) ocultos.push(c.slug); }
-    else ocultos = ocultos.filter(function (s) { return s !== c.slug; });
+    await setDoc(REF, { slugs: arrayUnion(c.slug) }, { merge: true });
+    if (excluidos.indexOf(c.slug) < 0) excluidos.push(c.slug);
     $("dlg").close(); render(search.value);
-    toast(exc ? c.cliente + " excluído." : c.cliente + " restaurado.");
+    toast(c.cliente + " excluído.");
   } catch (err) {
     console.error(err); $("dlgErr").textContent = "Não foi possível salvar. Verifique a internet e tente de novo.";
   } finally { $("dlgOk").disabled = false; }
@@ -193,7 +171,7 @@ $("dlgCancel").addEventListener("click", function () { $("dlg").close(); });
 search.addEventListener("input", function () { render(search.value); });
 render("");
 getDoc(REF).then(function (snap) {
-  ocultos = (snap.exists() && Array.isArray(snap.data().slugs)) ? snap.data().slugs : [];
+  excluidos = (snap.exists() && Array.isArray(snap.data().slugs)) ? snap.data().slugs : [];
   render(search.value);
 }).catch(function (err) { console.warn("Lista de excluídos indisponível:", err); });
 </script>
