@@ -11,13 +11,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="i9Treino">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0d0d0d;--surface:#161616;--surface2:#1e1e1e;--surface3:#262626;--border:#2a2a2a;--border2:#333;--accent:#c8f542;--accent2:#a8d932;--text:#f0f0f0;--muted:#888;--muted2:#555;--danger:#ff4d4d;--done:#1a3a1a;--done-border:#2d5c2d;--done-text:#6dbf6d;--radius:12px;--radius-sm:8px;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-h1,h2,h3,h4{font-family:'Syne',sans-serif}
+:root{--bg:#0B0C0A;--surface:#141612;--surface2:#1C1F19;--surface3:#23271D;--border:#2A2E25;--border2:#343A2D;--accent:#C8F542;--accent2:#B5E02F;--text:#F3F5EE;--muted:#A3A99A;--muted2:#7A8072;--danger:#FF6B5C;--done:#161A10;--done-border:#3B4A1A;--done-text:#C8F542;--amber:#FFC857;--coral:#FF8A5C;--sky:#7CC8FF;--lavanda:#BCA6FF;--radius:16px;--radius-sm:12px;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif}
 .view{display:none;min-height:100vh}.view.active{display:block}
 #view-login{display:none;align-items:center;justify-content:center;flex-direction:column;padding:2rem}
 #view-login.active{display:flex}
@@ -29,15 +29,15 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .login-logo span{color:var(--accent)}
 .login-sub{color:var(--muted);font-size:.875rem;margin-bottom:2.5rem}
 .login-box label{font-size:.75rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.5rem}
-.login-box input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.875rem 1rem;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border .2s}
+.login-box input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.875rem 1rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border .2s}
 .login-box input:focus{border-color:var(--accent)}
 .login-box input::placeholder{color:var(--muted2)}
-.btn-primary{width:100%;margin-top:1rem;background:var(--accent);color:#0d0d0d;border:none;border-radius:var(--radius-sm);padding:.875rem;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s,transform .1s}
+.btn-primary{width:100%;margin-top:1rem;background:var(--accent);color:#0d0d0d;border:none;border-radius:var(--radius-sm);padding:.875rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s,transform .1s}
 .btn-primary:hover{background:var(--accent2)}.btn-primary:active{transform:scale(.98)}
 .login-admin-link{margin-top:2rem;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;text-decoration:underline}
 .login-admin-link:hover{color:var(--accent)}
 .login-escolha{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem}
-.login-opcao{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:1.4rem .75rem;cursor:pointer;color:var(--text);font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.12em;transition:border-color .2s,background .2s,transform .15s}
+.login-opcao{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:1.4rem .75rem;cursor:pointer;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.12em;transition:border-color .2s,background .2s,transform .15s}
 .login-opcao:hover{border-color:var(--accent);transform:translateY(-2px)}
 .login-opcao svg{width:34px;height:34px;color:var(--muted);transition:color .2s}
 .login-opcao.ativo{border-color:var(--accent);background:rgba(200,245,66,.08)}
@@ -53,9 +53,9 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .topbar-logo span{color:var(--accent)}
 .topbar-user{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:.75rem}
 .topbar-user strong{color:var(--text)}
-.btn-back{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.4rem .9rem;font-size:.8rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-back{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.4rem .9rem;font-size:.8rem;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
 .btn-back:hover{color:var(--text);border-color:var(--muted)}
-.btn-logout{background:transparent;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;padding:.3rem .5rem}
+.btn-logout{background:transparent;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;padding:.3rem .5rem}
 .btn-logout:hover{color:var(--danger)}
 /* SEMANAS ALUNO */
 .page-header{padding:1.5rem 1.5rem .5rem}
@@ -90,15 +90,15 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .treino-header h2{font-family:'Montserrat',sans-serif;font-size:1.3rem;font-weight:800}
 .treino-header p{font-size:.8rem;color:var(--muted);margin-top:.2rem}
 .treino-actions{padding:.25rem 1.5rem .75rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
-.btn-concluir{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.5rem 1.1rem;font-size:.82rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-concluir{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.5rem 1.1rem;font-size:.82rem;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
 .btn-concluir:hover{border-color:var(--done-text);color:var(--done-text)}
 .btn-concluir.concluido{background:var(--done);border-color:var(--done-border);color:var(--done-text);font-weight:500}
 .exercicios-list{padding:0 1.5rem 2rem;display:flex;flex-direction:column;gap:.75rem}
 .card-exercicio{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:all .2s}
 .card-exercicio.feito{background:var(--done);border-color:var(--done-border);opacity:.85}
 .ex-check-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.5rem}
-.ex-nome{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700}
-.ex-check-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.3rem .75rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all .15s}
+.ex-nome{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.05rem;font-weight:700}
+.ex-check-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.3rem .75rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;transition:all .15s}
 .ex-check-btn:hover{border-color:var(--done-text);color:var(--done-text)}
 .ex-check-btn.feito{background:var(--done);border-color:var(--done-border);color:var(--done-text)}
 .ex-meta{font-size:.82rem;color:var(--muted);margin-bottom:.2rem;line-height:1.5}
@@ -108,9 +108,9 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .ex-peso-row{display:flex;align-items:center;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
 .ex-peso-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;min-width:50px}
 .peso-ctrl{display:flex;align-items:center;gap:.4rem}
-.peso-btn{width:34px;height:34px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'DM Sans',sans-serif;line-height:1}
+.peso-btn{width:34px;height:34px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;line-height:1}
 .peso-btn:hover{border-color:var(--accent);color:var(--accent)}.peso-btn:active{transform:scale(.9)}
-.peso-input{width:72px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.4rem .5rem;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--accent);text-align:center;outline:none;transition:border .2s}
+.peso-input{width:72px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.4rem .5rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:700;color:var(--accent);text-align:center;outline:none;transition:border .2s}
 .peso-input:focus{border-color:var(--accent)}
 .peso-unit{font-size:.8rem;color:var(--muted)}
 .peso-sugerido{font-size:.72rem;color:var(--muted2);margin-left:.25rem}
@@ -124,17 +124,17 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .prot-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;cursor:pointer;transition:border .2s}
 .prot-card:hover{border-color:var(--accent)}
 .prot-card-info{flex:1;min-width:0}
-.prot-card-nome{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem}
+.prot-card-nome{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem}
 .prot-card-desc{font-size:.78rem;color:var(--muted);margin-top:.2rem}
 .prot-card-actions{display:flex;gap:.4rem;flex-shrink:0}
 .proto-edit-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
-.proto-edit-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800}
+.proto-edit-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.4rem;font-weight:800}
 .proto-edit-desc{font-size:.85rem;color:var(--muted);margin-top:.25rem}
 /* Semana bloco */
 .semana-bloco{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;overflow:hidden}
 .semana-bloco-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;cursor:pointer;user-select:none}
 .semana-bloco-header:hover{background:var(--surface2)}
-.semana-bloco-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.6rem}
+.semana-bloco-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.6rem}
 .chevron{font-size:.72rem;color:var(--muted);transition:transform .2s;display:inline-block}
 .open-bloco .chevron{transform:rotate(180deg)}
 .bloco-body{display:none;border-top:1px solid var(--border);padding:1rem 1.25rem}
@@ -159,7 +159,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .form-card h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.75rem}
 .form-row{margin-bottom:.6rem}
 .form-row label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.3rem}
-.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.55rem .8rem;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--text);outline:none;transition:border .2s}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.55rem .8rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:.87rem;color:var(--text);outline:none;transition:border .2s}
 .form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--accent)}
 .form-row select option{background:var(--surface)}
 .form-row textarea{resize:vertical;min-height:56px}
@@ -167,20 +167,20 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
 .form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem}
 .form-actions{display:flex;gap:.4rem;margin-top:.75rem}
-.btn-save{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.48rem 1.1rem;font-size:.8rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer}
+.btn-save{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.48rem 1.1rem;font-size:.8rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
 .btn-save:hover{background:var(--accent2)}
-.btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:.48rem .9rem;font-size:.8rem;color:var(--muted);font-family:'DM Sans',sans-serif;cursor:pointer}
+.btn-cancel{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:.48rem .9rem;font-size:.8rem;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
 .btn-cancel:hover{color:var(--text)}
-.btn-add{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.35rem .8rem;font-size:.78rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap}
+.btn-add{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.35rem .8rem;font-size:.78rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;white-space:nowrap}
 .btn-add:hover{background:var(--accent2)}
-.btn-add-ghost{background:transparent;border:1px dashed var(--border2);border-radius:6px;padding:.3rem .7rem;font-size:.76rem;color:var(--muted);font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+.btn-add-ghost{background:transparent;border:1px dashed var(--border2);border-radius:6px;padding:.3rem .7rem;font-size:.76rem;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;white-space:nowrap}
 .btn-add-ghost:hover{border-color:var(--accent);color:var(--accent)}
 .btn-icon{background:var(--surface2);border:1px solid var(--border);border-radius:5px;width:27px;height:27px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.78rem;transition:all .14s;color:var(--muted)}
 .btn-icon:hover{border-color:var(--accent);color:var(--accent)}
 .btn-icon.del:hover{border-color:var(--danger);color:var(--danger)}
 /* Tipo toggle ex */
 .tipo-toggle{display:flex;gap:.4rem;margin-bottom:.75rem}
-.tipo-btn{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.45rem;font-size:.78rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;text-align:center}
+.tipo-btn{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.45rem;font-size:.78rem;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;text-align:center}
 .tipo-btn.ativo{background:var(--surface3);border-color:var(--accent);color:var(--accent);font-weight:500}
 /* Alunos */
 .admin-list{display:flex;flex-direction:column;gap:.5rem;margin-top:.85rem}
@@ -194,7 +194,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .edit-aluno-form.open{display:block}
 /* Tabs admin */
 .admin-nav{display:flex;gap:.4rem}
-.nav-tab{background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.35rem .8rem;font-size:.78rem;font-family:'DM Sans',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s}
+.nav-tab{background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.35rem .8rem;font-size:.78rem;font-family:'Plus Jakarta Sans',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s}
 .nav-tab:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
 .nav-tab.active{background:var(--surface2);color:var(--accent);border-color:var(--accent)}
 .admin-panel{display:none}.admin-panel.active{display:block}
@@ -206,11 +206,11 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .modal-box p{font-size:.85rem;color:var(--muted);margin-bottom:1rem;flex-shrink:0}
 .modal-scroll{flex:1;overflow-y:auto;margin-bottom:1rem}
 .modal-actions{display:flex;gap:.5rem;justify-content:flex-end;flex-shrink:0}
-.btn-danger{background:var(--danger);color:#fff;border:none;border-radius:var(--radius-sm);padding:.5rem 1.1rem;font-size:.85rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-danger{background:var(--danger);color:#fff;border:none;border-radius:var(--radius-sm);padding:.5rem 1.1rem;font-size:.85rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
 /* Duplicar dia */
 .dupl-group{margin-bottom:1rem}
 .dupl-group-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.4rem}
-.dupl-dia-btn{width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.6rem .85rem;font-size:.83rem;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:.3rem;transition:all .15s;display:block}
+.dupl-dia-btn{width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.6rem .85rem;font-size:.83rem;color:var(--text);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:.3rem;transition:all .15s;display:block}
 .dupl-dia-btn:hover{border-color:var(--accent);color:var(--accent)}
 /* Misc */
 .empty-state{text-align:center;padding:2rem 1rem;color:var(--muted)}
@@ -247,15 +247,15 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
   .rel-topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
   .rel-wrap{max-width:860px;margin:0 auto;padding:1.5rem}
   .rel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
-  .rel-aluno{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:.25rem}
+  .rel-aluno{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:.25rem}
   .rel-dia{font-size:.82rem;color:var(--muted);margin-bottom:.85rem}
   .rel-ex{margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
   .rel-ex:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-  .rel-ex-nome{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem}
+  .rel-ex-nome{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem}
   .rel-ex-meta{font-size:.82rem;color:var(--muted);margin-top:.2rem}
   .rel-ex-presc{font-size:.82rem;color:var(--text);white-space:pre-wrap;background:var(--surface2);padding:.4rem .6rem;border-radius:4px;margin-top:.3rem;border-left:2px solid var(--accent)}
   .rel-peso-box{border:1px solid var(--border2);border-radius:4px;padding:.3rem .6rem;font-size:.78rem;color:var(--muted);margin-top:.35rem;display:inline-block}
-  .btn-print{background:var(--accent);color:#0d0d0d;border:none;border-radius:var(--radius-sm);padding:.45rem 1.1rem;font-size:.82rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer}
+  .btn-print{background:var(--accent);color:#0d0d0d;border:none;border-radius:var(--radius-sm);padding:.45rem 1.1rem;font-size:.82rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer}
   .btn-print:hover{background:var(--accent2)}
 }
 /* CONFIG RELATORIO */
@@ -266,7 +266,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .aluno-sel-nome{font-size:.9rem;font-weight:500;flex:1}
 .aluno-sel-config{margin-top:.6rem;display:none;gap:.5rem}
 .aluno-sel-config.show{display:flex;flex-wrap:wrap}
-.aluno-sel-config select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.4rem .7rem;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--text);outline:none;flex:1;min-width:130px}
+.aluno-sel-config select{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.4rem .7rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;color:var(--text);outline:none;flex:1;min-width:130px}
 .aluno-sel-config select:focus{border-color:var(--accent)}
 
 
@@ -277,7 +277,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .rel-peso-ctrl{display:flex;align-items:center;gap:.3rem}
 .rel-peso-btn{width:28px;height:28px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .13s;line-height:1}
 .rel-peso-btn:hover{border-color:var(--accent);color:var(--accent)}
-.rel-peso-input{width:64px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:.3rem .4rem;font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--accent);text-align:center;outline:none;transition:border .2s}
+.rel-peso-input{width:64px;background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:.3rem .4rem;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:700;color:var(--accent);text-align:center;outline:none;transition:border .2s}
 .rel-peso-input:focus{border-color:var(--accent)}
 .rel-peso-unit{font-size:.75rem;color:var(--muted)}
 .rel-peso-anterior{font-size:.7rem;color:var(--muted2);margin-left:.2rem}
@@ -296,10 +296,10 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .card-protocolo-aluno{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
 .card-protocolo-aluno:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--surface2)}
 .card-protocolo-aluno::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
-.card-protocolo-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:var(--text);line-height:1.25}
+.card-protocolo-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.05rem;font-weight:800;color:var(--text);line-height:1.25}
 .card-protocolo-desc{font-size:.78rem;color:var(--muted);margin-top:.45rem;line-height:1.45}
 .card-protocolo-meta{font-size:.72rem;color:var(--muted2);margin-top:.75rem}
-.btn-switch-prot{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.35rem .7rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.btn-switch-prot{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.35rem .7rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
 .btn-switch-prot:hover{border-color:var(--accent);color:var(--accent)}
 .multi-prot-list{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:.55rem .7rem;display:flex;flex-direction:column;gap:.35rem;max-height:190px;overflow-y:auto}
 .multi-prot-item{display:flex;align-items:center;gap:.55rem;font-size:.83rem;color:var(--text);cursor:pointer;line-height:1.35}
@@ -314,9 +314,9 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .backup-bar-title{font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700}
 .backup-bar-sub{font-size:.75rem;color:var(--muted);margin-top:.2rem}
 .backup-actions{display:flex;gap:.5rem;flex-wrap:wrap}
-.btn-export{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.42rem .9rem;font-size:.78rem;color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-export{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:.42rem .9rem;font-size:.78rem;color:var(--text);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
 .btn-export:hover{border-color:var(--accent);color:var(--accent)}
-.btn-import{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.42rem .9rem;font-size:.78rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:background .15s}
+.btn-import{background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;padding:.42rem .9rem;font-size:.78rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:background .15s}
 .btn-import:hover{background:var(--accent2)}
 .import-status{font-size:.78rem;margin-top:.5rem;display:none}
 .import-status.ok{color:var(--done-text)}
@@ -324,10 +324,10 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 
 
 /* FASE 2: AVALIACAO FISICA */
-.btn-evolucao{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.35rem .75rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-evolucao{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.35rem .75rem;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
 .btn-evolucao:hover{border-color:var(--accent);color:var(--accent)}
 .aviso-avaliacao{margin:1rem 1.5rem 0;background:#201a05;border:1px solid #4a3808;border-radius:var(--radius);padding:.9rem 1rem;display:none;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
-.aviso-avaliacao strong{font-family:'Syne',sans-serif;color:var(--accent);font-size:.92rem}
+.aviso-avaliacao strong{font-family:'Plus Jakarta Sans',sans-serif;color:var(--accent);font-size:.92rem}
 .aviso-avaliacao p{font-size:.8rem;color:var(--muted);margin-top:.15rem}
 .av-wrap{max-width:920px;margin:0 auto;padding:1.5rem}
 .av-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
@@ -341,7 +341,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .av-history{display:flex;flex-direction:column;gap:.65rem}
 .av-history-item{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:.85rem}
 .av-history-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;margin-bottom:.55rem}
-.av-history-date{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent)}
+.av-history-date{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:var(--accent)}
 .av-history-meta{font-size:.72rem;color:var(--muted)}
 .av-measures{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.4rem;margin-top:.55rem}
 .av-measure{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:.35rem .5rem;font-size:.78rem;color:var(--muted)}
@@ -361,7 +361,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .checkpoint-scroll{overflow-x:auto}
 .checkpoint-table{width:100%;border-collapse:collapse;min-width:420px}
 .checkpoint-table th,.checkpoint-table td{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:.75rem .85rem;text-align:left;font-size:.84rem;white-space:pre-wrap;vertical-align:top}
-.checkpoint-table th{background:var(--surface2);font-family:'Syne',sans-serif;font-weight:700;color:var(--text)}
+.checkpoint-table th{background:var(--surface2);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:var(--text)}
 .checkpoint-table td{color:var(--muted)}
 .checkpoint-table tr:last-child td{border-bottom:none}.checkpoint-table th:last-child,.checkpoint-table td:last-child{border-right:none}
 .checkpoint-editor{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem;margin-top:.75rem}
@@ -369,7 +369,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .checkpoint-editor-actions{display:flex;gap:.4rem;flex-wrap:wrap}
 .checkpoint-edit-scroll{overflow-x:auto}
 .checkpoint-edit-table{border-collapse:separate;border-spacing:4px;min-width:100%}
-.checkpoint-edit-table input{min-width:125px;width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:.5rem .6rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none}
+.checkpoint-edit-table input{min-width:125px;width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:.5rem .6rem;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;outline:none}
 .checkpoint-edit-table th input{font-weight:700;color:var(--accent)}
 .checkpoint-edit-table input:focus{border-color:var(--accent)}
 .checkpoint-remove{width:28px;height:28px;background:transparent;border:1px solid var(--border2);border-radius:5px;color:var(--muted);cursor:pointer}
@@ -377,6 +377,172 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .checkpoint-empty{font-size:.78rem;color:var(--muted);padding:.4rem 0}
 @media(max-width:640px){.checkpoint-aluno-wrap{padding:.85rem 1rem 0}}
 
+
+/* ===== NOVO VISUAL 2026 (grafite + lima, uma cor por treino) ===== */
+body{font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:'Plus Jakarta Sans',sans-serif}
+/* acesso */
+#view-login{justify-content:flex-start;padding:4.5rem 1.5rem 2rem}
+.login-box{max-width:420px;display:flex;flex-direction:column}
+.login-logo{font-size:4.6rem;letter-spacing:-.03em;margin-bottom:.4rem}
+.login-sub{font-size:1rem;margin-bottom:2rem}
+.login-pergunta{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
+.login-escolha{grid-template-columns:1fr;gap:.7rem;margin-bottom:1.5rem}
+.login-opcao{flex-direction:row;justify-content:flex-start;gap:.9rem;padding:1rem;border-radius:18px;text-align:left;letter-spacing:0;font-weight:600;font-size:1rem;background:var(--surface);border:1px solid var(--border)}
+.login-opcao:hover{transform:none;border-color:var(--border2);background:var(--surface2)}
+.login-ic{width:48px;height:48px;border-radius:14px;background:var(--surface2);color:var(--muted);display:grid;place-items:center;flex:none;transition:all .2s}
+.login-opcao .login-ic svg{width:24px;height:24px;color:currentColor}
+.login-txt{display:flex;flex-direction:column;gap:2px;flex:1}
+.login-txt b{font-size:1.05rem;font-weight:700}
+.login-txt small{font-size:.82rem;color:var(--muted);font-weight:500}
+.login-ok{width:22px;height:22px;color:var(--accent);opacity:0;transition:opacity .2s}
+.login-ok svg{width:22px;height:22px}
+.login-opcao.ativo{border:1.5px solid var(--accent);background:#161A10}
+.login-opcao.ativo .login-ic{background:var(--accent);color:#0B0C0A}
+.login-opcao.ativo .login-ok{opacity:1}
+.login-box label{font-size:.82rem;font-weight:600;letter-spacing:0;text-transform:none}
+.login-box input{height:54px;border-radius:14px;font-size:1.05rem;background:var(--surface);border:1.5px solid var(--border2)}
+.btn-primary{height:56px;border-radius:16px;font-size:1.05rem;font-weight:800;color:#0B0C0A}
+.login-ajuda{margin-top:2.5rem;text-align:center;font-size:.9rem;color:var(--muted);text-decoration:none}
+.login-ajuda b{color:var(--accent)}
+/* topo */
+.topbar{padding:.85rem 1.25rem;border-bottom-color:#1F221B;background:rgba(11,12,10,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.topbar-logo{font-size:1.35rem}
+.btn-evolucao,.btn-switch-prot{border-radius:999px;padding:.5rem .95rem;font-size:.8rem;font-weight:600;color:var(--text);background:var(--surface);border-color:var(--border)}
+.btn-logout{font-size:.8rem;font-weight:600}
+.btn-back{width:44px;height:44px;padding:0;border-radius:12px;display:grid;place-items:center;background:var(--surface);border-color:var(--border);color:var(--text);flex:none}
+.btn-back svg{width:20px;height:20px}
+.topbar-voltar{justify-content:flex-start;gap:.75rem}
+.topbar-titulo{font-size:.9rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* semanas */
+.page-header{padding:1.4rem 1.25rem .4rem}
+.page-header h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.5rem;line-height:1.2;letter-spacing:-.02em}
+.page-header p{font-size:.9rem}
+.saudacao{font-size:.9rem;color:var(--muted);margin-bottom:.25rem}
+.prog-card{margin:1rem 1.25rem 0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;display:flex;flex-direction:column;gap:.9rem}
+.prog-topo{display:flex;align-items:center;gap:.9rem}
+.prog-anel{--p:0;width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--accent) calc(var(--p)*1%),#262A21 0)}
+.prog-anel span{width:50px;height:50px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font:900 1.1rem Montserrat,sans-serif;line-height:1}
+.prog-anel small{font-size:.68rem;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;font-weight:600}
+.prog-txt{display:flex;flex-direction:column;gap:.2rem}
+.prog-txt b{font-size:1rem}
+.prog-txt span{font-size:.82rem;color:var(--muted)}
+.prog-fases{display:grid;gap:6px}
+.prog-fase{display:flex;flex-direction:column;gap:6px;min-width:0}
+.prog-fase i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent) var(--f),#262A21 var(--f))}
+.prog-fase span{font-size:.7rem;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-fase.ativa span,.prog-fase.feita span{color:var(--accent);font-weight:700}
+.aviso-avaliacao{margin:.85rem 1.25rem 0;background:rgba(255,138,92,.1);border:1px solid rgba(255,138,92,.3);border-radius:14px;padding:.7rem .9rem;flex-wrap:nowrap;align-items:center;gap:.7rem}
+.aviso-ponto{width:8px;height:8px;border-radius:50%;background:var(--coral);flex:none}
+.aviso-txt{flex:1;min-width:0}
+.aviso-avaliacao strong{font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);font-size:.86rem;font-weight:700}
+.aviso-avaliacao p{font-size:.76rem;margin-top:.1rem}
+.aviso-avaliacao .btn-add{background:transparent;border:0;color:var(--coral);font-weight:700;padding:.4rem 0;white-space:nowrap}
+.lista-semanas{display:flex;flex-direction:column;gap:.5rem;padding:.6rem 1.25rem 2rem;max-width:760px}
+.fase-titulo{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .15rem}
+.card-semana{display:flex;align-items:center;gap:.9rem;width:100%;padding:.75rem .9rem;border-radius:16px;text-align:left;color:var(--text);background:var(--surface);border:1px solid var(--border);overflow:visible}
+.card-semana::before{display:none}
+.card-semana:hover{transform:none;border-color:var(--border2);background:var(--surface2)}
+.sem-ic{width:40px;height:40px;border-radius:12px;background:var(--surface2);color:var(--muted);display:grid;place-items:center;font:900 1.05rem Montserrat,sans-serif;flex:none}
+.sem-ic svg{width:20px;height:20px}
+.sem-txt{flex:1;display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.sem-txt b{font-size:.95rem}
+.sem-txt>span{font-size:.76rem;color:var(--muted)}
+.sem-dir{font-size:.76rem;font-weight:700;white-space:nowrap}
+.card-semana.concluida{background:var(--surface);border-color:var(--border)}
+.card-semana.concluida .sem-ic{background:rgba(200,245,66,.14);color:var(--accent)}
+.sem-dir.ok{color:var(--accent)}
+.card-semana.atual{background:#1A1C14;border:1.5px solid var(--amber)}
+.card-semana.atual .sem-ic{background:var(--amber);color:#0B0C0A}
+.sem-dir.agora{color:var(--amber)}
+.mini-bar{display:block;height:5px;border-radius:3px;background:#2E3127;overflow:hidden;margin-top:.25rem}
+.mini-bar b{display:block;height:100%;background:var(--amber);border-radius:3px}
+/* dias */
+.semana-head{display:flex;flex-direction:column;gap:.35rem;padding-top:1.5rem}
+.semana-head h2{font-family:'Montserrat',sans-serif;font-weight:900;font-size:2.4rem;line-height:1}
+.chip-status{align-self:flex-start;display:inline-block;font-size:.74rem;font-weight:700;padding:.35rem .75rem;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.chip-status:empty{display:none}
+.chip-status.ok{background:rgba(200,245,66,.14);color:var(--accent)}
+.chip-status.agora{background:rgba(255,200,87,.14);color:var(--amber)}
+.lista-dias{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem;padding:1.1rem 1.25rem 2rem;max-width:960px}
+.card-dia{--cor:var(--accent);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1rem;display:flex;flex-direction:column;gap:.9rem}
+.card-dia:hover{border-color:var(--border2);background:var(--surface)}
+.card-dia.proximo{border:1.5px solid var(--cor)}
+.card-dia.concluido{background:var(--surface);border-color:var(--border)}
+.dia-topo{display:flex;gap:.9rem;align-items:flex-start}
+.dia-tile{width:52px;height:52px;border-radius:14px;background:var(--cor,var(--accent));color:#0B0C0A;display:grid;place-items:center;font:900 1.6rem Montserrat,sans-serif;flex:none}
+.card-dia .dia-tile{background:var(--cor)}
+.dia-tile-sm{width:36px;height:36px;border-radius:10px;font-size:1.1rem}
+.dia-info{display:flex;flex-direction:column;gap:.25rem;min-width:0}
+.dia-nome{font-size:1.05rem;line-height:1.25;color:var(--text);margin:0}
+.dia-count{font-size:.82rem;color:var(--muted);margin:0}
+.dia-rodape{display:flex;align-items:center;justify-content:space-between}
+.dia-link{font-size:.88rem;font-weight:700}
+.dia-done-badge,.dia-label{display:none}
+.btn-comecar{height:52px;border:0;border-radius:14px;background:var(--accent);color:#0B0C0A;display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:1rem;font-weight:800;cursor:pointer}
+.btn-comecar svg{width:18px;height:18px}
+/* treino */
+.topbar-treino{flex-direction:column;align-items:stretch;gap:.7rem;padding:.8rem 1.25rem .75rem}
+.treino-top{display:flex;align-items:center;gap:.75rem}
+.treino-top-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.treino-top-txt h2{font-size:.98rem;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.treino-top-txt span{font-size:.76rem;color:var(--muted)}
+.treino-prog{display:flex;align-items:center;gap:.6rem}
+.treino-prog-bar{flex:1;height:6px;border-radius:3px;background:#262A21;overflow:hidden}
+.treino-prog-bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .3s}
+#treino-prog-txt{font-size:.76rem;font-weight:700;color:var(--accent);min-width:2.5rem;text-align:right}
+.treino-aviso{display:none;gap:.6rem;align-items:flex-start;margin:.9rem 1.25rem 0;padding:.65rem .8rem;border-radius:12px;background:rgba(255,138,92,.1);color:#FFB394;font-size:.8rem;line-height:1.45;max-width:760px}
+.treino-aviso svg{width:16px;height:16px;flex:none;margin-top:1px;color:var(--coral)}
+.exercicios-list{padding:.9rem 1.25rem 7.5rem;gap:.6rem;max-width:760px}
+.card-exercicio{border-radius:18px;padding:.9rem;background:var(--surface);border:1px solid var(--border)}
+.card-exercicio.atual{background:#161911;border:1.5px solid var(--accent)}
+.card-exercicio.feito{background:#10120E;border-color:#1F221B;opacity:1;padding:.7rem .9rem}
+.ex-check-row{align-items:flex-start;gap:.7rem;margin-bottom:0}
+.ex-num{font:900 .92rem Montserrat,sans-serif;color:var(--muted);padding-top:.15rem;min-width:1.4rem}
+.card-exercicio.atual .ex-num{color:var(--accent)}
+.ex-titulo{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
+.ex-nome{font-size:1rem;font-weight:700;line-height:1.3}
+.card-exercicio.atual .ex-nome{font-size:1.08rem}
+.ex-resumo{font-size:.78rem;color:var(--muted)}
+.card-exercicio.atual .ex-resumo{display:none}
+.card-exercicio.feito .ex-nome{font-size:.92rem;font-weight:600;color:var(--muted)}
+.ex-check-btn{width:32px;height:32px;padding:0;border-radius:50%;border:2px solid #3A4033;background:transparent;color:transparent;display:grid;place-items:center;flex:none}
+.ex-check-btn svg{width:16px;height:16px}
+.ex-check-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ex-check-btn.feito{background:var(--accent);border-color:var(--accent);color:#0B0C0A}
+.ex-corpo{display:none;flex-direction:column;gap:.6rem;margin-top:.75rem;padding-left:2.1rem}
+.card-exercicio.atual .ex-corpo{display:flex}
+.card-exercicio:not(.feito):not(.atual) .ex-corpo.aberto{display:flex}
+.ex-chips{display:flex;gap:.4rem;flex-wrap:wrap}
+.ex-chip{font-size:.76rem;font-weight:700;padding:.35rem .65rem;border-radius:8px;background:#23271D;color:var(--text);text-decoration:none}
+.ex-chip-video{background:rgba(124,200,255,.14);color:var(--sky)}
+.ex-meta{font-size:.84rem;color:var(--muted);margin:0}
+.ex-tecnica{color:var(--accent);background:rgba(200,245,66,.08);border:0;border-radius:8px;margin:0;align-self:flex-start}
+.ex-prescricao{background:var(--surface2);border-left:0;border-radius:12px;margin:0;font-size:.86rem}
+.ex-peso-row{margin-top:.15rem;gap:.5rem}
+.ex-peso-label{font-weight:700;flex:1;min-width:0}
+.peso-btn{width:44px;height:44px;border-radius:12px;font-size:1.25rem;background:var(--surface2);border-color:var(--border)}
+.peso-input{width:76px;height:44px;border-radius:12px;font:900 1.15rem Montserrat,sans-serif;color:var(--text);background:var(--bg);border-color:var(--border)}
+.peso-sugerido{width:100%;text-align:right;margin:0;font-size:.74rem;color:var(--muted)}
+.btn-feito{height:50px;border:0;border-radius:14px;background:var(--accent);color:#0B0C0A;font-size:.95rem;font-weight:800;cursor:pointer}
+.treino-rodape{position:fixed;left:0;right:0;bottom:0;z-index:90;display:none;align-items:center;gap:.75rem;padding:.8rem 1.25rem calc(.9rem + env(safe-area-inset-bottom));background:rgba(11,12,10,.96);border-top:1px solid #1F221B;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#view-treino.active .treino-rodape{display:flex}
+.treino-rodape-txt{flex:1;display:flex;flex-direction:column;min-width:0}
+.treino-rodape-txt b{font-size:.95rem}
+.treino-rodape-txt span{font-size:.76rem;color:var(--muted)}
+.treino-rodape .btn-concluir{height:50px;padding:0 1.2rem;border-radius:14px;font-size:.92rem;font-weight:700;color:var(--text);background:var(--surface2);border:1px solid var(--border)}
+.treino-rodape .btn-concluir.pronto{background:var(--accent);border-color:var(--accent);color:#0B0C0A}
+.treino-rodape .btn-concluir.concluido{background:rgba(200,245,66,.14);border-color:transparent;color:var(--accent)}
+/* painel do treinador e demais telas: mesmos tokens */
+.admin-item,.prot-card,.semana-bloco{border-radius:16px}
+.nav-tab.active{color:var(--accent)}
+/* telas do aluno centralizadas no computador (coluna de 760px) */
+#view-semanas,#view-dias,#view-treino,#view-protocolos-aluno{--gut:max(1.25rem,calc((100% - 760px) / 2))}
+#view-semanas .topbar,#view-dias .topbar,#view-treino .topbar,#view-protocolos-aluno .topbar,#view-semanas .page-header,#view-dias .page-header,#view-protocolos-aluno .page-header,.lista-semanas,.lista-dias,.exercicios-list,.treino-rodape{padding-left:var(--gut);padding-right:var(--gut)}
+.prog-card,.aviso-avaliacao,.treino-aviso{margin-left:var(--gut);margin-right:var(--gut)}
+.lista-semanas,.lista-dias,.exercicios-list,.treino-aviso{max-width:none}
+#view-semanas .checkpoint-aluno-wrap{padding-left:var(--gut);padding-right:var(--gut)}
+@media(max-width:640px){.backup-bar{flex-direction:column;align-items:stretch}.backup-actions{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -384,29 +550,33 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-login" class="view active">
   <div class="login-box fade-in">
     <div class="login-logo">i9<span>Fit</span></div>
-    <div class="login-sub">Como você quer entrar?</div>
+    <div class="login-sub">Seu treino, semana a semana.</div>
+    <div class="login-pergunta">Como você quer entrar?</div>
     <div class="login-escolha">
       <button type="button" class="login-opcao" id="opcao-aluno" onclick="escolherAcesso('aluno')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
-        ALUNO
+        <span class="login-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+        <span class="login-txt"><b>Sou aluno</b><small>Entre com seu nome ou login</small></span>
+        <span class="login-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
       </button>
       <button type="button" class="login-opcao" id="opcao-treinador" onclick="escolherAcesso('treinador')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>
-        TREINADOR
+        <span class="login-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg></span>
+        <span class="login-txt"><b>Sou treinador</b><small>Painel de alunos e protocolos</small></span>
+        <span class="login-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
       </button>
     </div>
     <div class="login-painel" id="painel-aluno">
-      <label>Seu nome ou nick</label>
-      <input type="text" id="login-input" placeholder="ex: joao, aninha..." autocomplete="off" autocapitalize="off">
+      <label for="login-input">Seu nome ou login</label>
+      <input type="text" id="login-input" placeholder="ex: joao, aninha..." autocomplete="off" autocapitalize="off" onkeydown="if(event.key==='Enter')loginAluno()">
       <div class="login-error" id="login-error">Aluno nao encontrado. Verifique com seu treinador.</div>
       <button class="btn-primary" onclick="loginAluno()">Entrar</button>
     </div>
     <div class="login-painel" id="painel-treinador">
-      <label>Senha de acesso</label>
+      <label for="admin-senha-input">Senha de acesso</label>
       <input type="password" id="admin-senha-input" placeholder="senha">
       <div class="login-error" id="admin-error">Senha incorreta.</div>
       <button class="btn-primary" onclick="loginAdmin()">Acessar painel</button>
     </div>
+    <a class="login-ajuda" href="https://wa.me/5514991042051" target="_blank" rel="noopener">Esqueceu seu login? <b>Fale com o Lucas</b></a>
   </div>
 </div>
 
@@ -428,47 +598,52 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-semanas" class="view">
   <div class="topbar">
     <div class="topbar-logo">i9<span>Fit</span></div>
-    <div class="topbar-user">Ola, <strong id="user-display"></strong><button class="btn-evolucao" onclick="abrirMinhasAvaliacoes()">Evolucao</button><button class="btn-switch-prot" id="btn-trocar-protocolo" onclick="voltarProtocolosAluno()" style="display:none">Trocar protocolo</button><button class="btn-logout" onclick="logout()">Sair</button></div>
+    <div class="topbar-user"><button class="btn-evolucao" onclick="abrirMinhasAvaliacoes()">Evolução</button><button class="btn-switch-prot" id="btn-trocar-protocolo" onclick="voltarProtocolosAluno()" style="display:none">Trocar protocolo</button><button class="btn-logout" onclick="logout()" title="Sair">Sair</button></div>
   </div>
   <div class="page-header fade-in">
+    <div class="saudacao">Olá, <span id="user-display"></span></div>
     <h2 id="protocolo-nome">Protocolo</h2>
     <p id="protocolo-desc"></p>
   </div>
+  <div id="progresso-semanas"></div>
   <div class="aviso-avaliacao" id="aviso-avaliacao-aluno"></div>
   <div id="checkpoint-semanas-aluno"></div>
-  <div class="grid-semanas fade-in" id="grid-semanas"></div>
+  <div class="lista-semanas fade-in" id="grid-semanas"></div>
 </div>
 
 <!-- DIAS DA SEMANA -->
 <div id="view-dias" class="view">
-  <div class="topbar">
-    <button class="btn-back" onclick="renderSemanas()">&#8592; Semanas</button>
-    <div class="topbar-logo">i9<span>Fit</span></div>
-    <div class="topbar-user"><strong id="dias-user"></strong></div>
+  <div class="topbar topbar-voltar">
+    <button class="btn-back" onclick="renderSemanas()" aria-label="Voltar para semanas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div class="topbar-titulo" id="breadcrumb-dias"></div>
+    <span id="dias-user" hidden></span>
   </div>
-  <div class="breadcrumb" id="breadcrumb-dias"></div>
-  <div class="page-header fade-in"><h2 id="semana-titulo"></h2><p id="semana-desc"></p></div>
-  <div class="grid-dias fade-in" id="grid-dias"></div>
+  <div class="page-header semana-head fade-in"><span class="chip-status" id="semana-status"></span><h2 id="semana-titulo"></h2><p id="semana-desc"></p></div>
+  <div class="lista-dias fade-in" id="grid-dias"></div>
 </div>
 
 <!-- TREINO DO DIA -->
 <div id="view-treino" class="view">
-  <div class="topbar">
-    <button class="btn-back" onclick="voltarParaDias()">&#8592; Dias</button>
-    <div class="topbar-logo">i9<span>Fit</span></div>
+  <div class="topbar topbar-treino">
+    <div class="treino-top">
+      <button class="btn-back" onclick="voltarParaDias()" aria-label="Voltar para a semana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="dia-tile dia-tile-sm" id="treino-tile">A</span>
+      <div class="treino-top-txt"><h2 id="dia-titulo"></h2><span id="breadcrumb-treino"></span></div>
+    </div>
+    <div class="treino-prog"><div class="treino-prog-bar"><i id="treino-prog-fill"></i></div><span id="treino-prog-txt">0/0</span></div>
   </div>
-  <div class="breadcrumb" id="breadcrumb-treino"></div>
-  <div class="treino-header fade-in"><h2 id="dia-titulo"></h2><p id="dia-desc"></p></div>
-  <div class="treino-actions fade-in">
-    <button class="btn-concluir" id="btn-concluir-dia" onclick="toggleConcluirDia()">&#10003; Marcar dia como concluido</button>
-  </div>
+  <div class="treino-aviso" id="dia-desc"></div>
   <div class="exercicios-list fade-in" id="exercicios-list"></div>
+  <div class="treino-rodape">
+    <div class="treino-rodape-txt"><b id="treino-feitos">0 de 0 feitos</b><span id="treino-faltam"></span></div>
+    <button class="btn-concluir" id="btn-concluir-dia" onclick="toggleConcluirDia()">Concluir treino</button>
+  </div>
 </div>
 
 <!-- ADMIN: LISTA DE PROTOCOLOS / ALUNOS -->
 <div id="view-admin" class="view">
   <div class="topbar">
-    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">admin</span></div>
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'Plus Jakarta Sans'">admin</span></div>
     <div style="display:flex;align-items:center;gap:.6rem">
       <div class="admin-nav">
         <button class="nav-tab active" id="tab-prot" onclick="adminTab('protocolos')">Protocolos</button>
@@ -534,7 +709,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-admin-prot" class="view">
   <div class="topbar">
     <button class="btn-back" onclick="voltarAdmin()">&#8592; Protocolos</button>
-    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">admin</span></div>
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'Plus Jakarta Sans'">admin</span></div>
   </div>
   <div class="admin-wrap fade-in">
     <div class="proto-edit-header">
@@ -619,7 +794,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-avaliacoes" class="view">
   <div class="topbar">
     <button class="btn-back" onclick="voltarAvaliacoes()">&#8592; Voltar</button>
-    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">evolucao</span></div>
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'Plus Jakarta Sans'">evolucao</span></div>
   </div>
   <div class="av-wrap fade-in">
     <div class="av-header">
@@ -682,7 +857,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 <div id="view-rel-config" class="view no-print">
   <div class="topbar">
     <button class="btn-back" onclick="voltarAdmin()">&#8592; Admin</button>
-    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'DM Sans'">relatorio</span></div>
+    <div class="topbar-logo">i9<span>Fit</span> <span style="font-size:.65rem;color:var(--muted);font-weight:400;font-family:'Plus Jakarta Sans'">relatorio</span></div>
   </div>
   <div class="rel-config fade-in">
     <div class="section-head" style="margin-bottom:1.25rem">
@@ -704,7 +879,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
   <div class="rel-wrap" id="rel-conteudo"></div>
   <div class="rel-save-bar no-print">
     <div>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem">Salvar cargas da sessao</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.9rem">Salvar cargas da sessao</div>
       <p>Os pesos preenchidos aqui serao sugeridos na proxima sessao de cada aluno.</p>
     </div>
     <div style="display:flex;gap:.6rem;align-items:center">
@@ -757,7 +932,7 @@ let __firebaseReady = false;
 let __salvandoFirebase = false;
 let __saveRequested = false;
 let __lastSyncedStorage = null;
-const I9_BUILD = "2026-11-20-cadastro-unico-v12";
+const I9_BUILD = "2026-11-21-novo-visual-v13";
 
 function __safeDocId(id){
   return encodeURIComponent(String(id || (Date.now().toString(36)+Math.random().toString(36).slice(2))));
@@ -1632,7 +1807,7 @@ function renderAvisoAvaliacaoAluno(){
   var d=getData();var aluno=getAlunoById(d,state.user.id)||state.user;var ult=ultimaAvaliacao(aluno);
   if(!avaliacaoPendente(aluno)){box.style.display='none';box.innerHTML='';return;}
   var msg=ult?'Ja passaram 30 dias da ultima avaliacao. Atualize suas medidas e fotos.':'Voce ainda nao possui avaliacao fisica cadastrada.';
-  box.innerHTML='<div><strong>Atualizacao de evolucao</strong><p>'+msg+'</p></div><button class="btn-add" onclick="abrirMinhasAvaliacoes()">Atualizar agora</button>';
+  box.innerHTML='<span class="aviso-ponto" aria-hidden="true"></span><div class="aviso-txt"><strong>Avaliação física pendente</strong><p>'+msg+'</p></div><button class="btn-add" onclick="abrirMinhasAvaliacoes()">Atualizar →</button>';
   box.style.display='flex';
 }
 function abrirMinhasAvaliacoes(){if(!state.user)return showView('view-login');abrirAvaliacoesAluno(state.user.id,'aluno');}
@@ -1745,7 +1920,7 @@ function renderSemanas(){
       state.protocolo=prot;
     }
   }
-  document.getElementById('user-display').textContent=state.user.nome||state.user.nick;
+  document.getElementById('user-display').textContent=String(state.user.nome||state.user.nick).split(' ')[0];
   renderCheckpointAluno('checkpoint-semanas-aluno',state.user);
   var btnTrocar=document.getElementById('btn-trocar-protocolo');
   if(btnTrocar)btnTrocar.style.display=alunoTemMultiplosProtocolos(state.user)?'inline-block':'none';
@@ -1754,17 +1929,44 @@ function renderSemanas(){
   var nick=state.user.nick;
   var semanas=prot?d.semanas.filter(function(s){return s.protocoloId===prot.id;}).sort(function(a,b){return a.num-b.num;}):[];
   var grid=document.getElementById('grid-semanas');
-  if(!semanas.length){grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhuma semana cadastrada.</p></div>';renderAvisoAvaliacaoAluno();showView('view-semanas');return;}
-  grid.innerHTML=semanas.map(function(s){
+  var progBox=document.getElementById('progresso-semanas');
+  if(!semanas.length){grid.innerHTML='<div class="empty-state"><div>&#128203;</div><p>Nenhuma semana cadastrada.</p></div>';if(progBox)progBox.innerHTML='';renderAvisoAvaliacaoAluno();showView('view-semanas');return;}
+  // NOVO VISUAL: progresso geral, fases (campo obs da semana) e lista agrupada por fase
+  var info=semanas.map(function(s){
     var dias=d.dias.filter(function(di){return di.semanaId===s.id;});
-    var concl=dias.length>0&&dias.every(function(di){return localStorage.getItem(nick+'__dia__'+di.id)==='1';});
-    return '<div class="card-semana'+(concl?' concluida':'')+'" onclick="openSemana(\''+s.id+'\')">'
-      +'<div class="semana-num">'+s.num+'</div>'
-      +'<div class="semana-label">Semana</div>'
-      +'<div class="semana-dias">'+dias.length+' dia'+(dias.length!==1?'s':'')+'</div>'
-      +(s.obs?'<div class="semana-badge">'+s.obs+'</div>':'')
-      +'<div class="semana-check">&#10003; Concluida</div>'
+    var feitos=dias.filter(function(di){return localStorage.getItem(nick+'__dia__'+di.id)==='1';}).length;
+    return {s:s,dias:dias,feitos:feitos,concl:dias.length>0&&feitos===dias.length};
+  });
+  var atual=null;for(var k=0;k<info.length;k++){if(!info[k].concl){atual=info[k];break;}}
+  var nConcl=info.filter(function(x){return x.concl;}).length;
+  var chaveFase=function(t){t=String(t||'').trim();var m=t.match(/^Fase\s*\d+/i);return m?m[0].toLowerCase().replace(/\s+/g,' '):t;};
+  var fases=[];info.forEach(function(x){var f=(x.s.obs||'').trim();var ult=fases[fases.length-1];if(!ult||ult.chave!==chaveFase(f))fases.push({nome:f,chave:chaveFase(f),itens:[x]});else ult.itens.push(x);});
+  var temFases=fases.length>1||(fases.length===1&&fases[0].nome);
+  var semExtra=function(t){return String(t||'').replace(/\s*·.*$/,'').replace(/\s*\(.*?\)\s*$/,'');};
+  var curta=function(t){return i9Esc(semExtra(t).replace(/^Fase\s*\d+\s*[—–-]\s*/i,''));};
+  if(progBox){
+    var pct=Math.round(nConcl/info.length*100);
+    progBox.innerHTML='<div class="prog-card fade-in">'
+      +'<div class="prog-topo"><div class="prog-anel" style="--p:'+pct+'"><span>'+nConcl+'<small>/'+info.length+'</small></span></div>'
+      +'<div class="prog-txt"><b>'+(atual?'Semana '+atual.s.num+(atual.feitos?' em andamento':' é a próxima'):'Protocolo concluído!')+'</b>'
+      +'<span>'+(atual?atual.feitos+' de '+atual.dias.length+' treino'+(atual.dias.length!==1?'s':'')+' feito'+(atual.feitos!==1?'s':'')+' nesta semana':'Parabéns, todas as semanas foram feitas.')+'</span></div></div>'
+      +(temFases&&fases.length<=6?'<div class="prog-fases" style="grid-template-columns:repeat('+fases.length+',minmax(0,1fr))">'+fases.map(function(f){
+          var tot=f.itens.length,ok=f.itens.filter(function(x){return x.concl;}).length,ativa=atual&&f.itens.indexOf(atual)>=0;
+          return '<div class="prog-fase'+(ativa?' ativa':'')+(ok===tot?' feita':'')+'"><i style="--f:'+Math.round(ok/tot*100)+'%"></i><span>'+(curta(f.nome)||'Fase')+'</span></div>';
+        }).join('')+'</div>':'')
       +'</div>';
+  }
+  grid.innerHTML=fases.map(function(f){
+    return (temFases?'<div class="fase-titulo">'+i9Esc(semExtra(f.nome).replace(/\s*[—–-]\s*/,' · '))+'</div>':'')
+      +f.itens.map(function(x){
+        var s=x.s,eAtual=x===atual,cls=x.concl?' concluida':(eAtual?' atual':'');
+        var ic=x.concl?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>':s.num;
+        var sub=x.concl?x.feitos+' de '+x.dias.length+' treinos':(eAtual&&x.feitos?'<i class="mini-bar"><b style="width:'+Math.round(x.feitos/x.dias.length*100)+'%"></b></i>':x.dias.length+' treino'+(x.dias.length!==1?'s':'')+(x.dias.length?' · '+x.dias.map(function(di){return di.label;}).join(' e '):''));
+        var dir=x.concl?'<span class="sem-dir ok">Concluída</span>':(eAtual?'<span class="sem-dir agora">'+(x.feitos?x.feitos+' de '+x.dias.length:'Próxima')+'</span>':'');
+        return '<button type="button" class="card-semana'+cls+'" onclick="openSemana(\''+s.id+'\')">'
+          +'<span class="sem-ic">'+ic+'</span>'
+          +'<span class="sem-txt"><b>Semana '+s.num+'</b><span>'+sub+'</span></span>'+dir+'</button>';
+      }).join('');
   }).join('');
   renderAvisoAvaliacaoAluno();
   showView('view-semanas');
@@ -1779,25 +1981,37 @@ function openSemana(id){
   document.getElementById('semana-titulo').textContent='Semana '+sem.num;
   document.getElementById('semana-desc').textContent=sem.obs||'';
   document.getElementById('dias-user').textContent=state.user.nome||state.user.nick;
-  document.getElementById('breadcrumb-dias').innerHTML='<span onclick="renderSemanas()">'+(state.protocolo?state.protocolo.nome:'Protocolo')+'</span><span class="sep">&#8250;</span><span>Semana '+sem.num+'</span>';
+  document.getElementById('breadcrumb-dias').textContent=state.protocolo?state.protocolo.nome:'Protocolo';
   renderDiasGrid();
   showView('view-dias');
 }
 
+// Cor de cada treino: A lima, B ceu, C coral, D lavanda (depois repete).
+var CORES_DIA=['var(--accent)','var(--sky)','var(--coral)','var(--lavanda)'];
+function corDoDia(label,idx){var l=String(label||'').trim().toUpperCase().charCodeAt(0)-65;if(!(l>=0&&l<26))l=idx||0;return CORES_DIA[l%CORES_DIA.length];}
+function i9Esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function renderDiasGrid(){
   var d=getData();var sem=state.semana;if(!sem)return;
   var nick=state.user.nick;
   var dias=d.dias.filter(function(di){return di.semanaId===sem.id;}).sort(function(a,b){return a.ordem-b.ordem;});
   var grid=document.getElementById('grid-dias');if(!grid)return;
-  if(!dias.length){grid.innerHTML='<div class="empty-state"><div>&#128197;</div><p>Nenhum dia cadastrado.</p></div>';return;}
-  grid.innerHTML=dias.map(function(di){
+  var st=document.getElementById('semana-status');
+  if(!dias.length){grid.innerHTML='<div class="empty-state"><div>&#128197;</div><p>Nenhum dia cadastrado.</p></div>';if(st)st.textContent='';return;}
+  var concls=dias.map(function(di){return localStorage.getItem(nick+'__dia__'+di.id)==='1';});
+  var nFeitos=concls.filter(Boolean).length;
+  var proximo=concls.indexOf(false);
+  if(st){st.className='chip-status '+(nFeitos===dias.length?'ok':(nFeitos?'agora':'vem'));st.textContent=nFeitos===dias.length?'✓ Semana concluída':(nFeitos?'Em andamento · '+nFeitos+' de '+dias.length:dias.length+' treino'+(dias.length!==1?'s':'')+' nesta semana');}
+  grid.innerHTML=dias.map(function(di,idx){
     var exs=d.exercicios.filter(function(e){return e.diaId===di.id;});
-    var concl=localStorage.getItem(nick+'__dia__'+di.id)==='1';
-    return '<div class="card-dia'+(concl?' concluido':'')+'" onclick="openDia(\''+di.id+'\')">'
-      +'<div class="dia-label">'+di.label+'</div>'
-      +'<div class="dia-nome">'+(di.nome||'')+'</div>'
-      +'<div class="dia-count">'+exs.length+' exercicio'+(exs.length!==1?'s':'')+'</div>'
-      +'<div class="dia-done-badge">&#10003; Concluido</div>'
+    var concl=concls[idx],eProx=idx===proximo,cor=corDoDia(di.label,idx);
+    var nome=di.nome||'';var limpo=nome.replace(new RegExp('^\\s*(Treino\\s*)?'+String(di.label||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[—–:-]\\s*','i'),'');
+    return '<div class="card-dia'+(concl?' concluido':'')+(eProx?' proximo':'')+'" style="--cor:'+cor+'" onclick="openDia(\''+di.id+'\')">'
+      +'<div class="dia-topo"><span class="dia-tile">'+i9Esc(di.label)+'</span>'
+      +'<div class="dia-info"><b class="dia-nome">'+i9Esc(limpo||nome||('Treino '+di.label))+'</b>'
+      +'<span class="dia-count">'+exs.length+' exercício'+(exs.length!==1?'s':'')+(concl?' · feito':(eProx?' · próximo treino':''))+'</span></div></div>'
+      +(concl?'<div class="dia-rodape"><span class="chip-status ok">✓ Concluído</span><span class="dia-link">Rever →</span></div>'
+        :(eProx?'<button type="button" class="btn-comecar"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Começar treino '+i9Esc(di.label)+'</button>'
+        :'<div class="dia-rodape"><span class="chip-status vem">A seguir</span><span class="dia-link">Abrir →</span></div>'))
       +'</div>';
   }).join('');
 }
@@ -1813,42 +2027,56 @@ function openDia(id){
   if(!dia)return;
   state.dia=dia;
   var sem=state.semana;var prot=state.protocolo;var nick=state.user.nick;
-  document.getElementById('dia-titulo').textContent=dia.label+(dia.nome?' - '+dia.nome:'');
-  document.getElementById('dia-desc').textContent=dia.obs||'';
-  document.getElementById('breadcrumb-treino').innerHTML='<span onclick="renderSemanas()">'+(prot?prot.nome:'Protocolo')+'</span><span class="sep">&#8250;</span><span onclick="voltarParaDias()">Semana '+(sem?sem.num:'')+'</span><span class="sep">&#8250;</span><span>'+dia.label+'</span>';
+  var nomeDia=dia.nome||'';var limpoDia=nomeDia.replace(new RegExp('^\\s*(Treino\\s*)?'+String(dia.label||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[—–:-]\\s*','i'),'');
+  document.getElementById('dia-titulo').textContent=limpoDia||nomeDia||('Treino '+dia.label);
+  var tile=document.getElementById('treino-tile');if(tile){tile.textContent=dia.label;var idxDia=d.dias.filter(function(x){return x.semanaId===dia.semanaId;}).sort(function(a,b){return a.ordem-b.ordem;}).indexOf(dia);tile.style.setProperty('--cor',corDoDia(dia.label,idxDia));}
+  var avisoEl=document.getElementById('dia-desc');
+  if(avisoEl){avisoEl.innerHTML=dia.obs?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>'+i9Esc(dia.obs)+'</span>':'';avisoEl.style.display=dia.obs?'flex':'none';}
+  document.getElementById('breadcrumb-treino').textContent='Semana '+(sem?sem.num:'')+' · Treino '+dia.label;
   // botao concluir dia
   var diaConcl=localStorage.getItem(nick+'__dia__'+id)==='1';
   var btnC=document.getElementById('btn-concluir-dia');
-  if(btnC){if(diaConcl){btnC.classList.add('concluido');btnC.textContent='\u2713 Dia concluido!';}else{btnC.classList.remove('concluido');btnC.textContent='\u2713 Marcar dia como concluido';}}
+  if(btnC){if(diaConcl){btnC.classList.add('concluido');btnC.textContent='\u2713 Treino concluído';}else{btnC.classList.remove('concluido');btnC.textContent='Concluir treino';}}
   // exercicios
   var exs=d.exercicios.filter(function(e){return e.diaId===id;}).sort(function(a,b){return a.ordem-b.ordem;});
   var list=document.getElementById('exercicios-list');
-  if(!exs.length){list.innerHTML='<div class="empty-state"><div>&#128170;</div><p>Nenhum exercicio.</p></div>';showView('view-treino');return;}
+  if(!exs.length){list.innerHTML='<div class="empty-state"><div>&#128170;</div><p>Nenhum exercicio.</p></div>';atualizarProgressoTreino();showView('view-treino');return;}
   var pesos=getPesos();
+  var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
   list.innerHTML=exs.map(function(ex,i){
     var key=nick+'__'+ex.id;
     var ultimo=pesos[key]!==undefined?pesos[key]:'';
     var exFeito=localStorage.getItem(nick+'__ex__'+ex.id+'__'+id)==='1';
+    var musc=ex.tipo!=='func';
+    var resumo=musc&&ex.series?(ex.series+' × '+(ex.reps||'--')):(ex.prescricao?(function(l){l=l.replace(/:$/,'');return l.length>52?l.slice(0,50).replace(/\s+\S*$/,'')+'…':l;})(String(ex.prescricao).split('\n')[0]):'');
+    var video=i9VideoSeguro(ex.videoUrl);
+    var acao="toggleExFeito('"+nick+"','"+id+"','"+ex.id+"',"+i+")";
     return '<div class="card-exercicio'+(exFeito?' feito':'')+'" id="cex-'+i+'">'
       +'<div class="ex-check-row">'
-      +'<div class="ex-nome">'+ex.nome+'</div>'
-      +'<button class="ex-check-btn'+(exFeito?' feito':'')+'" onclick="toggleExFeito(\''+nick+'\',\''+id+'\',\''+ex.id+'\','+i+')">'+( exFeito?'\u2713 Feito':'\u2713 Marcar')+'</button>'
+      +'<span class="ex-num">'+String(i+1).padStart(2,'0')+'</span>'
+      +'<div class="ex-titulo"><div class="ex-nome">'+ex.nome+'</div>'+(resumo?'<div class="ex-resumo">'+i9Esc(resumo)+'</div>':'')+'</div>'
+      +'<button type="button" class="ex-check-btn'+(exFeito?' feito':'')+'" aria-label="'+(exFeito?'Desmarcar ':'Marcar ')+i9Esc(ex.nome)+'" onclick="'+acao+'">'+CHECK+'</button>'
       +'</div>'
-      +(ex.series&&ex.tipo!=='func'?'<div class="ex-meta">'+ex.series+' series x <span>'+(ex.reps||'--')+'</span> reps</div>':'')
-      +(ex.metodo&&ex.tipo!=='func'?'<div class="ex-meta">Metodo: <span>'+ex.metodo+'</span></div>':'')
-      +(ex.obs&&ex.tipo!=='func'?'<div class="ex-meta">Obs: <span>'+ex.obs+'</span></div>':'')
-      +(ex.tecnica&&ex.tipo!=='func'?'<div class="ex-tecnica">&#9889; '+ex.tecnica+'</div>':'')
+      +'<div class="ex-corpo">'
+      +((musc&&ex.series)||(musc&&ex.metodo)||video?'<div class="ex-chips">'
+        +(musc&&ex.series?'<span class="ex-chip">'+ex.series+' série'+(String(ex.series)==='1'?'':'s')+'</span><span class="ex-chip">'+(ex.reps||'--')+' reps</span>':'')
+        +(musc&&ex.metodo?'<span class="ex-chip">'+ex.metodo+'</span>':'')
+        +(video?'<a class="ex-chip ex-chip-video" href="'+i9EscAttr(video)+'" target="_blank" rel="noopener noreferrer">&#9654; Ver execução</a>':'')
+        +'</div>':'')
+      +(ex.obs&&musc?'<div class="ex-meta">'+ex.obs+'</div>':'')
+      +(ex.tecnica&&musc?'<div class="ex-tecnica">&#9889; '+ex.tecnica+'</div>':'')
       +(ex.prescricao?'<div class="ex-prescricao">'+ex.prescricao.replace(/\n/g,'<br>')+'</div>':'')
-      +(i9VideoSeguro(ex.videoUrl)?'<div style="margin:.65rem 0"><a href="'+i9EscAttr(i9VideoSeguro(ex.videoUrl))+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:.45rem;background:var(--accent);color:#111;padding:.55rem .85rem;border-radius:7px;font-weight:700;text-decoration:none;font-size:.85rem">&#9654; Ver execução do exercício</a></div>':'')
       +'<div class="ex-peso-row"><span class="ex-peso-label">Carga</span>'
       +'<div class="peso-ctrl">'
-      +'<button class="peso-btn" onclick="ajustarPeso(\'pi'+i+'\',-1,\''+nick+'\',\''+ex.id+'\')">&#8722;</button>'
-      +'<input class="peso-input" id="pi'+i+'" type="number" min="0" step="0.5" value="'+ultimo+'" placeholder="0" oninput="salvarPeso(\''+nick+'\',\''+ex.id+'\',this.value)">'
-      +'<button class="peso-btn" onclick="ajustarPeso(\'pi'+i+'\',1,\''+nick+'\',\''+ex.id+'\')">+</button>'
+      +'<button type="button" class="peso-btn" aria-label="Diminuir carga" onclick="ajustarPeso(\'pi'+i+'\',-1,\''+nick+'\',\''+ex.id+'\')">&#8722;</button>'
+      +'<input class="peso-input" id="pi'+i+'" type="number" inputmode="decimal" min="0" step="0.5" value="'+ultimo+'" placeholder="0" oninput="salvarPeso(\''+nick+'\',\''+ex.id+'\',this.value)">'
+      +'<button type="button" class="peso-btn" aria-label="Aumentar carga" onclick="ajustarPeso(\'pi'+i+'\',1,\''+nick+'\',\''+ex.id+'\')">+</button>'
       +'<span class="peso-unit">kg</span>'
-      +(ultimo!==''?'<span class="peso-sugerido">(ultimo: '+ultimo+' kg)</span>':'')
-      +'</div></div></div>';
+      +'</div>'+(ultimo!==''?'<span class="peso-sugerido">último: '+ultimo+' kg</span>':'')+'</div>'
+      +'<button type="button" class="btn-feito" onclick="'+acao+'">Marcar como feito</button>'
+      +'</div></div>';
   }).join('');
+  atualizarProgressoTreino();
   showView('view-treino');
 }
 
@@ -1860,14 +2088,29 @@ async function toggleExFeito(nick,diaId,exId,idx){
   var btn=card?card.querySelector('.ex-check-btn'):null;
 
   if(card)card.classList.toggle('feito',!atual);
-  if(btn){btn.classList.toggle('feito',!atual);btn.textContent=(!atual?'\u2713 Feito':'\u2713 Marcar');btn.disabled=true;}
+  if(btn){btn.classList.toggle('feito',!atual);btn.disabled=true;}
+  atualizarProgressoTreino();
 
   var salvou=await __salvarEstadoImediato(key,novoValor);
   if(btn)btn.disabled=false;
   if(!salvou){
     if(card)card.classList.toggle('feito',atual);
-    if(btn){btn.classList.toggle('feito',atual);btn.textContent=(atual?'\u2713 Feito':'\u2713 Marcar');}
+    if(btn){btn.classList.toggle('feito',atual);}
+    atualizarProgressoTreino();
   }
+}
+
+// Barra de progresso do treino, exercicio atual em destaque e rodape fixo.
+function atualizarProgressoTreino(){
+  var cards=[].slice.call(document.querySelectorAll('#exercicios-list .card-exercicio'));
+  var tot=cards.length,feitos=cards.filter(function(c){return c.classList.contains('feito');}).length;
+  var atualMarcado=false;
+  cards.forEach(function(c){var eh=!atualMarcado&&!c.classList.contains('feito');c.classList.toggle('atual',eh);if(eh)atualMarcado=true;});
+  var fill=document.getElementById('treino-prog-fill');if(fill)fill.style.width=(tot?Math.round(feitos/tot*100):0)+'%';
+  var t=document.getElementById('treino-prog-txt');if(t)t.textContent=feitos+'/'+tot;
+  var f=document.getElementById('treino-feitos');if(f)f.textContent=feitos+' de '+tot+' feito'+(feitos!==1?'s':'');
+  var fa=document.getElementById('treino-faltam');if(fa)fa.textContent=tot-feitos>0?'Faltam '+(tot-feitos)+' exercício'+(tot-feitos!==1?'s':''):'Tudo feito!';
+  var b=document.getElementById('btn-concluir-dia');if(b)b.classList.toggle('pronto',tot>0&&feitos===tot);
 }
 
 async function toggleConcluirDia(){
@@ -1877,12 +2120,12 @@ async function toggleConcluirDia(){
   var novoValor=atual?'0':'1';
   var btn=document.getElementById('btn-concluir-dia');
 
-  if(btn){btn.classList.toggle('concluido',!atual);btn.textContent=!atual?'\u2713 Salvando...':'Removendo conclusao...';btn.disabled=true;}
+  if(btn){btn.classList.toggle('concluido',!atual);btn.textContent=!atual?'Salvando...':'Removendo...';btn.disabled=true;}
   var salvou=await __salvarEstadoImediato(key,novoValor);
   if(btn){
     btn.disabled=false;
     btn.classList.toggle('concluido',salvou?!atual:atual);
-    btn.textContent=salvou?(!atual?'\u2713 Dia concluido!':'\u2713 Marcar dia como concluido'):(atual?'\u2713 Dia concluido!':'\u2713 Marcar dia como concluido');
+    btn.textContent=salvou?(!atual?'\u2713 Treino concluído':'Concluir treino'):(atual?'\u2713 Treino concluído':'Concluir treino');
   }
 }
 
