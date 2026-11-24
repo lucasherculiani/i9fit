@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>i9 Cifras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ferramenta de palco — direta, sem enfeite, tudo a um toque
+   IDEA: estante de partitura com luz baixa: folha escura, acordes em amarelo-banana
+   PICTURE: a própria cifra aberta, grande, logo abaixo da barra de controles
+   COLOUR and TYPE: carvão #121214, tinta clara, acento amarelo #ffcf33, laranja nas seções; Manrope + JetBrains Mono
+   LAYOUT: barra fixa de controles, folha em 1–3 colunas; biblioteca e ranking como telas próprias */
+:root{color-scheme:dark;--bg:#121214;--panel:#1a1a1e;--panel2:#232329;--line:#2e2e35;--ink:#ececef;--mute:#a0a0aa;--ch:#ffcf33;--sec:#ff9f5a;--tab:#d3d6dc;--fs:17px;--hh:61px}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:150px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Manrope,system-ui,sans-serif;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--ch);outline-offset:2px}
+.app{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:10px max(3vw,14px);background:#0d0d0f;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;font-size:20px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.logo span{background:var(--ch);color:#141414;border-radius:6px;padding:0 6px;margin-right:5px}
+nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.btn{min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:#4a4a53}
+nav .btn[aria-current=page]{border-color:var(--ch);color:var(--ch)}
+.pri{background:var(--ch);color:#151515;border-color:var(--ch)}
+.pri:hover{border-color:#fff}
+.view{display:none}.view.on{display:block}
+.bar{position:sticky;top:var(--hh);z-index:20;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px max(3vw,14px);background:rgba(22,22,26,.97);border-bottom:1px solid var(--line)}
+.g{display:flex;align-items:center;gap:4px;flex:none}
+.lb{font-size:12px;color:var(--mute);margin-right:3px;font-weight:700}
+.ib{min-width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;font-weight:800;font-size:15px;display:inline-grid;place-items:center;padding:0 10px}
+.ib:hover{border-color:#4a4a53}
+.ib.on{background:var(--ch);color:#151515;border-color:var(--ch)}
+.ib svg{width:16px;height:16px;fill:currentColor}
+.kv{min-width:54px;text-align:center;font:700 19px "JetBrains Mono",monospace;color:var(--ch)}
+.fv{min-width:30px;text-align:center;font:700 14px "JetBrains Mono",monospace}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{height:38px;padding:0 11px;border:0;border-right:1px solid var(--line);background:var(--panel2);cursor:pointer;font-weight:700;font-size:13px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ch);color:#151515}
+select{height:40px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);padding:0 8px;font-size:15px}
+input[type=range]{accent-color:var(--ch);width:100px}
+@media(max-width:1000px){.bar{flex-wrap:nowrap;overflow-x:auto}}
+nav .sm{display:none}
+@media(max-width:600px){.lg{display:none}nav .sm{display:inline}.app{gap:8px}nav .btn{padding:0 10px}.logo{font-size:18px}}
+.head{padding:22px max(3vw,14px) 4px}
+.head h1{margin:0;font-size:clamp(26px,3.4vw,40px);line-height:1.05;font-weight:800;text-wrap:balance}
+.meta{color:var(--mute);margin:6px 0 0;font-size:15px;display:flex;gap:6px 14px;flex-wrap:wrap}
+.meta a{color:var(--mute)}
+.meta .kn{color:var(--sec);font-weight:700}
+.sheet{padding:16px max(3vw,14px) 45vh;font:400 var(--fs)/1.4 "JetBrains Mono",ui-monospace,Menlo,monospace;column-gap:44px;column-rule:1px solid var(--line)}
+.sheet.c2{column-count:2}.sheet.c3{column-count:3}
+@media(max-width:760px){.sheet.c2,.sheet.c3{column-count:1}}
+.blk{break-inside:avoid;margin:0 0 1.2em;overflow-x:auto}
+.ln{white-space:pre;min-height:1.4em}
+.ch{color:var(--ch);font-weight:700}
+.sec,.lbl{color:var(--sec);font-weight:700}
+.nochords .chl{display:none}
+.tabh{all:unset;cursor:pointer;color:var(--sec);font:700 14px Manrope,sans-serif;padding:4px 0}
+.tabh span{color:var(--mute);font-weight:500}
+.tabb pre{margin:.3em 0 0;font-size:.84em;line-height:1.3;color:var(--tab);background:#18181c;border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto}
+.tabb.closed pre{display:none}
+.tabs-hide .tabb{display:none}
+.exit{display:none;position:fixed;right:14px;bottom:14px;z-index:40}
+.stage .app{display:none}
+.stage .bar{top:0;opacity:.4;transition:opacity .2s}
+.stage .bar:hover,.stage .bar:focus-within{opacity:1}
+.stage .head{padding-top:12px}
+.stage .exit{display:inline-flex}
+.wrap{max-width:1100px;margin:0 auto;padding:26px max(3vw,14px) 70px}
+.wrap>h1{margin:0 0 14px;font-size:clamp(26px,3.4vw,40px);line-height:1.05;font-weight:800}
+h2{font-size:21px;margin:30px 0 10px;font-weight:800}
+.search input{width:100%;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--panel);padding:0 16px;font-size:16px}
+.ext{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0;align-items:center;font-size:14px;color:var(--mute)}
+.ext a{color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;text-decoration:none;font-weight:700}
+.ext a:hover{border-color:var(--ch)}
+.list{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:10px}
+.card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;width:100%;text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.card:hover{border-color:#4a4a53}
+.card b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card small{color:var(--mute);font-size:14px}
+.card .k{grid-row:1/3;grid-column:2;align-self:center;font:700 16px "JetBrains Mono",monospace;color:var(--ch);text-align:right}
+.card .k em{display:block;font:500 12px Manrope,sans-serif;color:var(--mute)}
+.empty{color:var(--mute);padding:24px 0}
+.list .empty{grid-column:1/-1}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:700;font-size:14px}
+.chips button.on{background:var(--ch);color:#151515;border-color:var(--ch)}
+.dates{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;color:var(--mute);font-size:14px}
+input[type=date]{height:40px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);padding:0 10px;font-size:16px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 6px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-size:clamp(24px,4vw,34px);font-weight:800;color:var(--ch);line-height:1.1}
+.stat span{color:var(--mute);font-size:13px}
+.cols2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:32px}
+@media(max-width:820px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.rank,.hist{list-style:none;padding:0;margin:0}
+.rank li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.pos{font:800 18px "JetBrains Mono",monospace;color:var(--mute);text-align:right}
+.rank li:nth-child(-n+3) .pos{color:var(--ch)}
+.nm{all:unset;cursor:pointer;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm small{color:var(--mute);font-weight:500;margin-left:6px}
+.nm:hover{color:var(--ch)}
+.n{font:700 15px "JetBrains Mono",monospace;white-space:nowrap;text-align:right}
+.meter{grid-column:2/4;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--ch);border-radius:3px}
+.day{font-size:14px;color:var(--mute);margin:18px 0 4px;font-weight:700}
+.hist li{display:grid;grid-template-columns:50px minmax(0,1fr) 40px;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
+.hist time{font:400 14px "JetBrains Mono",monospace;color:var(--mute);white-space:nowrap}
+.x{width:38px;height:38px;border-radius:8px;border:1px solid transparent;background:none;color:var(--mute);cursor:pointer;font-size:18px}
+.x:hover{border-color:var(--line);color:var(--ink)}
+.bk{margin-top:40px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.bk summary{cursor:pointer;font-weight:800;padding:6px 0}
+.bk textarea{width:100%;min-height:120px;margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font:13px/1.4 "JetBrains Mono",monospace}
+.hint{color:var(--mute);font-size:14px;margin:6px 0 10px}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.65);display:none;align-items:flex-start;justify-content:center;padding:4vh 12px;overflow:auto}
+.modal.on{display:flex}
+.dlg{width:min(880px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.dlg h2{margin:0 0 12px}
+.row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,2fr) minmax(0,1fr);gap:10px}
+@media(max-width:640px){.row{grid-template-columns:minmax(0,1fr)}}
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fld>span{font-size:13px;color:var(--mute);font-weight:700}
+.fld input,.fld textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px}
+.fld textarea{min-height:42vh;font:15px/1.35 "JetBrains Mono",monospace;white-space:pre;overflow:auto;resize:vertical}
+.linkrow{display:flex;gap:8px;flex-wrap:wrap}.linkrow input{flex:1 1 260px}
+.msg{font-size:14px;color:var(--sec);min-height:1.3em;margin:2px 0 8px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.acts .sp{flex:1}
+.danger{color:#ff8a8a;border-color:#5c2d2d}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#29292f;border:1px solid var(--line);border-radius:12px;padding:10px 16px;display:flex;gap:14px;align-items:center;transition:.25s;z-index:60;font-size:14px;max-width:calc(100vw - 24px)}
+.toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{all:unset;color:var(--ch);font-weight:800;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.toast,.stage .bar{transition:none}}
+</style>
+</head>
+<body>
+<header class="app" id="app">
+  <a class="logo" href="#biblioteca"><span>i9</span>Cifras</a>
+  <nav>
+    <button class="btn" data-go="biblioteca">Biblioteca</button>
+    <button class="btn" data-go="ranking"><span class="lg">Histórico e ranking</span><span class="sm">Ranking</span></button>
+    <button class="btn pri" id="btnNova">+ Nova cifra</button>
+  </nav>
+</header>
+
+<main>
+  <section class="view" id="vSong">
+    <div class="bar" id="bar">
+      <div class="g"><span class="lb">Tom</span><button class="ib" id="tDown" aria-label="Baixar meio tom">−</button><span class="kv" id="tKey">G</span><button class="ib" id="tUp" aria-label="Subir meio tom">+</button><button class="ib" id="tReset" title="Voltar ao tom original">orig.</button></div>
+      <div class="g"><span class="lb">Capo</span><select id="capo" aria-label="Capotraste"></select></div>
+      <div class="g"><span class="lb">♯/♭</span><select id="accid" aria-label="Sustenidos ou bemóis"><option value="auto">auto</option><option value="#">♯</option><option value="b">♭</option></select></div>
+      <div class="g"><span class="lb">Fonte</span><button class="ib" id="fDown" aria-label="Diminuir fonte">A−</button><span class="fv" id="fVal">17</span><button class="ib" id="fUp" aria-label="Aumentar fonte">A+</button></div>
+      <div class="g"><span class="lb">Colunas</span><div class="seg" id="segCols"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+      <div class="g"><span class="lb">Tabs</span><div class="seg" id="segTabs"><button data-v="show">mostrar</button><button data-v="collapse">recolher</button><button data-v="hide">ocultar</button></div></div>
+      <div class="g"><button class="ib" id="chords" title="Mostrar/ocultar acordes">acordes</button></div>
+      <div class="g"><span class="lb">Rolagem</span><button class="ib" id="play" aria-label="Rolagem automática"></button><input type="range" id="speed" min="1" max="10" aria-label="Velocidade da rolagem"></div>
+      <div class="g"><button class="ib" id="stage">palco</button><button class="ib" id="edit">editar</button><button class="ib" id="mark" title="Registrar agora no histórico">+ tocada</button></div>
+    </div>
+    <div class="head">
+      <h1 id="sTitle"></h1>
+      <p class="meta" id="sMeta"></p>
+    </div>
+    <article class="sheet" id="sheet"></article>
+    <button class="btn pri exit" id="exitStage">Sair do palco</button>
+  </section>
+
+  <section class="view" id="vLib">
+    <div class="wrap">
+      <h1>Biblioteca</h1>
+      <div class="search"><input id="q" type="search" placeholder="Buscar música ou artista" autocomplete="off" aria-label="Buscar música ou artista"></div>
+      <div class="ext" id="ext"></div>
+      <ul class="list" id="libList"></ul>
+    </div>
+  </section>
+
+  <section class="view" id="vRank">
+    <div class="wrap">
+      <h1>Histórico e ranking</h1>
+      <div class="chips" id="chips">
+        <button data-p="hoje">Hoje</button><button data-p="7">7 dias</button><button data-p="30">30 dias</button><button data-p="mes">Este mês</button><button data-p="ano">Este ano</button><button data-p="tudo">Tudo</button><button data-p="custom">Escolher datas</button>
+      </div>
+      <div class="dates" id="dates" hidden><label>De <input type="date" id="dFrom"></label><label>até <input type="date" id="dTo"></label></div>
+      <div class="stats" id="stats"></div>
+      <div class="cols2">
+        <div><h2>Mais tocadas</h2><ol class="rank" id="rank"></ol></div>
+        <div><h2>Histórico</h2><div id="hist"></div></div>
+      </div>
+      <p class="hint">A música entra no histórico sozinha depois de 45 segundos aberta, ou quando você liga a rolagem automática (uma vez a cada 3 horas por música).</p>
+      <details class="bk">
+        <summary>Backup e restauração</summary>
+        <p class="hint">Cifras e histórico ficam salvos neste navegador. Gere um backup para guardar ou levar para outro aparelho.</p>
+        <div class="acts" style="justify-content:flex-start">
+          <button class="btn" id="bkExp">Gerar backup</button>
+          <button class="btn" id="bkCopy">Copiar texto</button>
+          <label class="btn">Restaurar de arquivo<input type="file" id="bkFile" accept=".json,application/json" hidden></label>
+          <button class="btn" id="bkRestore">Restaurar do texto colado</button>
+        </div>
+        <textarea id="bkTxt" aria-label="Texto do backup" placeholder="O backup aparece aqui. Para restaurar, cole um backup e clique em “Restaurar do texto colado”."></textarea>
+      </details>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="mEdit" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="dlg">
+    <h2 id="mTitle">Nova cifra</h2>
+    <label class="fld"><span id="urlLbl">Link da cifra (Cifra Club ou Banana Cifras)</span>
+      <div class="linkrow"><input id="fUrl" type="url" placeholder="https://www.cifraclub.com.br/artista/musica/"><button class="btn" id="btnImport" type="button">Importar do link</button></div>
+    </label>
+    <div class="msg" id="mMsg"></div>
+    <div class="row">
+      <label class="fld"><span>Música</span><input id="fTitle"></label>
+      <label class="fld"><span>Artista</span><input id="fArtist"></label>
+      <label class="fld"><span>Tom original</span><input id="fKey" placeholder="auto"></label>
+    </div>
+    <div class="ext" id="mExt"></div>
+    <label class="fld" style="margin-top:10px"><span>Cifra — copie no site e cole aqui</span><textarea id="fText" spellcheck="false"></textarea></label>
+    <div class="acts">
+      <button class="btn danger" id="btnDel" type="button">Excluir</button>
+      <span class="sp"></span>
+      <button class="btn" id="btnCancel" type="button">Cancelar</button>
+      <button class="btn pri" id="btnSave" type="button">Salvar e abrir</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+{
+/*CORE*/
+const SHARP=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const IDX={C:0,'B#':0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,Fb:4,F:5,'E#':5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11,Cb:11};
+const FLATKEYS=new Set(['F','Bb','Eb','Ab','Db','Dm','Gm','Cm','Fm','Bbm','Ebm']);
+const CH=/^([A-G])([#b]?)((?:maj|min|dim|aug|sus|add|m|M|º|°|ø|\+|-|\d|\(|\)|#|b|\/(?=\d))*)(?:\/([A-G])([#b]?))?$/;
+const NEU=/^(\(?\d+\s*[xX]\)?|\(?[xX]\d+\)?|[|\-–—%:.~\/\\*>]+|\(|\)|\d+)$/;
+const LABEL=/^[A-Za-zÀ-ÿ0-9ºª.]+:$/;
+function chordTok(t){
+  let m=t.match(CH); if(m) return {pre:'',m,post:''};
+  const a=t.match(/^([(\[|]*)(.*?)([)\]|.,]*)$/); if(!a||!a[2]) return null;
+  m=a[2].match(CH); return m?{pre:a[1],m,post:a[3]}:null;
+}
+function isTab(line){
+  const t=line.trim(); if(t.length<6) return false;
+  if((t.match(/[-–]/g)||[]).length<4) return false;
+  return /^([A-Ga-g][#b]?\s*)?[|:]/.test(t) && /^[A-Ga-g#b|:\-–0-9hpbrxvst~\/\\().^*<>=\s]+$/.test(t);
+}
+function classify(line){
+  if(!line.trim()) return {t:'blank'};
+  if(isTab(line)) return {t:'tab',s:line};
+  const parts=[]; let ch=0,w=0;
+  const lb=line.match(/^(\s*)(\[[^\]]*\])/);
+  if(lb) parts.push({p:lb[1].length,x:lb[2],lbl:1});
+  const re=/\S+/g; re.lastIndex=lb?lb[0].length:0; let m,first=!lb;
+  while((m=re.exec(line))){
+    const tok=m[0], c=chordTok(tok);
+    if(c){ch++;parts.push({p:m.index,c,tok});}
+    else if(NEU.test(tok)) parts.push({p:m.index,x:tok});
+    else if(first&&LABEL.test(tok)) parts.push({p:m.index,x:tok,lbl:1});
+    else {w++;parts.push({p:m.index,x:tok});}
+    first=false;
+  }
+  if(ch&&!w) return {t:'chord',parts};
+  if(!ch&&!w&&parts.some(p=>p.lbl)) return {t:'sec',s:line};
+  return {t:'lyr',s:line};
+}
+function parse(text){
+  const blocks=[]; let cur=null;
+  const close=()=>{if(cur&&cur.lines.length)blocks.push(cur);cur=null};
+  for(const raw of String(text||'').replace(/\r/g,'').replace(/\t/g,'    ').split('\n')){
+    const c=classify(raw.replace(/\s+$/,''));
+    if(c.t==='blank'){close();continue}
+    if(c.t==='tab'){
+      if(!cur||cur.k!=='tab'){
+        let title='';
+        if(cur&&cur.lines.length===1&&cur.lines[0].t==='sec'){title=cur.lines[0].s.trim();cur=null}else close();
+        cur={k:'tab',title,lines:[]};
+      }
+      cur.lines.push(c);continue;
+    }
+    if(cur&&cur.k==='tab') close();
+    if(!cur) cur={k:'txt',lines:[]};
+    cur.lines.push(c);
+  }
+  close(); return blocks;
+}
+function tpNote(n,s,flat){const i=IDX[n];if(i==null)return n;return (flat?FLAT:SHARP)[((i+s)%12+12)%12]}
+function tpChord(c,s,flat){const m=c.m;return c.pre+tpNote(m[1]+m[2],s,flat)+m[3]+(m[4]?'/'+tpNote(m[4]+(m[5]||''),s,flat):'')+c.post}
+function keyParts(k){const m=String(k||'').trim().match(/^([A-G][#b]?)(m(?!aj))?/);return m?{r:m[1],mi:!!m[2]}:null}
+function autoFlat(k,s){const p=keyParts(k);if(!p)return false;return FLATKEYS.has(tpNote(p.r,s,true)+(p.mi?'m':''))}
+function tpKey(k,s,flat){const p=keyParts(k);if(!p)return '';if(flat==null)flat=autoFlat(k,s);return tpNote(p.r,s,flat)+(p.mi?'m':'')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderChordLine(parts,tx){
+  let out='',col=0;
+  for(const p of parts){
+    const t=p.c?tx(p):p.x;
+    if(p.p>col){out+=' '.repeat(p.p-col);col=p.p}else if(col>0){out+=' ';col++}
+    out+=p.c?`<b class="ch">${esc(t)}</b>`:p.lbl?`<span class="lbl">${esc(t)}</span>`:esc(t);
+    col+=t.length;
+  }
+  return out;
+}
+function detectKey(t){
+  const m=String(t||'').match(/^\s*tom\s*:?\s*([A-G][#b]?m?)(?![a-z])/im); if(m) return m[1];
+  for(const b of parse(t)) if(b.k==='txt') for(const l of b.lines) if(l.t==='chord'){
+    const c=l.parts.find(p=>p.c); if(c){const x=c.c.m;return x[1]+x[2]+(/^m(?!aj)/.test(x[3])?'m':'')}
+  }
+  return '';
+}
+/*ENDCORE*/
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const STORE='i9cifras.v1';
+let db={songs:{},plays:[],prefs:{font:innerWidth<600?15:17,cols:1,tabs:'show',chords:true,accid:'auto',speed:3},last:null};
+function load(){try{const r=localStorage.getItem(STORE);if(r){const d=JSON.parse(r);db={...db,...d,prefs:{...db.prefs,...(d.prefs||{})}};if(!Array.isArray(db.plays))db.plays=[]}}catch(e){}}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(db))}catch(e){}}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const pretty=s=>decodeURIComponent(s).replace(/[-_]+/g,' ').replace(/\b\p{L}/gu,c=>c.toUpperCase());
+const DEMO=`Tom: G
+
+[Intro] G  D/F#  Em7  C9
+
+[Primeira Parte]
+G               D/F#
+Cedo eu levanto e abro a janela
+Em7             C9
+O dia nasce dourado lá fora
+G               D/F#
+Pego o violão, afino a primeira
+Am7        C9        D4  D
+E a canção começa agora
+
+[Refrão]
+C9       G/B        Am7       D
+Toca de novo, que a sala inteira canta
+C9       G/B       Em7     D/F#
+Toca de novo, ninguém fica parado
+C9      D       Bm7     Em7
+Tom que sobe, voz que se levanta
+Am7          D4        G
+Tudo em seu lugar, tudo afinado
+
+[Solo]
+E|-----------------|-----------------|
+B|-----3-----3-----|-----3-----3-----|
+G|---0---0-----0---|---0---0-----0---|
+D|-----------------|-----------------|
+A|-----------------|-----------------|
+E|-3---------------|-2---------------|
+
+[Final] C9  D  G`;
+
+let view='lib', cur=null, cache={id:null,text:null,blocks:[]}, toggled=new Set(), seen=0, logged=false;
+let period='30';
+
+function blocksOf(s){if(cache.id!==s.id||cache.text!==s.text)cache={id:s.id,text:s.text,blocks:parse(s.text)};return cache.blocks}
+function playsOf(id){return db.plays.filter(p=>p.s===id)}
+function logPlay(id,manual){
+  const now=Date.now(), last=playsOf(id).pop();
+  if(!manual&&last&&now-last.t<3*3600e3) return;
+  db.plays.push({s:id,t:now}); save(); toast('Registrada no histórico');
+}
+let tt;
+function toast(msg,act,fn){
+  const el=$('#toast'); el.textContent=''; const sp=document.createElement('span'); sp.textContent=msg; el.append(sp);
+  if(act){const b=document.createElement('button');b.textContent=act;b.onclick=()=>{fn();el.classList.remove('on')};el.append(b)}
+  el.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('on'),act?6500:2600);
+}
+
+function show(v){
+  view=v;
+  $('#vSong').classList.toggle('on',v==='song');$('#vLib').classList.toggle('on',v==='lib');$('#vRank').classList.toggle('on',v==='rank');
+  $$('nav [data-go]').forEach(b=>((v==='lib'&&b.dataset.go==='biblioteca')||(v==='rank'&&b.dataset.go==='ranking'))?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+  if(v!=='song'){stopScroll();exitStage()}
+  if(v==='lib'){renderLib();document.title='Biblioteca · i9 Cifras'}
+  if(v==='rank'){renderRank();document.title='Ranking · i9 Cifras'}
+}
+function go(h){if(location.hash==='#'+h)route();else location.hash=h}
+function route(){
+  const h=location.hash.slice(1);
+  if(h.startsWith('c-')&&db.songs[h.slice(2)]) openSong(h.slice(2));
+  else if(h==='ranking') show('rank');
+  else if(h==='biblioteca') show('lib');
+  else if(!h&&db.last&&db.songs[db.last]) openSong(db.last);
+  else show('lib');
+}
+
+/* ---------- cifra ---------- */
+function openSong(id){
+  cur=id; db.last=id; db.songs[id].opened=Date.now(); save();
+  seen=0; logged=false; toggled=new Set(); stopScroll();
+  show('song'); renderSong(); window.scrollTo(0,0);
+  document.title=(db.songs[id].title||'Cifra')+' · i9 Cifras';
+}
+function accFlat(k,shift){const a=db.prefs.accid;return a==='#'?false:a==='b'?true:autoFlat(k,shift)}
+function renderSong(){
+  const s=db.songs[cur]; if(!s) return; const P=db.prefs;
+  const semis=s.semis||0, capo=s.capo||0, shift=semis-capo, flat=accFlat(s.key,shift);
+  const changed=shift!==0||P.accid!=='auto';
+  const tx=p=>changed?tpChord(p.c,shift,flat):p.tok;
+  $('#sTitle').textContent=s.title||'Sem título';
+  const meta=$('#sMeta'); meta.textContent='';
+  const add=(t,cls)=>{const e=document.createElement('span');e.textContent=t;if(cls)e.className=cls;meta.append(e);return e};
+  if(s.artist) add(s.artist);
+  if(s.key&&semis) add('tom original '+s.key);
+  if(capo) add(`capo na ${capo}ª casa · formas de ${s.key?tpKey(s.key,shift,flat):'—'}`,'kn');
+  if(s.source){const a=document.createElement('a');a.href=s.source;a.target='_blank';a.rel='noopener';a.textContent='ver fonte';meta.append(a)}
+  const n=playsOf(s.id).length; add(n?`tocada ${n}×`:'ainda não tocada');
+  $('#tKey').textContent=s.key?tpKey(s.key,semis,P.accid==='auto'?null:P.accid==='b'):(semis>0?'+':'')+semis;
+  const notTp=shift!==0?' · não transposta':'';
+  $('#sheet').innerHTML=blocksOf(s).map((b,i)=>{
+    if(b.k==='tab'){
+      const closed=(P.tabs==='collapse')!==toggled.has(i);
+      return `<div class="blk tabb${closed?' closed':''}"><button class="tabh" data-tab="${i}">${esc(b.title||'Tablatura')} <span>· ${b.lines.length} linhas${notTp}</span></button><pre>${esc(b.lines.map(l=>l.s).join('\n'))}</pre></div>`;
+    }
+    return `<div class="blk">${b.lines.map(l=>l.t==='chord'?`<div class="ln chl">${renderChordLine(l.parts,tx)}</div>`:`<div class="ln${l.t==='sec'?' sec':''}">${esc(l.s)}</div>`).join('')}</div>`;
+  }).join('')||'<p class="empty">Cifra vazia. Clique em “editar” e cole o texto.</p>';
+  const sh=$('#sheet'); sh.className='sheet c'+P.cols+(P.chords?'':' nochords')+(P.tabs==='hide'?' tabs-hide':'');
+  sh.style.setProperty('--fs',P.font+'px');
+  $('#capo').value=capo; $('#accid').value=P.accid; $('#fVal').textContent=P.font; $('#speed').value=P.speed;
+  $$('#segCols button').forEach(b=>b.classList.toggle('on',+b.dataset.v===P.cols));
+  $$('#segTabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===P.tabs));
+  $('#chords').classList.toggle('on',P.chords);
+  $('#stage').classList.toggle('on',document.body.classList.contains('stage'));
+}
+function shiftKey(d){const s=db.songs[cur];let v=(s.semis||0)+d;if(v>11)v-=12;if(v<-11)v+=12;s.semis=v;save();renderSong()}
+function setPref(k,v){db.prefs[k]=v;save();renderSong()}
+
+let scrolling=false,raf=0,lastT=0,acc=0;
+const ICON_PLAY='<svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>',ICON_PAUSE='<svg viewBox="0 0 16 16"><path d="M3 2h4v12H3zM9 2h4v12H9z"/></svg>';
+function step(t){
+  if(!scrolling) return;
+  const dt=lastT?Math.min((t-lastT)/1000,.1):0; lastT=t;
+  acc+=6*Math.pow(db.prefs.speed,1.35)*dt; const px=Math.floor(acc);
+  if(px>=1){window.scrollBy(0,px);acc-=px}
+  if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-2){stopScroll();return}
+  raf=requestAnimationFrame(step);
+}
+function startScroll(){if(scrolling)return;scrolling=true;lastT=0;acc=0;$('#play').innerHTML=ICON_PAUSE;$('#play').classList.add('on');raf=requestAnimationFrame(step);if(cur&&!logged){logged=true;logPlay(cur,false)}}
+function stopScroll(){scrolling=false;cancelAnimationFrame(raf);const b=$('#play');if(b){b.innerHTML=ICON_PLAY;b.classList.remove('on')}}
+function toggleScroll(){scrolling?stopScroll():startScroll()}
+function enterStage(){document.body.classList.add('stage');try{const p=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(p&&p.catch)p.catch(()=>{})}catch(e){}renderSong()}
+function exitStage(){if(!document.body.classList.contains('stage'))return;document.body.classList.remove('stage');try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}if(view==='song')renderSong()}
+
+/* ---------- biblioteca ---------- */
+function extLinks(q,el,lead){
+  const e=encodeURIComponent(q.trim());
+  el.innerHTML=(lead?`<span>${lead}</span>`:'')+(q.trim()
+    ?`<a href="https://www.cifraclub.com.br/?q=${e}" target="_blank" rel="noopener">Buscar “${esc(q.trim())}” no Cifra Club</a><a href="https://www.google.com/search?q=${encodeURIComponent('site:bananacifras.com '+q.trim())}" target="_blank" rel="noopener">no Banana Cifras</a>`
+    :`<a href="https://www.cifraclub.com.br/" target="_blank" rel="noopener">Abrir Cifra Club</a><a href="https://www.bananacifras.com/" target="_blank" rel="noopener">Abrir Banana Cifras</a>`);
+}
+function renderLib(){
+  const raw=$('#q').value, q=norm(raw);
+  extLinks(raw,$('#ext'),raw.trim()?'Não achou aqui?':'Buscar fora:');
+  const cnt={}; db.plays.forEach(p=>cnt[p.s]=(cnt[p.s]||0)+1);
+  const arr=Object.values(db.songs).filter(s=>!q||norm(s.title+' '+s.artist).includes(q)).sort((a,b)=>(b.opened||b.created||0)-(a.opened||a.created||0));
+  $('#libList').innerHTML=arr.map(s=>`<li><button class="card" data-open="${esc(s.id)}"><b>${esc(s.title||'Sem título')}</b><small>${esc(s.artist||'—')}</small><span class="k">${esc(s.key?tpKey(s.key,s.semis||0):'')}<em>${cnt[s.id]?cnt[s.id]+'×':''}</em></span></button></li>`).join('')
+    ||`<li class="empty">${q?'Nada na sua biblioteca com esse nome. Use os botões acima para buscar e depois “+ Nova cifra”.':'Sua biblioteca está vazia. Clique em “+ Nova cifra”.'}</li>`;
+}
+
+/* ---------- ranking ---------- */
+function range(){
+  const now=new Date(), d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(), day=864e5;
+  switch(period){
+    case 'hoje':return [d0,Infinity];
+    case '7':return [d0-6*day,Infinity];
+    case '30':return [d0-29*day,Infinity];
+    case 'mes':return [new Date(now.getFullYear(),now.getMonth(),1).getTime(),Infinity];
+    case 'ano':return [new Date(now.getFullYear(),0,1).getTime(),Infinity];
+    case 'custom':{const f=$('#dFrom').value,t=$('#dTo').value;return [f?new Date(f+'T00:00').getTime():0,t?new Date(t+'T23:59:59.999').getTime():Infinity]}
+    default:return [0,Infinity];
+  }
+}
+function renderRank(){
+  $$('#chips button').forEach(b=>b.classList.toggle('on',b.dataset.p===period));
+  $('#dates').hidden=period!=='custom';
+  const [a,b]=range(), ps=db.plays.filter(p=>p.t>=a&&p.t<=b&&db.songs[p.s]);
+  const cnt={}, last={}; ps.forEach(p=>{cnt[p.s]=(cnt[p.s]||0)+1;last[p.s]=Math.max(last[p.s]||0,p.t)});
+  const ids=Object.keys(cnt).sort((x,y)=>cnt[y]-cnt[x]||last[y]-last[x]);
+  const days=new Set(ps.map(p=>new Date(p.t).toDateString()));
+  $('#stats').innerHTML=[[ps.length,'vezes tocadas'],[ids.length,'músicas diferentes'],[days.size,'dias com registro']].map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join('');
+  const max=cnt[ids[0]]||1;
+  $('#rank').innerHTML=ids.slice(0,50).map((id,i)=>{const s=db.songs[id];return `<li><span class="pos">${i+1}</span><button class="nm" data-open="${esc(id)}">${esc(s.title||'Sem título')}<small>${esc(s.artist||'')}</small></button><span class="n">${cnt[id]}×</span><div class="meter"><i style="width:${Math.max(4,cnt[id]/max*100)}%"></i></div></li>`}).join('')||'<li class="empty">Nenhuma música tocada nesse período.</li>';
+  const fmtD=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'}), fmtT=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  let html='',lastDay='';
+  ps.slice().sort((x,y)=>y.t-x.t).slice(0,300).forEach(p=>{
+    const d=fmtD.format(p.t); if(d!==lastDay){if(lastDay)html+='</ul>';html+=`<div class="day">${esc(d)}</div><ul class="hist">`;lastDay=d}
+    const s=db.songs[p.s];
+    html+=`<li><time>${fmtT.format(p.t)}</time><button class="nm" data-open="${esc(p.s)}">${esc(s.title||'Sem título')}<small>${esc(s.artist||'')}</small></button><button class="x" data-del="${p.t}|${esc(p.s)}" aria-label="Remover registro">×</button></li>`;
+  });
+  $('#hist').innerHTML=lastDay?html+'</ul>':'<p class="empty">Sem registros nesse período.</p>';
+}
+
+/* ---------- editar / importar ---------- */
+let editing=null, delArmed=false, fnOk=null;
+function probeFn(){
+  if(fnOk!==null) return;
+  fetch('/.netlify/functions/cifra?url=').then(r=>{fnOk=r.status===400;applyFn()},()=>{fnOk=false;applyFn()});
+}
+function applyFn(){
+  $('#btnImport').hidden=!fnOk;
+  $('#urlLbl').textContent=fnOk?'Link da cifra (Cifra Club ou Banana Cifras)':'Link da cifra (opcional: preenche música e artista e fica salvo como fonte)';
+}
+function openEdit(id){
+  editing=id||null; delArmed=false; const s=id?db.songs[id]:{};
+  $('#mTitle').textContent=id?'Editar cifra':'Nova cifra';
+  $('#fUrl').value=s.source||''; $('#fTitle').value=s.title||''; $('#fArtist').value=s.artist||''; $('#fKey').value=s.key||''; $('#fText').value=s.text||'';
+  $('#btnDel').hidden=!id; $('#btnDel').textContent='Excluir'; $('#mMsg').textContent='';
+  updKeyHint(); updModalExt(); applyFn(); probeFn(); $('#mEdit').classList.add('on'); stopScroll();
+  setTimeout(()=>(id?$('#fText'):$('#fUrl')).focus(),30);
+}
+function closeEdit(){$('#mEdit').classList.remove('on')}
+function updKeyHint(){$('#fKey').placeholder=detectKey($('#fText').value)||'auto'}
+function updModalExt(){extLinks([$('#fTitle').value,$('#fArtist').value].join(' '),$('#mExt'),'Buscar:')}
+function slugFill(){
+  try{const u=new URL($('#fUrl').value.trim());
+    const seg=u.pathname.split('/').filter(Boolean).map(x=>x.replace(/\.html?$/,'')).filter(x=>!/^(imprimir|simplificada|letra|cifra|cifras|tab|tabs|musica)$/i.test(x));
+    if(seg.length>=2){if(!$('#fArtist').value)$('#fArtist').value=pretty(seg[seg.length-2]);if(!$('#fTitle').value)$('#fTitle').value=pretty(seg[seg.length-1])}
+    updModalExt();
+  }catch(e){}
+}
+async function importLink(){
+  const url=$('#fUrl').value.trim(); if(!url){$('#mMsg').textContent='Cole o link da cifra primeiro.';return}
+  slugFill(); $('#mMsg').textContent='Buscando a cifra…';
+  try{
+    const r=await fetch('/.netlify/functions/cifra?url='+encodeURIComponent(url));
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.text) throw new Error(d.error||'sem resposta');
+    if(d.title)$('#fTitle').value=d.title; if(d.artist)$('#fArtist').value=d.artist; if(d.key)$('#fKey').value=d.key;
+    $('#fText').value=d.text; updKeyHint(); updModalExt(); $('#mMsg').textContent='Cifra importada. Confira e salve.';
+  }catch(e){
+    $('#mMsg').textContent='A importação por link só funciona com a página publicada no Netlify (função “cifra”). Por enquanto: abra o link, copie a cifra e cole no campo abaixo.';
+  }
+}
+function saveEdit(){
+  const text=$('#fText').value.replace(/\s+$/,'');
+  if(!text.trim()){$('#mMsg').textContent='Cole o texto da cifra antes de salvar.';return}
+  const now=Date.now(), id=editing||uid(), old=db.songs[id]||{created:now,semis:0,capo:0};
+  db.songs[id]={...old,id,title:$('#fTitle').value.trim()||'Sem título',artist:$('#fArtist').value.trim(),key:$('#fKey').value.trim()||detectKey(text),text,source:$('#fUrl').value.trim(),updated:now};
+  save(); closeEdit(); go('c-'+id);
+}
+function delSong(){
+  if(!delArmed){delArmed=true;$('#btnDel').textContent='Confirmar exclusão';return}
+  const id=editing, s=db.songs[id], ps=db.plays.filter(p=>p.s===id);
+  delete db.songs[id]; db.plays=db.plays.filter(p=>p.s!==id); if(db.last===id)db.last=null; save(); closeEdit(); go('biblioteca');
+  toast(`“${s.title}” excluída`,'Desfazer',()=>{db.songs[id]=s;db.plays=db.plays.concat(ps).sort((a,b)=>a.t-b.t);save();go('c-'+id)});
+}
+
+/* ---------- backup ---------- */
+function backupText(){return JSON.stringify({app:'i9cifras',v:1,exported:new Date().toISOString(),songs:db.songs,plays:db.plays})}
+function exportBackup(){
+  const data=backupText(); $('#bkTxt').value=data;
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='i9cifras-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove()}catch(e){}
+  toast('Backup gerado');
+}
+function restore(txt){
+  try{const d=JSON.parse(txt); if(!d||typeof d.songs!=='object') throw 0;
+    let n=0; for(const [id,s] of Object.entries(d.songs)){if(s&&typeof s.text==='string'){db.songs[id]={...s,id};n++}}
+    const have=new Set(db.plays.map(p=>p.s+'|'+p.t));
+    (Array.isArray(d.plays)?d.plays:[]).forEach(p=>{if(p&&p.s&&p.t&&!have.has(p.s+'|'+p.t))db.plays.push({s:String(p.s),t:+p.t})});
+    db.plays.sort((a,b)=>a.t-b.t); save(); renderRank(); toast(n+' cifras restauradas');
+  }catch(e){toast('Esse texto não é um backup válido do i9 Cifras')}
+}
+
+/* ---------- eventos ---------- */
+$('#capo').innerHTML=Array.from({length:12},(_,i)=>`<option value="${i}">${i?i+'ª':'sem'}</option>`).join('');
+$$('nav [data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+$('#btnNova').onclick=()=>openEdit(null);
+$('#tUp').onclick=()=>shiftKey(1); $('#tDown').onclick=()=>shiftKey(-1);
+$('#tReset').onclick=()=>{db.songs[cur].semis=0;save();renderSong()};
+$('#capo').onchange=e=>{db.songs[cur].capo=+e.target.value;save();renderSong()};
+$('#accid').onchange=e=>setPref('accid',e.target.value);
+$('#fUp').onclick=()=>setPref('font',Math.min(34,db.prefs.font+1));
+$('#fDown').onclick=()=>setPref('font',Math.max(11,db.prefs.font-1));
+$('#segCols').onclick=e=>{const b=e.target.closest('button');if(b)setPref('cols',+b.dataset.v)};
+$('#segTabs').onclick=e=>{const b=e.target.closest('button');if(b){toggled=new Set();setPref('tabs',b.dataset.v)}};
+$('#chords').onclick=()=>setPref('chords',!db.prefs.chords);
+$('#play').onclick=toggleScroll;
+$('#speed').oninput=e=>{db.prefs.speed=+e.target.value;save()};
+$('#stage').onclick=()=>document.body.classList.contains('stage')?exitStage():enterStage();
+$('#exitStage').onclick=exitStage;
+$('#edit').onclick=()=>openEdit(cur);
+$('#mark').onclick=()=>{logged=true;logPlay(cur,true);renderSong()};
+$('#sheet').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;const i=+b.dataset.tab;toggled.has(i)?toggled.delete(i):toggled.add(i);renderSong()};
+document.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o)go('c-'+o.dataset.open)});
+$('#q').oninput=renderLib;
+$('#q').onkeydown=e=>{if(e.key==='Enter'){const f=$('#libList [data-open]');if(f)f.click()}};
+$('#chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;period=b.dataset.p;if(period==='custom'&&!$('#dFrom').value){const t=new Date();$('#dTo').value=t.toISOString().slice(0,10);$('#dFrom').value=new Date(t-29*864e5).toISOString().slice(0,10)}renderRank()};
+$('#dFrom').onchange=renderRank; $('#dTo').onchange=renderRank;
+$('#hist').addEventListener('click',e=>{
+  const b=e.target.closest('[data-del]'); if(!b) return; e.stopPropagation();
+  const [t,s]=b.dataset.del.split('|'); const i=db.plays.findIndex(p=>p.t===+t&&p.s===s); if(i<0) return;
+  const [rem]=db.plays.splice(i,1); save(); renderRank();
+  toast('Registro removido','Desfazer',()=>{db.plays.push(rem);db.plays.sort((a,b)=>a.t-b.t);save();renderRank()});
+});
+$('#bkExp').onclick=exportBackup;
+$('#bkCopy').onclick=()=>{if(!$('#bkTxt').value)$('#bkTxt').value=backupText();try{navigator.clipboard.writeText($('#bkTxt').value).then(()=>toast('Backup copiado'),()=>{$('#bkTxt').select();toast('Selecionei o texto: use Ctrl+C')})}catch(e){$('#bkTxt').select()}};
+$('#bkRestore').onclick=()=>restore($('#bkTxt').value);
+$('#bkFile').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(restore);e.target.value=''};
+$('#btnImport').onclick=importLink;
+$('#fUrl').addEventListener('change',slugFill);
+$('#fText').addEventListener('input',updKeyHint);
+$('#fTitle').addEventListener('input',updModalExt); $('#fArtist').addEventListener('input',updModalExt);
+$('#btnSave').onclick=saveEdit; $('#btnCancel').onclick=closeEdit; $('#btnDel').onclick=delSong;
+$('#mEdit').addEventListener('mousedown',e=>{if(e.target.id==='mEdit')closeEdit()});
+document.addEventListener('keydown',e=>{
+  if($('#mEdit').classList.contains('on')){if(e.key==='Escape')closeEdit();return}
+  if(view!=='song'||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if(e.key===' '){e.preventDefault();toggleScroll()}
+  else if(e.key==='+'||e.key==='=') shiftKey(1);
+  else if(e.key==='-') shiftKey(-1);
+  else if(e.key==='Escape') exitStage();
+});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('stage')){document.body.classList.remove('stage');renderSong()}});
+window.addEventListener('wheel',()=>{acc=0},{passive:true});
+window.addEventListener('hashchange',route);
+setInterval(()=>{if(view==='song'&&cur&&!logged&&!document.hidden&&!$('#mEdit').classList.contains('on')){if(++seen>=45){logged=true;logPlay(cur,false);renderSong()}}},1000);
+const headObs=new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',$('#app').offsetHeight+'px'));
+headObs.observe($('#app'));
+
+load();
+if(!Object.keys(db.songs).length){const id='demo';db.songs[id]={id,title:'Caminho de Luz (exemplo)',artist:'i9 Cifras · cifra de demonstração',key:'G',text:DEMO,source:'',semis:0,capo:0,created:Date.now()};db.last=id;save()}
+stopScroll(); route();
+}
+</script>
+</body>
+</html>
