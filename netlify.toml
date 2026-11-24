@@ -1,0 +1,5 @@
+# Servidor do i9 Cifras no Netlify (busca no Banana + importação automática).
+# O site principal continua no GitHub Pages; o Netlify só roda as funções.
+[build]
+  publish = "cifras"
+  functions = "netlify/functions"

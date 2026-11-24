@@ -88,6 +88,13 @@ h2{font-size:21px;margin:30px 0 10px;font-weight:800}
 .card .k em{display:block;font:500 12px Manrope,sans-serif;color:var(--mute)}
 .empty{color:var(--mute);padding:24px 0}
 .list .empty{grid-column:1/-1}
+.sform{display:flex;gap:8px}.sform input{flex:1;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--panel);padding:0 16px;font-size:16px}.sform .btn{min-height:50px;padding:0 22px}
+.res{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.res .card{grid-template-columns:minmax(0,1fr) auto}
+.res .tag{grid-row:1/3;grid-column:2;align-self:center;font-size:12px;font-weight:800;color:var(--mute);white-space:nowrap}
+.res .card.busy{opacity:.6;pointer-events:none}
+.res .card .tag.ok{color:var(--ok,#6fd39a)}
+.srcname{display:flex;align-items:center;gap:8px}.srcname i{font-style:normal;font-size:12px;color:var(--mute);font-weight:600}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chips button{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:700;font-size:14px}
 .chips button.on{background:var(--ch);color:#151515;border-color:var(--ch)}
@@ -143,6 +150,7 @@ input[type=date]{height:40px;border-radius:9px;border:1px solid var(--line);back
 <header class="app" id="app">
   <a class="logo" href="#biblioteca"><span>i9</span>Cifras</a>
   <nav>
+    <button class="btn" data-go="buscar">Buscar</button>
     <button class="btn" data-go="biblioteca">Biblioteca</button>
     <button class="btn" data-go="ranking"><span class="lg">Histórico e ranking</span><span class="sm">Ranking</span></button>
     <button class="btn pri" id="btnNova">+ Nova cifra</button>
@@ -168,6 +176,18 @@ input[type=date]{height:40px;border-radius:9px;border:1px solid var(--line);back
     </div>
     <article class="sheet" id="sheet"></article>
     <button class="btn pri exit" id="exitStage">Sair do palco</button>
+  </section>
+
+  <section class="view" id="vSearch">
+    <div class="wrap">
+      <h1>Buscar cifra</h1>
+      <form class="sform" id="sForm"><input id="sq" type="search" placeholder="Nome da música, artista ou trecho" autocomplete="off" aria-label="Buscar cifra"><button class="btn pri" type="submit">Buscar</button></form>
+      <p class="hint" id="sStatus">Busca no Cifra Club e no Banana Cifras ao mesmo tempo. Toque no resultado para importar e abrir.</p>
+      <div class="cols2">
+        <div><h2 class="srcname">Cifra Club <i id="ccInfo"></i></h2><ul class="res" id="resCC"></ul></div>
+        <div><h2 class="srcname">Banana Cifras <i id="bnInfo"></i></h2><ul class="res" id="resBN"></ul></div>
+      </div>
+    </div>
   </section>
 
   <section class="view" id="vLib">
@@ -201,6 +221,10 @@ input[type=date]{height:40px;border-radius:9px;border:1px solid var(--line);back
           <label class="btn">Restaurar de arquivo<input type="file" id="bkFile" accept=".json,application/json" hidden></label>
           <button class="btn" id="bkRestore">Restaurar do texto colado</button>
         </div>
+        <label class="fld" style="margin-top:16px"><span>Servidor de importação</span>
+          <div class="linkrow"><input id="apiUrl" type="url" placeholder="https://i9cifras.netlify.app"><button class="btn" id="apiTest" type="button">Testar</button></div>
+        </label>
+        <p class="hint" id="apiMsg"></p>
         <textarea id="bkTxt" aria-label="Texto do backup" placeholder="O backup aparece aqui. Para restaurar, cole um backup e clique em “Restaurar do texto colado”."></textarea>
       </details>
     </div>
@@ -376,17 +400,19 @@ function toast(msg,act,fn){
 
 function show(v){
   view=v;
-  $('#vSong').classList.toggle('on',v==='song');$('#vLib').classList.toggle('on',v==='lib');$('#vRank').classList.toggle('on',v==='rank');
-  $$('nav [data-go]').forEach(b=>((v==='lib'&&b.dataset.go==='biblioteca')||(v==='rank'&&b.dataset.go==='ranking'))?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+  $('#vSong').classList.toggle('on',v==='song');$('#vSearch').classList.toggle('on',v==='search');$('#vLib').classList.toggle('on',v==='lib');$('#vRank').classList.toggle('on',v==='rank');
+  $$('nav [data-go]').forEach(b=>((v==='lib'&&b.dataset.go==='biblioteca')||(v==='rank'&&b.dataset.go==='ranking')||(v==='search'&&b.dataset.go==='buscar'))?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
   if(v!=='song'){stopScroll();exitStage()}
   if(v==='lib'){renderLib();document.title='Biblioteca · i9 Cifras'}
-  if(v==='rank'){renderRank();document.title='Ranking · i9 Cifras'}
+  if(v==='rank'){renderRank();document.title='Ranking · i9 Cifras';$('#apiUrl').value=db.prefs.api||''}
+  if(v==='search'){document.title='Buscar · i9 Cifras';setTimeout(()=>$('#sq').focus(),30)}
 }
 function go(h){if(location.hash==='#'+h)route();else location.hash=h}
 function route(){
   const h=location.hash.slice(1);
   if(h.startsWith('c-')&&db.songs[h.slice(2)]) openSong(h.slice(2));
   else if(h==='ranking') show('rank');
+  else if(h==='buscar') show('search');
   else if(h==='biblioteca') show('lib');
   else if(!h&&db.last&&db.songs[db.last]) openSong(db.last);
   else show('lib');
@@ -459,6 +485,7 @@ function extLinks(q,el,lead){
 function renderLib(){
   const raw=$('#q').value, q=norm(raw);
   extLinks(raw,$('#ext'),raw.trim()?'Não achou aqui?':'Buscar fora:');
+  if(raw.trim()){const b=document.createElement('a');b.href='#buscar';b.textContent='Buscar e importar “'+raw.trim()+'”';b.onclick=e=>{e.preventDefault();$('#sq').value=raw.trim();go('buscar');runSearch()};$('#ext').prepend(b)}
   const cnt={}; db.plays.forEach(p=>cnt[p.s]=(cnt[p.s]||0)+1);
   const arr=Object.values(db.songs).filter(s=>!q||norm(s.title+' '+s.artist).includes(q)).sort((a,b)=>(b.opened||b.created||0)-(a.opened||a.created||0));
   $('#libList').innerHTML=arr.map(s=>`<li><button class="card" data-open="${esc(s.id)}"><b>${esc(s.title||'Sem título')}</b><small>${esc(s.artist||'—')}</small><span class="k">${esc(s.key?tpKey(s.key,s.semis||0):'')}<em>${cnt[s.id]?cnt[s.id]+'×':''}</em></span></button></li>`).join('')
@@ -499,12 +526,17 @@ function renderRank(){
 }
 
 /* ---------- editar / importar ---------- */
-let editing=null, delArmed=false, fnOk=null;
-function probeFn(){
-  if(fnOk!==null) return;
-  fetch('/.netlify/functions/cifra?url=').then(r=>{fnOk=r.status===400;applyFn()},()=>{fnOk=false;applyFn()});
+let editing=null, delArmed=false, fnOk=null, fnProbe=null;
+const API_DEFAULT='https://i9cifras.netlify.app';
+function apiBase(){return /netlify\.app$/.test(location.hostname)?'':String(db.prefs.api||API_DEFAULT).replace(/\/+$/,'')}
+function fnUrl(n,qs){return apiBase()+'/.netlify/functions/'+n+'?'+qs}
+function probeFn(force){
+  if(force){fnOk=null;fnProbe=null}
+  if(!fnProbe) fnProbe=fetch(fnUrl('cifra','url=')).then(r=>{fnOk=r.status===400},()=>{fnOk=false}).then(()=>{applyFn();return fnOk});
+  return fnProbe;
 }
 function applyFn(){
+  if(!$('#btnImport')) return;
   $('#btnImport').hidden=!fnOk;
   $('#urlLbl').textContent=fnOk?'Link da cifra (Cifra Club ou Banana Cifras)':'Link da cifra (opcional: preenche música e artista e fica salvo como fonte)';
 }
@@ -530,13 +562,13 @@ async function importLink(){
   const url=$('#fUrl').value.trim(); if(!url){$('#mMsg').textContent='Cole o link da cifra primeiro.';return}
   slugFill(); $('#mMsg').textContent='Buscando a cifra…';
   try{
-    const r=await fetch('/.netlify/functions/cifra?url='+encodeURIComponent(url));
+    const r=await fetch(fnUrl('cifra','url='+encodeURIComponent(url)));
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.text) throw new Error(d.error||'sem resposta');
     if(d.title)$('#fTitle').value=d.title; if(d.artist)$('#fArtist').value=d.artist; if(d.key)$('#fKey').value=d.key;
     $('#fText').value=d.text; updKeyHint(); updModalExt(); $('#mMsg').textContent='Cifra importada. Confira e salve.';
   }catch(e){
-    $('#mMsg').textContent='A importação por link só funciona com a página publicada no Netlify (função “cifra”). Por enquanto: abra o link, copie a cifra e cole no campo abaixo.';
+    $('#mMsg').textContent='Não consegui importar esse link agora. Abra a cifra no site, copie e cole no campo abaixo.';
   }
 }
 function saveEdit(){
@@ -551,6 +583,51 @@ function delSong(){
   const id=editing, s=db.songs[id], ps=db.plays.filter(p=>p.s===id);
   delete db.songs[id]; db.plays=db.plays.filter(p=>p.s!==id); if(db.last===id)db.last=null; save(); closeEdit(); go('biblioteca');
   toast(`“${s.title}” excluída`,'Desfazer',()=>{db.songs[id]=s;db.plays=db.plays.concat(ps).sort((a,b)=>a.t-b.t);save();go('c-'+id)});
+}
+
+/* ---------- buscar e importar ---------- */
+let sTimer=0, sSeq=0;
+const bySource=url=>Object.values(db.songs).find(s=>s.source&&s.source.replace(/\/+$/,'')===url.replace(/\/+$/,''));
+async function searchCC(q){
+  const r=await fetch('https://solr.sscdn.co/cc/c7/?q='+encodeURIComponent(q)); if(!r.ok) throw 0;
+  const docs=((await r.json()).response||{}).docs||[];
+  let songs=docs.filter(x=>x&&x.dns&&x.url&&String(x.tipo)==='2'); if(!songs.length) songs=docs.filter(x=>x&&x.dns&&x.url&&x.txt);
+  return songs.slice(0,15).map(x=>({title:String(x.txt),artist:String(x.art||''),url:`https://www.cifraclub.com.br/${x.dns}/${x.url}/`}));
+}
+async function searchBN(q){
+  const r=await fetch(fnUrl('busca','q='+encodeURIComponent(q))); const d=await r.json().catch(()=>({}));
+  if(!r.ok||!Array.isArray(d.items)) throw new Error(d.error||'falha');
+  return d.items.slice(0,15).map(x=>({title:String(x.title||''),artist:String(x.artist||''),url:String(x.url||'')})).filter(x=>x.url);
+}
+function resHtml(items,src){
+  return items.map((x,i)=>{const have=bySource(x.url);return `<li><button class="card" data-imp="${src}|${i}"><b>${esc(x.title)}</b><small>${esc(x.artist)}</small><span class="tag${have?' ok':''}">${have?'na biblioteca':'importar'}</span></button></li>`}).join('');
+}
+let lastRes={cc:[],bn:[]};
+async function runSearch(){
+  const q=$('#sq').value.trim(), seq=++sSeq;
+  if(q.length<2){$('#resCC').innerHTML='';$('#resBN').innerHTML='';$('#ccInfo').textContent='';$('#bnInfo').textContent='';return}
+  $('#ccInfo').textContent='buscando…'; $('#bnInfo').textContent='buscando…';
+  searchCC(q).then(items=>{if(seq!==sSeq)return;lastRes.cc=items;$('#ccInfo').textContent=items.length+' resultados';$('#resCC').innerHTML=resHtml(items,'cc')||'<li class="empty">Nada encontrado.</li>'},()=>{if(seq!==sSeq)return;$('#ccInfo').textContent='';$('#resCC').innerHTML=`<li class="empty">Não consegui buscar agora. <a href="https://www.cifraclub.com.br/?q=${encodeURIComponent(q)}" target="_blank" rel="noopener">Abrir no Cifra Club</a></li>`});
+  const ok=await probeFn(); if(seq!==sSeq) return;
+  if(!ok){lastRes.bn=[];$('#bnInfo').textContent='';$('#resBN').innerHTML=`<li class="empty">A busca no Banana precisa do servidor de importação ligado. <a href="https://www.google.com/search?q=${encodeURIComponent('site:bananacifras.com '+q)}" target="_blank" rel="noopener">Procurar no Banana</a></li>`;return}
+  searchBN(q).then(items=>{if(seq!==sSeq)return;lastRes.bn=items;$('#bnInfo').textContent=items.length+' resultados';$('#resBN').innerHTML=resHtml(items,'bn')||'<li class="empty">Nada encontrado.</li>'},()=>{if(seq!==sSeq)return;$('#bnInfo').textContent='';$('#resBN').innerHTML=`<li class="empty">O Banana não respondeu agora. <a href="https://www.google.com/search?q=${encodeURIComponent('site:bananacifras.com '+q)}" target="_blank" rel="noopener">Procurar no Banana</a></li>`});
+}
+async function importItem(x,btn){
+  const have=bySource(x.url); if(have){go('c-'+have.id);return}
+  btn.classList.add('busy'); const tag=btn.querySelector('.tag'); tag.textContent='importando…';
+  try{
+    if(!(await probeFn())) throw 0;
+    const r=await fetch(fnUrl('cifra','url='+encodeURIComponent(x.url))); const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.text) throw 0;
+    const id=uid(), now=Date.now();
+    db.songs[id]={id,title:x.title||d.title||'Sem título',artist:x.artist||d.artist||'',key:d.key||detectKey(d.text),text:d.text,source:x.url,semis:0,capo:0,created:now,updated:now};
+    save(); go('c-'+id);
+  }catch(e){
+    btn.classList.remove('busy'); tag.textContent='importar';
+    openEdit(null); $('#fUrl').value=x.url; $('#fTitle').value=x.title; $('#fArtist').value=x.artist; updModalExt();
+    const m=$('#mMsg'); m.textContent='Não deu para importar sozinho. '; const a=document.createElement('a'); a.href=x.url; a.target='_blank'; a.rel='noopener'; a.textContent='Abra a cifra'; a.style.color='var(--ch)'; m.append(a,document.createTextNode(', copie e cole abaixo.'));
+    setTimeout(()=>$('#fText').focus(),40);
+  }
 }
 
 /* ---------- backup ---------- */
@@ -591,6 +668,10 @@ $('#mark').onclick=()=>{logged=true;logPlay(cur,true);renderSong()};
 $('#sheet').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;const i=+b.dataset.tab;toggled.has(i)?toggled.delete(i):toggled.add(i);renderSong()};
 document.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o)go('c-'+o.dataset.open)});
 $('#q').oninput=renderLib;
+$('#sForm').onsubmit=e=>{e.preventDefault();clearTimeout(sTimer);runSearch()};
+$('#sq').oninput=()=>{clearTimeout(sTimer);sTimer=setTimeout(runSearch,450)};
+$('#vSearch').addEventListener('click',e=>{const b=e.target.closest('[data-imp]');if(!b)return;const [src,i]=b.dataset.imp.split('|');const x=lastRes[src][+i];if(x)importItem(x,b)});
+$('#apiTest').onclick=async()=>{db.prefs.api=$('#apiUrl').value.trim();save();$('#apiMsg').textContent='Testando…';$('#apiMsg').textContent=(await probeFn(true))?'Servidor respondendo. Busca no Banana e importação automática ligadas.':'Servidor não respondeu nesse endereço.'};
 $('#q').onkeydown=e=>{if(e.key==='Enter'){const f=$('#libList [data-open]');if(f)f.click()}};
 $('#chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;period=b.dataset.p;if(period==='custom'&&!$('#dFrom').value){const t=new Date();$('#dTo').value=t.toISOString().slice(0,10);$('#dFrom').value=new Date(t-29*864e5).toISOString().slice(0,10)}renderRank()};
 $('#dFrom').onchange=renderRank; $('#dTo').onchange=renderRank;
