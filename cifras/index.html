@@ -184,6 +184,15 @@ input[type=date]{height:40px;border-radius:9px;border:1px solid var(--line);back
       <h1>Buscar cifra</h1>
       <form class="sform" id="sForm"><input id="sq" type="search" placeholder="Nome da música, artista ou trecho" autocomplete="off" aria-label="Buscar cifra"><button class="btn pri" type="submit">Buscar</button></form>
       <p class="hint" id="sStatus">Busca no Cifra Club e no Banana Cifras ao mesmo tempo. Toque no resultado para importar e abrir.</p>
+      <details class="bk" id="bmBox" style="margin:4px 0 8px">
+        <summary>Botão “Enviar para i9 Cifras” (importa direto da página da cifra)</summary>
+        <p class="hint">Abra a cifra no Cifra Club ou no Banana e toque nesse botão: a cifra chega aqui pronta, com tom e tablaturas. Serve também quando a importação automática falhar.</p>
+        <p><a class="btn pri" id="bmLink" href="#buscar">Enviar para i9 Cifras</a></p>
+        <p class="hint"><b>No computador:</b> mostre a barra de favoritos (Ctrl+Shift+B) e arraste o botão amarelo para ela.<br>
+        <b>No celular (Chrome):</b> copie o código abaixo, salve qualquer página nos favoritos, edite esse favorito, troque o nome para <b>i9</b> e cole o código no lugar do endereço. Na página da cifra, digite <b>i9</b> na barra de endereço e toque no favorito.</p>
+        <div class="acts" style="justify-content:flex-start"><button class="btn" id="bmCopy" type="button">Copiar código do botão</button></div>
+        <textarea id="bmCode" readonly aria-label="Código do botão" style="min-height:70px"></textarea>
+      </details>
       <div class="cols2">
         <div><h2 class="srcname">Cifra Club <i id="ccInfo"></i></h2><ul class="res" id="resCC"></ul></div>
         <div><h2 class="srcname">Banana Cifras <i id="bnInfo"></i></h2><ul class="res" id="resBN"></ul></div>
@@ -414,6 +423,7 @@ function route(){
   if(h.startsWith('c-')&&db.songs[h.slice(2)]) openSong(h.slice(2));
   else if(h==='ranking') show('rank');
   else if(h==='buscar') show('search');
+  else if(h==='receber') startReceive();
   else if(h==='biblioteca') show('lib');
   else if(!h&&db.last&&db.songs[db.last]) openSong(db.last);
   else show('lib');
@@ -626,10 +636,41 @@ async function importItem(x,btn){
   }catch(e){
     btn.classList.remove('busy'); tag.textContent='importar';
     openEdit(null); $('#fUrl').value=x.url; $('#fTitle').value=x.title; $('#fArtist').value=x.artist; updModalExt();
-    const m=$('#mMsg'); m.textContent='Não deu para importar sozinho. '; const a=document.createElement('a'); a.href=x.url; a.target='_blank'; a.rel='noopener'; a.textContent='Abra a cifra'; a.style.color='var(--ch)'; m.append(a,document.createTextNode(', copie e cole abaixo.'));
+    const m=$('#mMsg'); m.textContent='Não deu para importar sozinho. '; const a=document.createElement('a'); a.href=x.url; a.target='_blank'; a.rel='noopener'; a.textContent='Abra a cifra'; a.style.color='var(--ch)'; m.append(a,document.createTextNode(' e toque no botão “Enviar para i9 Cifras” (aba Buscar), ou copie e cole abaixo.'));
     setTimeout(()=>$('#fText').focus(),40);
   }
 }
+
+/* ---------- botão dos favoritos ---------- */
+const HOME='https://www.i9treino.com.br/cifras/';
+const BM=`javascript:(()=>{var h=location.hostname;if(!/(cifraclub\\.com\\.br|bananacifras\\.com)$/.test(h)){alert('Abra uma cifra no Cifra Club ou no Banana Cifras e toque de novo.');return}var p=[].slice.call(document.querySelectorAll('pre')).sort(function(a,b){return b.innerText.length-a.innerText.length})[0];if(!p||p.innerText.trim().length<10){alert('N\u00e3o encontrei a cifra nesta p\u00e1gina.');return}var q=function(s){var e=document.querySelector(s);return e?e.textContent.trim():''};var d={i9cifras:1,text:p.innerText,title:q('h1.t1'),artist:q('h2.t3'),key:q('#cifra_tom a'),page:document.title,source:location.href.split('#')[0]};var w=window.open('${HOME}#receber','i9cifras');var f=function(e){if(e.origin==='https://www.i9treino.com.br'&&e.data==='i9-pronto'){w.postMessage(d,'https://www.i9treino.com.br')}if(e.origin==='https://www.i9treino.com.br'&&e.data==='i9-ok'){removeEventListener('message',f)}};addEventListener('message',f)})()`;
+const SRC_ORIGIN=/^https:\/\/([a-z0-9-]+\.)?(cifraclub\.com\.br|bananacifras\.com)$/;
+let recvTimer=0, recvDone=false;
+function titleFromPage(page,src){
+  const t=String(page||''); let m;
+  if((m=t.match(/^(.*?)\s+-\s+(.*?)\s+-\s+Cifra Club/i))) return [m[1],m[2]];
+  if((m=t.match(/^(.*?)\s+CIFRA\s+(.*)$/))) return [m[1],m[2]];
+  try{const seg=new URL(src).pathname.split('/').filter(Boolean);if(seg.length>=2)return [pretty(seg[seg.length-1]),pretty(seg[seg.length-2])]}catch(e){}
+  return [t,''];
+}
+function startReceive(){
+  recvDone=false; clearInterval(recvTimer);
+  if(!window.opener){show('search');toast('Use o botão “Enviar para i9 Cifras” na página da cifra');return}
+  show('search'); $('#sStatus').textContent='Recebendo a cifra…';
+  let n=0; const ping=()=>{try{window.opener.postMessage('i9-pronto','*')}catch(e){} if(++n>40){clearInterval(recvTimer);if(!recvDone)$('#sStatus').textContent='Não recebi a cifra. Toque no botão de novo na página da cifra.'}};
+  ping(); recvTimer=setInterval(ping,300);
+}
+window.addEventListener('message',e=>{
+  const d=e.data; if(recvDone||!SRC_ORIGIN.test(e.origin)||!d||d.i9cifras!==1||typeof d.text!=='string') return;
+  recvDone=true; clearInterval(recvTimer); try{e.source.postMessage('i9-ok',e.origin)}catch(x){}
+  const str=(v,n)=>String(v||'').slice(0,n).trim();
+  const source=/^https:\/\//.test(d.source)?str(d.source,500):'';
+  const text=String(d.text).replace(/\r/g,'').replace(/\u00a0/g,' ').replace(/\s+$/,'').slice(0,60000);
+  let [t,a]=titleFromPage(d.page,source); t=str(d.title,120)||str(t,120); a=str(d.artist,120)||str(a,120);
+  const have=source&&bySource(source), now=Date.now(), id=have?have.id:uid();
+  db.songs[id]={...(have||{semis:0,capo:0,created:now}),id,title:t||'Sem título',artist:a,key:str(d.key,8)||(have&&have.key)||detectKey(text),text,source,updated:now};
+  save(); $('#sStatus').textContent=''; go('c-'+id); toast(have?'Cifra atualizada':'Cifra importada');
+});
 
 /* ---------- backup ---------- */
 function backupText(){return JSON.stringify({app:'i9cifras',v:1,exported:new Date().toISOString(),songs:db.songs,plays:db.plays})}
@@ -669,6 +710,9 @@ $('#mark').onclick=()=>{logged=true;logPlay(cur,true);renderSong()};
 $('#sheet').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;const i=+b.dataset.tab;toggled.has(i)?toggled.delete(i):toggled.add(i);renderSong()};
 document.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o)go('c-'+o.dataset.open)});
 $('#q').oninput=renderLib;
+$('#bmLink').href=BM; $('#bmCode').value=BM;
+$('#bmLink').onclick=e=>{e.preventDefault();toast('Arraste esse botão para a barra de favoritos')};
+$('#bmCopy').onclick=()=>{try{navigator.clipboard.writeText(BM).then(()=>toast('Código copiado'),()=>{$('#bmCode').select();toast('Selecionei o código: copie')})}catch(e){$('#bmCode').select()}};
 $('#sForm').onsubmit=e=>{e.preventDefault();clearTimeout(sTimer);runSearch()};
 $('#sq').oninput=()=>{clearTimeout(sTimer);sTimer=setTimeout(runSearch,450)};
 $('#vSearch').addEventListener('click',e=>{const b=e.target.closest('[data-imp]');if(!b)return;const [src,i]=b.dataset.imp.split('|');const x=lastRes[src][+i];if(x)importItem(x,b)});
