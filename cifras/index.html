@@ -183,7 +183,7 @@ input[type=date]{height:40px;border-radius:9px;border:1px solid var(--line);back
     <div class="wrap">
       <h1>Buscar cifra</h1>
       <form class="sform" id="sForm"><input id="sq" type="search" placeholder="Nome da música, artista ou trecho" autocomplete="off" aria-label="Buscar cifra"><button class="btn pri" type="submit">Buscar</button></form>
-      <p class="hint" id="sStatus">Busca no Cifra Club e no Banana Cifras ao mesmo tempo. Toque no resultado para importar e abrir.</p>
+      <p class="hint" id="sStatus">Busca no Cifra Club e no Banana Cifras ao mesmo tempo. Toque no resultado: a cifra abre em outra aba e o botão “Enviar para i9 Cifras” traz ela para cá.</p>
       <details class="bk" id="bmBox" style="margin:4px 0 8px">
         <summary>Botão “Enviar para i9 Cifras” (importa direto da página da cifra)</summary>
         <p class="hint">Abra a cifra no Cifra Club ou no Banana e toque nesse botão: a cifra chega aqui pronta, com tom e tablaturas. Serve também quando a importação automática falhar.</p>
@@ -548,8 +548,8 @@ function probeFn(force){
 }
 function applyFn(){
   if(!$('#btnImport')) return;
-  $('#btnImport').hidden=!fnOk;
-  $('#urlLbl').textContent=fnOk?'Link da cifra (Cifra Club ou Banana Cifras)':'Link da cifra (opcional: preenche música e artista e fica salvo como fonte)';
+  $('#btnImport').hidden=true;
+  $('#urlLbl').textContent='Link da cifra (opcional: preenche música e artista e fica salvo como fonte)';
 }
 function openEdit(id){
   editing=id||null; delArmed=false; const s=id?db.songs[id]:{};
@@ -611,7 +611,7 @@ async function searchBN(q){
   return d.items.slice(0,15).map(x=>({title:String(x.title||''),artist:String(x.artist||''),url:String(x.url||'')})).filter(x=>x.url);
 }
 function resHtml(items,src){
-  return items.map((x,i)=>{const have=bySource(x.url);return `<li><button class="card" data-imp="${src}|${i}"><b>${esc(x.title)}</b><small>${esc(x.artist)}</small><span class="tag${have?' ok':''}">${have?'na biblioteca':'importar'}</span></button></li>`}).join('');
+  return items.map((x,i)=>{const have=bySource(x.url);return `<li><button class="card" data-imp="${src}|${i}"><b>${esc(x.title)}</b><small>${esc(x.artist)}</small><span class="tag${have?' ok':''}">${have?'na biblioteca':'abrir e importar'}</span></button></li>`}).join('');
 }
 let lastRes={cc:[],bn:[]};
 async function runSearch(){
@@ -623,22 +623,17 @@ async function runSearch(){
   if(!ok){lastRes.bn=[];$('#bnInfo').textContent='';$('#resBN').innerHTML=`<li class="empty">A busca no Banana precisa do servidor de importação ligado. <a href="https://www.google.com/search?q=${encodeURIComponent('site:bananacifras.com '+q)}" target="_blank" rel="noopener">Procurar no Banana</a></li>`;return}
   searchBN(q).then(items=>{if(seq!==sSeq)return;lastRes.bn=items;$('#bnInfo').textContent=items.length+' resultados';$('#resBN').innerHTML=resHtml(items,'bn')||'<li class="empty">Nada encontrado.</li>'},()=>{if(seq!==sSeq)return;$('#bnInfo').textContent='';$('#resBN').innerHTML=`<li class="empty">O Banana não respondeu agora. <a href="https://www.google.com/search?q=${encodeURIComponent('site:bananacifras.com '+q)}" target="_blank" rel="noopener">Procurar no Banana</a></li>`});
 }
-async function importItem(x,btn){
+let srcWin=null;
+function importItem(x,btn,e){
   const have=bySource(x.url); if(have){go('c-'+have.id);return}
-  btn.classList.add('busy'); const tag=btn.querySelector('.tag'); tag.textContent='importando…';
-  try{
-    if(!(await probeFn())) throw 0;
-    const r=await fetch(fnUrl('cifra','url='+encodeURIComponent(x.url))); const d=await r.json().catch(()=>({}));
-    if(!r.ok||!d.text) throw 0;
-    const id=uid(), now=Date.now();
-    db.songs[id]={id,title:x.title||d.title||'Sem título',artist:x.artist||d.artist||'',key:d.key||detectKey(d.text),text:d.text,source:x.url,semis:0,capo:0,created:now,updated:now};
-    save(); go('c-'+id);
-  }catch(e){
-    btn.classList.remove('busy'); tag.textContent='importar';
-    openEdit(null); $('#fUrl').value=x.url; $('#fTitle').value=x.title; $('#fArtist').value=x.artist; updModalExt();
-    const m=$('#mMsg'); m.textContent='Não deu para importar sozinho. '; const a=document.createElement('a'); a.href=x.url; a.target='_blank'; a.rel='noopener'; a.textContent='Abra a cifra'; a.style.color='var(--ch)'; m.append(a,document.createTextNode(' e toque no botão “Enviar para i9 Cifras” (aba Buscar), ou copie e cole abaixo.'));
-    setTimeout(()=>$('#fText').focus(),40);
-  }
+  try{srcWin=window.open(x.url,'_blank')}catch(err){srcWin=null}
+  const st=$('#sStatus'); st.textContent='';
+  st.append(document.createTextNode('A cifra abriu em outra aba. Lá, toque no favorito “Enviar para i9 Cifras” e ela chega aqui pronta. '));
+  const a=document.createElement('a'); a.href='#buscar'; a.textContent='Ainda não tem o botão?'; a.style.color='var(--ch)';
+  a.onclick=ev=>{ev.preventDefault();$('#bmBox').open=true;$('#bmBox').scrollIntoView({block:'start'})};
+  st.append(a);
+  if(!srcWin){const l=document.createElement('a');l.href=x.url;l.target='_blank';l.textContent=' Abrir a cifra';l.style.color='var(--ch)';st.append(l)}
+  if(!localStorage.getItem('i9bm')){$('#bmBox').open=true}
 }
 
 /* ---------- botão dos favoritos ---------- */
@@ -655,9 +650,10 @@ function titleFromPage(page,src){
 }
 function startReceive(){
   recvDone=false; clearInterval(recvTimer);
-  if(!window.opener){show('search');toast('Use o botão “Enviar para i9 Cifras” na página da cifra');return}
+  const peer=window.opener||(srcWin&&!srcWin.closed?srcWin:null);
+  if(!peer){show('search');toast('Use o botão “Enviar para i9 Cifras” na página da cifra');return}
   show('search'); $('#sStatus').textContent='Recebendo a cifra…';
-  let n=0; const ping=()=>{try{window.opener.postMessage('i9-pronto','*')}catch(e){} if(++n>40){clearInterval(recvTimer);if(!recvDone)$('#sStatus').textContent='Não recebi a cifra. Toque no botão de novo na página da cifra.'}};
+  let n=0; const ping=()=>{try{peer.postMessage('i9-pronto','*')}catch(e){} if(++n>40){clearInterval(recvTimer);if(!recvDone)$('#sStatus').textContent='Não recebi a cifra. Toque no botão de novo na página da cifra.'}};
   ping(); recvTimer=setInterval(ping,300);
 }
 window.addEventListener('message',e=>{
@@ -669,7 +665,7 @@ window.addEventListener('message',e=>{
   let [t,a]=titleFromPage(d.page,source); t=str(d.title,120)||str(t,120); a=str(d.artist,120)||str(a,120);
   const have=source&&bySource(source), now=Date.now(), id=have?have.id:uid();
   db.songs[id]={...(have||{semis:0,capo:0,created:now}),id,title:t||'Sem título',artist:a,key:str(d.key,8)||(have&&have.key)||detectKey(text),text,source,updated:now};
-  save(); $('#sStatus').textContent=''; go('c-'+id); toast(have?'Cifra atualizada':'Cifra importada');
+  save(); try{localStorage.setItem('i9bm','1')}catch(x){} $('#sStatus').textContent=''; go('c-'+id); toast(have?'Cifra atualizada':'Cifra importada'); try{window.focus()}catch(x){}
 });
 
 /* ---------- backup ---------- */
@@ -715,7 +711,7 @@ $('#bmLink').onclick=e=>{e.preventDefault();toast('Arraste esse botão para a ba
 $('#bmCopy').onclick=()=>{try{navigator.clipboard.writeText(BM).then(()=>toast('Código copiado'),()=>{$('#bmCode').select();toast('Selecionei o código: copie')})}catch(e){$('#bmCode').select()}};
 $('#sForm').onsubmit=e=>{e.preventDefault();clearTimeout(sTimer);runSearch()};
 $('#sq').oninput=()=>{clearTimeout(sTimer);sTimer=setTimeout(runSearch,450)};
-$('#vSearch').addEventListener('click',e=>{const b=e.target.closest('[data-imp]');if(!b)return;const [src,i]=b.dataset.imp.split('|');const x=lastRes[src][+i];if(x)importItem(x,b)});
+$('#vSearch').addEventListener('click',e=>{const b=e.target.closest('[data-imp]');if(!b)return;const [src,i]=b.dataset.imp.split('|');const x=lastRes[src][+i];if(x)importItem(x,b,e)});
 $('#apiTest').onclick=async()=>{db.prefs.api=$('#apiUrl').value.trim();save();$('#apiMsg').textContent='Testando…';$('#apiMsg').textContent=(await probeFn(true))?'Servidor respondendo. Busca no Banana e importação automática ligadas.':'Servidor não respondeu nesse endereço.'};
 $('#q').onkeydown=e=>{if(e.key==='Enter'){const f=$('#libList [data-open]');if(f)f.click()}};
 $('#chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;period=b.dataset.p;if(period==='custom'&&!$('#dFrom').value){const t=new Date();$('#dTo').value=t.toISOString().slice(0,10);$('#dFrom').value=new Date(t-29*864e5).toISOString().slice(0,10)}renderRank()};
@@ -751,6 +747,7 @@ setInterval(()=>{if(view==='song'&&cur&&!logged&&!document.hidden&&!$('#mEdit').
 const headObs=new ResizeObserver(()=>document.documentElement.style.setProperty('--hh',$('#app').offsetHeight+'px'));
 headObs.observe($('#app'));
 
+try{if(/i9treino\.com\.br$/.test(location.hostname))window.name='i9cifras'}catch(e){}
 load();
 if(!Object.keys(db.songs).length){const id='demo';db.songs[id]={id,title:'Caminho de Luz (exemplo)',artist:'i9 Cifras · cifra de demonstração',key:'G',text:DEMO,source:'',semis:0,capo:0,created:Date.now()};db.last=id;save()}
 stopScroll(); route();
